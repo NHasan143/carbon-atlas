@@ -1,282 +1,5 @@
-<title>Climate &amp; Energy Atlas</title>
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<style>
-  :root{
-    --bg:#f9f9f7;
-    --surface:#fcfcfb;
-    --surface-2:#f2f1ec;
-    --text-primary:#0b0b0b;
-    --text-secondary:#52514e;
-    --text-muted:#898781;
-    --border:rgba(11,11,11,0.10);
-    --grid:#e1e0d9;
-    --axis:#c3c2b7;
-    --accent:#2a78d6;
-    --accent-2:#eb6834;
-    --accent-3:#1baf7a;
-    --seq-100:#cde2fb; --seq-200:#9ec5f4; --seq-300:#6da7ec; --seq-400:#3987e5;
-    --seq-500:#256abf; --seq-600:#184f95; --seq-700:#0d366b;
-    --context-dot:#c3c2b7;
-    --focus-ring:#2a78d6;
-    color-scheme:light;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#0d0d0d;
-      --surface:#1a1a19;
-      --surface-2:#232322;
-      --text-primary:#ffffff;
-      --text-secondary:#c3c2b7;
-      --text-muted:#898781;
-      --border:rgba(255,255,255,0.10);
-      --grid:#2c2c2a;
-      --axis:#383835;
-      --accent:#3987e5;
-      --accent-2:#d95926;
-      --accent-3:#199e70;
-      --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
-      --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
-      --context-dot:#4a4a47;
-      color-scheme:dark;
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#0d0d0d;
-    --surface:#1a1a19;
-    --surface-2:#232322;
-    --text-primary:#ffffff;
-    --text-secondary:#c3c2b7;
-    --text-muted:#898781;
-    --border:rgba(255,255,255,0.10);
-    --grid:#2c2c2a;
-    --axis:#383835;
-    --accent:#3987e5;
-    --accent-2:#d95926;
-    --accent-3:#199e70;
-    --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
-    --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
-    --context-dot:#4a4a47;
-    color-scheme:dark;
-  }
-
-  *{box-sizing:border-box;}
-  body{
-    background:var(--bg);
-    color:var(--text-primary);
-    font-family:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-    padding-inline:20px;
-    padding-block:28px 60px;
-    max-width:1180px;
-    margin-inline:auto;
-  }
-  .mono, .tabular, table, .year-readout, .stat-value{
-    font-variant-numeric:tabular-nums;
-  }
-  .mono{ font-family:"IBM Plex Mono", ui-monospace, monospace; }
-
-  header.page{ margin-bottom:22px; }
-  header.page .eyebrow{
-    font-family:"IBM Plex Mono", ui-monospace, monospace;
-    font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
-    color:var(--accent); margin:0 0 6px;
-  }
-  header.page h1{
-    font-size:clamp(26px,4vw,36px); line-height:1.15; margin:0 0 8px; font-weight:700;
-    text-wrap:balance;
-  }
-  header.page p{
-    color:var(--text-secondary); font-size:15px; max-width:62ch; margin:0; line-height:1.5;
-  }
-
-  .panel{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:20px;
-    margin-bottom:22px;
-  }
-  .panel h2{
-    font-size:17px; margin:0 0 4px; font-weight:600;
-  }
-  .panel .sub{
-    color:var(--text-secondary); font-size:13.5px; margin:0 0 16px; max-width:70ch; line-height:1.5;
-  }
-  .panel .caption{
-    color:var(--text-muted); font-size:12.5px; margin-top:10px; line-height:1.5;
-  }
-
-  /* --- Global control bar --- */
-  .controls{
-    display:flex; flex-wrap:wrap; align-items:flex-end; gap:18px 26px;
-  }
-  .control-group{ display:flex; flex-direction:column; gap:6px; min-width:0; }
-  .control-group label{
-    font-size:11.5px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase;
-    color:var(--text-muted);
-  }
-  select{
-    font:inherit; font-size:13.5px; color:var(--text-primary);
-    background:var(--surface-2); border:1px solid var(--border); border-radius:8px;
-    padding:7px 10px; min-width:0; max-width:220px;
-  }
-  select:focus-visible, input:focus-visible, button:focus-visible{
-    outline:2px solid var(--focus-ring); outline-offset:2px;
-  }
-  .swatch-select{ display:flex; align-items:center; gap:8px; }
-  .swatch{ width:11px; height:11px; border-radius:50%; flex:none; }
-
-  .year-block{ display:flex; align-items:center; gap:14px; flex:1 1 320px; }
-  #playBtn{
-    font:inherit; font-size:13px; font-weight:600; cursor:pointer;
-    background:var(--accent); color:#fff; border:none; border-radius:8px;
-    padding:9px 16px; flex:none; min-width:76px;
-  }
-  #playBtn:hover{ filter:brightness(1.08); }
-  #playBtn:disabled{ opacity:0.55; cursor:wait; }
-  .year-slider-wrap{ flex:1 1 auto; display:flex; align-items:center; gap:12px; }
-  input[type="range"]{
-    flex:1; height:4px; border-radius:2px; background:var(--grid);
-    appearance:none; -webkit-appearance:none; cursor:pointer;
-  }
-  input[type="range"]::-webkit-slider-thumb{
-    appearance:none; -webkit-appearance:none;
-    width:16px; height:16px; border-radius:50%; background:var(--accent);
-    border:2px solid var(--surface); box-shadow:0 0 0 1px var(--accent);
-    margin-top:-6px;
-  }
-  input[type="range"]::-moz-range-thumb{
-    width:16px; height:16px; border-radius:50%; background:var(--accent);
-    border:2px solid var(--surface); box-shadow:0 0 0 1px var(--accent);
-  }
-  .year-readout{
-    font-family:"IBM Plex Mono", monospace; font-weight:600; font-size:16px;
-    min-width:3.4em; text-align:right;
-  }
-
-  .compare-row{ display:flex; flex-wrap:wrap; gap:14px 22px; }
-
-  /* --- Comparison table --- */
-  .table-scroll{ overflow-x:auto; }
-  table.compare{ border-collapse:collapse; width:100%; font-size:13px; min-width:560px; }
-  table.compare th, table.compare td{
-    padding:8px 12px; text-align:right; border-bottom:1px solid var(--border);
-    white-space:nowrap;
-  }
-  table.compare th:first-child, table.compare td:first-child{ text-align:left; }
-  table.compare thead th{
-    color:var(--text-muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.03em;
-  }
-  table.compare td.country-cell{ font-weight:600; display:flex; align-items:center; gap:8px; }
-  table.compare .swatch{ width:9px; height:9px; }
-  .empty-note{ color:var(--text-muted); font-size:13.5px; padding:14px 0; }
-
-  /* --- Chart grid --- */
-  .chart-full{ width:100%; height:460px; }
-  .chart-full.scatter{ height:520px; }
-  .sm-grid{
-    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:16px;
-  }
-  .sm-cell{ min-width:0; }
-  .sm-cell .chart-sm{ width:100%; height:190px; }
-  .sm-cell .sm-title{ font-size:12.5px; font-weight:600; color:var(--text-secondary); margin:0 0 2px; }
-
-  footer{
-    color:var(--text-muted); font-size:12.5px; margin-top:8px; line-height:1.6;
-  }
-  footer a{ color:var(--text-secondary); }
-
-  @media (max-width:640px){
-    select{ max-width:100%; }
-    .control-group{ flex:1 1 100%; }
-    .year-block{ flex:1 1 100%; }
-  }
-</style>
-
-<header class="page">
-  <p class="eyebrow">Interactive explorer &middot; 1990&ndash;2023</p>
-  <h1>Climate &amp; Energy Atlas</h1>
-  <p>Emissions, energy mix and GDP for 217 countries, built from Our World in Data's CO&#8322; and energy datasets. Pick up to three countries to compare, scrub the year, or press play.</p>
-</header>
-
-<section class="panel" id="controlsPanel">
-  <p id="loadStatus" role="status">Loading the atlas…</p>
-  <p id="loadRetry" hidden><a href="">Reload the atlas</a></p>
-  <div class="controls">
-    <div class="year-block">
-      <button id="playBtn" type="button" aria-label="Play animation" disabled>&#9658; Play</button>
-      <div class="year-slider-wrap">
-        <input type="range" id="yearSlider" min="0" max="33" step="1" value="33" aria-label="Year">
-        <span class="year-readout" id="yearReadout">2023</span>
-      </div>
-    </div>
-  </div>
-  <div class="compare-row" style="margin-top:16px;">
-    <div class="control-group">
-      <label for="cmp0">Compare &mdash; series 1</label>
-      <div class="swatch-select"><span class="swatch" style="background:var(--accent)"></span><select id="cmp0"></select></div>
-    </div>
-    <div class="control-group">
-      <label for="cmp1">Compare &mdash; series 2</label>
-      <div class="swatch-select"><span class="swatch" style="background:var(--accent-2)"></span><select id="cmp1"></select></div>
-    </div>
-    <div class="control-group">
-      <label for="cmp2">Compare &mdash; series 3</label>
-      <div class="swatch-select"><span class="swatch" style="background:var(--accent-3)"></span><select id="cmp2"></select></div>
-    </div>
-  </div>
-  <p class="caption">Highlighted countries stay in the same three colors across every chart below. Everything else is shown in gray for context &mdash; that cap keeps colors tell-apart-able (a fourth or fifth hue starts to look the same to some readers).</p>
-</section>
-
-<section class="panel">
-  <h2>Now comparing</h2>
-  <p class="sub">Snapshot for the selected year across every metric in the atlas.</p>
-  <div class="table-scroll">
-    <table class="compare" id="compareTable"></table>
-  </div>
-</section>
-
-<section class="panel">
-  <h2>World map</h2>
-  <p class="sub" id="choroSub">One metric, every country, colored by value.</p>
-  <div class="control-group" style="margin-bottom:14px;">
-    <label for="choroMetric">Metric</label>
-    <select id="choroMetric"></select>
-  </div>
-  <div id="choroplethChart" class="chart-full"></div>
-  <p class="caption" id="choroCaption"></p>
-</section>
-
-<section class="panel">
-  <h2>GDP, emissions and population</h2>
-  <p class="sub">Each bubble is a country; bubble size is population. Drag the year slider above or press play to watch the whole world move.</p>
-  <div class="compare-row" style="margin-bottom:14px;">
-    <div class="control-group">
-      <label for="scatterX">X axis</label>
-      <select id="scatterX"></select>
-    </div>
-    <div class="control-group">
-      <label for="scatterY">Y axis</label>
-      <select id="scatterY"></select>
-    </div>
-  </div>
-  <div id="scatterChart" class="chart-full scatter"></div>
-</section>
-
-<section class="panel">
-  <h2>Trends side by side</h2>
-  <p class="sub">The full 1990&ndash;2023 history for your three countries, one small chart per metric. The dashed line marks the year selected above.</p>
-  <div class="sm-grid" id="smGrid"></div>
-</section>
-
-<footer>
-  Data: <a href="https://github.com/owid/co2-data" target="_blank" rel="noopener">Our World in Data &ndash; CO&#8322; and Greenhouse Gas Emissions</a> and
-  <a href="https://github.com/owid/energy-data" target="_blank" rel="noopener">Our World in Data &ndash; Energy</a>, both CC BY. Renewables-share data covers 79 countries with reliable energy-mix reporting; others show as no-data on the map and are omitted from that metric's comparisons.
-</footer>
-
-<script>
-(function(){
-  "use strict";
+export function initAtlas(){
+  let Plotly;
 
   var DATA = null;
   var YEARS = [];
@@ -284,9 +7,6 @@
   var COUNTRIES_SORTED = [];
   var currentYearIdx = 0;
   var highlighted = ["USA","CHN","IND"]; // slot order = series 1/2/3
-  var SERIES_COLORS = [
-    getVar("--accent"), getVar("--accent-2"), getVar("--accent-3")
-  ];
   var choroMetric = "co2_per_capita";
   var scatterXMetric = "gdp_per_capita";
   var scatterYMetric = "co2_per_capita";
@@ -352,17 +72,20 @@
   }
 
   setControlsEnabled(false);
-  Promise.resolve().then(function(){
-    if (!window.Plotly) {
-      throw new Error("The chart library could not load. Check your internet connection and reload the atlas.");
-    }
-    return fetch("dataset.json").then(function(r){
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      return r.json();
+  const assetBase = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+  Promise.all([
+    import("plotly.js-dist-min").then(function(module){
+      Plotly = module.default;
     }).catch(function(){
-      throw new Error("The atlas data could not load. Make sure the local server is running and dataset.json is beside index.html, then reload the atlas.");
-    });
-  }).then(function(d){
+      throw new Error("The chart library could not load. Reload the atlas to try again.");
+    }),
+    fetch(assetBase + "dataset.json").then(function(response){
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.json();
+    }).catch(function(){
+      throw new Error("The atlas data could not load. Check your connection and reload the atlas.");
+    })
+  ]).then(function([, d]){
     DATA = d;
     YEARS = d.years;
     d.countries.forEach(function(c){ COUNTRIES_BY_ISO[c.iso3] = c; });
@@ -386,11 +109,9 @@
     buildMetricDropdown(document.getElementById("scatterY"), scatterYMetric);
     buildCompareDropdowns();
 
-    renderChoropleth();
-    renderScatter();
-    renderSmallMultiples();
     updateCompareTable();
-
+    return Promise.all([renderChoropleth(), renderScatter(), renderSmallMultiples()]);
+  }).then(function(){
     wireEvents();
     setControlsEnabled(true);
     document.getElementById("loadStatus").hidden = true;
@@ -487,16 +208,23 @@
     renderSmallMultiples();
   }
 
+  function setPlayState(playing){
+    document.getElementById("playLabel").textContent = playing ? "Pause" : "Play";
+    document.getElementById("playIcon").style.display = playing ? "none" : "block";
+    document.getElementById("pauseIcon").style.display = playing ? "block" : "none";
+    document.getElementById("playBtn").setAttribute("aria-pressed", String(playing));
+  }
+
   function togglePlay(){
     var btn = document.getElementById("playBtn");
     if (playTimer){
       clearInterval(playTimer);
       playTimer = null;
-      btn.innerHTML = "&#9658; Play";
+      setPlayState(false);
       btn.setAttribute("aria-label", "Play animation");
       return;
     }
-    btn.innerHTML = "&#10074;&#10074; Pause";
+    setPlayState(true);
     btn.setAttribute("aria-label", "Pause animation");
     playTimer = setInterval(function(){
       currentYearIdx += 1;
@@ -589,7 +317,7 @@
     // time; topojsonURL redirects that one request to a same-origin file
     // (world_110m.json, published next to this page) built from Natural Earth
     // 110m data, so nothing is fetched from an external host at runtime.
-    Plotly.react("choroplethChart", [trace], layout, {displayModeBar:false, responsive:true, topojsonURL:"./"});
+    return Plotly.react("choroplethChart", [trace], layout, {displayModeBar:false, responsive:true, topojsonURL:assetBase});
   }
 
   function updateChoroplethYear(){
@@ -664,7 +392,7 @@
                 gridcolor:t.grid, zerolinecolor:t.axis, linecolor:t.axis, tickfont:{color:t.textSecondary} }
     };
 
-    Plotly.react("scatterChart", traces, layout, {displayModeBar:false, responsive:true});
+    return Plotly.react("scatterChart", traces, layout, {displayModeBar:false, responsive:true});
   }
 
   function SERIES_COLORS_LIVE(){
@@ -696,7 +424,7 @@
       });
       grid.dataset.built = "1";
     }
-    SM_METRICS.forEach(renderSmallMultiple);
+    return Promise.all(SM_METRICS.map(renderSmallMultiple));
   }
 
   function renderSmallMultiple(metric){
@@ -742,7 +470,7 @@
 
     var elId = "sm-" + metric;
     if (document.getElementById(elId)){
-      Plotly.react(elId, traces, layout, {displayModeBar:false, responsive:true});
+      return Plotly.react(elId, traces, layout, {displayModeBar:false, responsive:true});
     }
   }
 
@@ -764,9 +492,12 @@
     var rows = highlighted.map(function(iso, slot){ return iso ? {iso:iso, slot:slot} : null; }).filter(Boolean);
     if (!rows.length){
       table.innerHTML = '';
-      table.parentElement.innerHTML = '<p class="empty-note">Pick at least one country above.</p>';
+      document.getElementById("compareEmpty").hidden = false;
+      table.hidden = true;
       return;
     }
+    document.getElementById("compareEmpty").hidden = true;
+    table.hidden = false;
     var thead = "<thead><tr><th>Country</th>" + TABLE_METRICS.map(function(m){
       return "<th>" + DATA.metricMeta[m].label + "</th>";
     }).join("") + "</tr></thead>";
@@ -780,5 +511,4 @@
     table.innerHTML = thead + tbody;
   }
 
-})();
-</script>
+}

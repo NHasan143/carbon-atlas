@@ -1,0 +1,51 @@
+---
+import AtlasLayout from '../layouts/AtlasLayout.astro';
+import AtlasControls from '../components/AtlasControls.astro';
+import MetricSelect from '../components/MetricSelect.astro';
+import Panel from '../components/Panel.astro';
+---
+
+<AtlasLayout>
+  <header class="mb-[22px]">
+    <p class="mb-1.5 font-mono text-xs tracking-[0.08em] text-accent uppercase">Interactive explorer · 1990–2023</p>
+    <h1 class="mb-2 text-[clamp(26px,4vw,36px)] leading-[1.15] font-bold text-balance">Climate &amp; Energy Atlas</h1>
+    <p class="max-w-[62ch] text-[15px] leading-normal text-secondary">Emissions, energy mix and GDP for 217 countries, built from Our World in Data's CO₂ and energy datasets. Pick up to three countries to compare, scrub the year, or press play.</p>
+  </header>
+
+  <AtlasControls />
+
+  <Panel title="Now comparing" description="Snapshot for the selected year across every metric in the atlas.">
+    <div class="overflow-x-auto">
+      <table class="compare" id="compareTable" aria-label="Country metrics for the selected year"></table>
+      <p id="compareEmpty" class="empty-note" hidden>Pick at least one country above.</p>
+    </div>
+  </Panel>
+
+  <Panel title="World map" description="One metric, every country, colored by value." descriptionId="choroSub">
+    <div class="mb-3.5"><MetricSelect id="choroMetric" label="Metric" /></div>
+    <div id="choroplethChart" class="h-[460px] w-full" aria-label="World map of the selected metric"></div>
+    <p id="choroCaption" class="mt-2.5 text-[12.5px] leading-normal text-muted"></p>
+  </Panel>
+
+  <Panel title="GDP, emissions and population" description="Each bubble is a country; bubble size is population. Drag the year slider above or press play to watch the whole world move.">
+    <div class="mb-3.5 flex flex-wrap gap-x-[22px] gap-y-3.5">
+      <MetricSelect id="scatterX" label="X axis" />
+      <MetricSelect id="scatterY" label="Y axis" />
+    </div>
+    <div id="scatterChart" class="h-[520px] w-full" aria-label="Country metric and population comparison"></div>
+  </Panel>
+
+  <Panel title="Trends side by side" description="The full 1990–2023 history for your three countries, one small chart per metric. The dashed line marks the year selected above.">
+    <div id="smGrid" class="grid grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-4"></div>
+  </Panel>
+
+  <footer class="mt-2 text-[12.5px] leading-[1.6] text-muted">
+    Data: <a class="text-secondary underline" href="https://github.com/owid/co2-data" target="_blank" rel="noopener">Our World in Data – CO₂ and Greenhouse Gas Emissions</a> and
+    <a class="text-secondary underline" href="https://github.com/owid/energy-data" target="_blank" rel="noopener">Our World in Data – Energy</a>, both CC BY. Renewables-share data covers 79 countries with reliable energy-mix reporting; others show as no-data on the map and are omitted from that metric's comparisons.
+  </footer>
+</AtlasLayout>
+
+<script>
+  import { initAtlas } from '../scripts/atlas.js';
+  initAtlas();
+</script>

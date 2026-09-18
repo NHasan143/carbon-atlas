@@ -1,0 +1,15 @@
+---
+interface Props {
+  id?: string;
+  title?: string;
+  description?: string;
+  descriptionId?: string;
+}
+const { id, title, description, descriptionId } = Astro.props;
+---
+
+<section id={id} class="mb-[22px] rounded-[14px] border border-line bg-surface p-5">
+  {title && <h2 class="mb-1 text-[17px] font-semibold">{title}</h2>}
+  {description && <p id={descriptionId} class="mb-4 max-w-[70ch] text-[13.5px] leading-normal text-secondary">{description}</p>}
+  <slot />
+</section>
