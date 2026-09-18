@@ -28,7 +28,7 @@ python3 -m http.server 8000
 
 Open **http://localhost:8000**. Stop the server with `Ctrl+C`.
 
-Serve the project over HTTP instead of opening `index.html` directly: the app fetches its JSON files using relative URLs. An internet connection is needed to load Plotly.js from cdnjs and the IBM Plex fonts from Google Fonts. The dataset and map geometry are served locally.
+Serve the project over HTTP instead of opening `index.html` directly: the app fetches its JSON files using relative URLs. An internet connection is needed to load Plotly.js from Plotly's CDN and the IBM Plex fonts from Google Fonts. The dataset and map geometry are served locally. If the chart library or dataset fails to load, the page displays an error and a reload link; controls become available after initialization succeeds.
 
 ## Explore the atlas
 

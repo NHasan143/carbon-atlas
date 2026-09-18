@@ -1,5 +1,5 @@
 <title>Climate &amp; Energy Atlas</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   :root{
@@ -133,6 +133,7 @@
     padding:9px 16px; flex:none; min-width:76px;
   }
   #playBtn:hover{ filter:brightness(1.08); }
+  #playBtn:disabled{ opacity:0.55; cursor:wait; }
   .year-slider-wrap{ flex:1 1 auto; display:flex; align-items:center; gap:12px; }
   input[type="range"]{
     flex:1; height:4px; border-radius:2px; background:var(--grid);
@@ -199,9 +200,11 @@
 </header>
 
 <section class="panel" id="controlsPanel">
+  <p id="loadStatus" role="status">Loading the atlas…</p>
+  <p id="loadRetry" hidden><a href="">Reload the atlas</a></p>
   <div class="controls">
     <div class="year-block">
-      <button id="playBtn" type="button" aria-label="Play animation">&#9658; Play</button>
+      <button id="playBtn" type="button" aria-label="Play animation" disabled>&#9658; Play</button>
       <div class="year-slider-wrap">
         <input type="range" id="yearSlider" min="0" max="33" step="1" value="33" aria-label="Year">
         <span class="year-readout" id="yearReadout">2023</span>
@@ -342,7 +345,24 @@
   }
 
   // ---------- bootstrap ----------
-  fetch("dataset.json").then(function(r){ return r.json(); }).then(function(d){
+  function setControlsEnabled(enabled){
+    document.querySelectorAll("#controlsPanel button, #controlsPanel input, #controlsPanel select, #choroMetric, #scatterX, #scatterY").forEach(function(control){
+      control.disabled = !enabled;
+    });
+  }
+
+  setControlsEnabled(false);
+  Promise.resolve().then(function(){
+    if (!window.Plotly) {
+      throw new Error("The chart library could not load. Check your internet connection and reload the atlas.");
+    }
+    return fetch("dataset.json").then(function(r){
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).catch(function(){
+      throw new Error("The atlas data could not load. Make sure the local server is running and dataset.json is beside index.html, then reload the atlas.");
+    });
+  }).then(function(d){
     DATA = d;
     YEARS = d.years;
     d.countries.forEach(function(c){ COUNTRIES_BY_ISO[c.iso3] = c; });
@@ -372,6 +392,15 @@
     updateCompareTable();
 
     wireEvents();
+    setControlsEnabled(true);
+    document.getElementById("loadStatus").hidden = true;
+  }).catch(function(error){
+    console.error("Atlas initialization failed:", error);
+    setControlsEnabled(false);
+    var status = document.getElementById("loadStatus");
+    status.textContent = error.message;
+    status.hidden = false;
+    document.getElementById("loadRetry").hidden = false;
   });
 
   function buildMetricDropdown(sel, selected){
@@ -464,9 +493,11 @@
       clearInterval(playTimer);
       playTimer = null;
       btn.innerHTML = "&#9658; Play";
+      btn.setAttribute("aria-label", "Play animation");
       return;
     }
     btn.innerHTML = "&#10074;&#10074; Pause";
+    btn.setAttribute("aria-label", "Pause animation");
     playTimer = setInterval(function(){
       currentYearIdx += 1;
       if (currentYearIdx > YEARS.length - 1) currentYearIdx = 0;
