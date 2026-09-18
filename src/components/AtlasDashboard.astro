@@ -1,19 +1,91 @@
-export function initAtlas(){
-  let Plotly;
+---
+import AtlasControls from './AtlasControls.astro';
+import MetricSelect from './MetricSelect.astro';
+import Panel from './Panel.astro';
+---
 
-  var DATA = null;
-  var YEARS = [];
-  var COUNTRIES_BY_ISO = {};
-  var COUNTRIES_SORTED = [];
+  <header class="mb-[22px]">
+    <p class="mb-1.5 font-mono text-xs tracking-[0.08em] text-accent uppercase">Interactive explorer · 1990–2023</p>
+    <h1 class="mb-2 text-[clamp(26px,4vw,36px)] leading-[1.15] font-bold text-balance">Climate &amp; Energy Atlas</h1>
+    <p class="max-w-[62ch] text-[15px] leading-normal text-secondary">Emissions, energy mix and GDP for 217 countries, built from Our World in Data's CO₂ and energy datasets. Pick up to three countries to compare, scrub the year, or press play.</p>
+  </header>
+
+  <AtlasControls />
+
+  <Panel title="Now comparing" description="Snapshot for the selected year across every metric in the atlas.">
+    <div class="overflow-x-auto">
+      <table class="compare" id="compareTable" aria-label="Country metrics for the selected year"></table>
+      <p id="compareEmpty" class="empty-note" hidden>Pick at least one country above.</p>
+    </div>
+  </Panel>
+
+  <Panel title="World map" description="One metric, every country, colored by value." descriptionId="choroSub">
+    <div class="mb-3.5"><MetricSelect id="choroMetric" label="Metric" /></div>
+    <div id="choroplethChart" class="h-[460px] w-full" aria-label="World map of the selected metric"></div>
+    <p id="choroCaption" class="mt-2.5 text-[12.5px] leading-normal text-muted"></p>
+  </Panel>
+
+  <Panel title="GDP, emissions and population" description="Each bubble is a country; bubble size is population. Drag the year slider above or press play to watch the whole world move.">
+    <div class="mb-3.5 flex flex-wrap gap-x-[22px] gap-y-3.5">
+      <MetricSelect id="scatterX" label="X axis" />
+      <MetricSelect id="scatterY" label="Y axis" />
+    </div>
+    <div id="scatterChart" class="h-[520px] w-full" aria-label="Country metric and population comparison"></div>
+  </Panel>
+
+  <Panel title="Trends side by side" description="The full 1990–2023 history for your three countries, one small chart per metric. The dashed line marks the year selected above.">
+    <div id="smGrid" class="grid grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-4"></div>
+  </Panel>
+
+  <footer class="mt-2 text-[12.5px] leading-[1.6] text-muted">
+    Data: <a class="text-secondary underline" href="https://github.com/owid/co2-data" target="_blank" rel="noopener">Our World in Data – CO₂ and Greenhouse Gas Emissions</a> and
+    <a class="text-secondary underline" href="https://github.com/owid/energy-data" target="_blank" rel="noopener">Our World in Data – Energy</a>, both CC BY. Renewables-share data covers 79 countries with reliable energy-mix reporting; others show as no-data on the map and are omitted from that metric's comparisons.
+  </footer>
+
+<script>
+import type { Data, Layout, Shape, Annotations, ScatterLine, PlotlyHTMLElement } from 'plotly.js';
+
+interface Country { iso3: string; name: string; continent: string; }
+interface AtlasData {
+  years: number[];
+  countries: Country[];
+  metrics: Record<string, Record<string, (number | null)[]>>;
+  metricMeta: Record<string, { label: string; unit: string; vmax: number }>;
+}
+interface Bubble { x: number; y: number; size: number; text: string; }
+interface TrendTrace {
+  type: 'scatter';
+  mode: 'lines';
+  name: string;
+  x: number[];
+  y: number[];
+  line: Partial<ScatterLine> & { color: string };
+  hovertemplate: string;
+  showlegend: boolean;
+}
+
+function element<T extends HTMLElement = HTMLElement>(id: string): T {
+  const node = document.getElementById(id);
+  if (!node) throw new Error(`Missing atlas element: ${id}`);
+  return node as T;
+}
+
+function initAtlas(){
+  let Plotly: typeof import('plotly.js');
+
+  let DATA: AtlasData;
+  let YEARS: number[] = [];
+  const COUNTRIES_BY_ISO: Record<string, Country> = {};
+  let COUNTRIES_SORTED: Country[] = [];
   var currentYearIdx = 0;
   var highlighted = ["USA","CHN","IND"]; // slot order = series 1/2/3
   var choroMetric = "co2_per_capita";
   var scatterXMetric = "gdp_per_capita";
   var scatterYMetric = "co2_per_capita";
   var maxPopulation = 1;
-  var playTimer = null;
+  let playTimer: ReturnType<typeof setInterval> | null = null;
 
-  function getVar(name){
+  function getVar(name: string){
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   }
 
@@ -34,7 +106,7 @@ export function initAtlas(){
     };
   }
 
-  function fmtValue(v, metric){
+  function fmtValue(v: number | null | undefined, metric: string){
     if (v === null || v === undefined || isNaN(v)) return "—";
     if (metric === "co2_per_capita") return v.toFixed(2) + " t";
     if (metric === "co2") return v.toLocaleString(undefined,{maximumFractionDigits:0}) + " Mt";
@@ -45,28 +117,28 @@ export function initAtlas(){
     return String(v);
   }
 
-  function metricLabel(metric){
+  function metricLabel(metric: string){
     var m = DATA.metricMeta[metric];
     return m ? (m.label + " (" + m.unit + ")") : metric;
   }
 
-  function seriesAt(iso, metric){
+  function seriesAt(iso: string, metric: string){
     var m = DATA.metrics[metric];
     return m ? (m[iso] || null) : null;
   }
 
-  function valueAt(iso, metric, yearIdx){
+  function valueAt(iso: string, metric: string, yearIdx: number){
     var s = seriesAt(iso, metric);
     return s ? s[yearIdx] : null;
   }
 
-  function axisType(metric){
+  function axisType(metric: string){
     return (metric === "gdp_per_capita" || metric === "population") ? "log" : "linear";
   }
 
   // ---------- bootstrap ----------
-  function setControlsEnabled(enabled){
-    document.querySelectorAll("#controlsPanel button, #controlsPanel input, #controlsPanel select, #choroMetric, #scatterX, #scatterY").forEach(function(control){
+  function setControlsEnabled(enabled: boolean){
+    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button, #controlsPanel input, #controlsPanel select, #choroMetric, #scatterX, #scatterY").forEach(function(control){
       control.disabled = !enabled;
     });
   }
@@ -81,7 +153,7 @@ export function initAtlas(){
     }),
     fetch(assetBase + "dataset.json").then(function(response){
       if (!response.ok) throw new Error("HTTP " + response.status);
-      return response.json();
+      return response.json() as Promise<AtlasData>;
     }).catch(function(){
       throw new Error("The atlas data could not load. Check your connection and reload the atlas.");
     })
@@ -100,13 +172,13 @@ export function initAtlas(){
     });
 
     currentYearIdx = YEARS.length - 1;
-    document.getElementById("yearSlider").max = YEARS.length - 1;
-    document.getElementById("yearSlider").value = currentYearIdx;
-    document.getElementById("yearReadout").textContent = YEARS[currentYearIdx];
+    element<HTMLInputElement>("yearSlider").max = String(YEARS.length - 1);
+    element<HTMLInputElement>("yearSlider").value = String(currentYearIdx);
+    element("yearReadout").textContent = String(YEARS[currentYearIdx]);
 
-    buildMetricDropdown(document.getElementById("choroMetric"), choroMetric);
-    buildMetricDropdown(document.getElementById("scatterX"), scatterXMetric);
-    buildMetricDropdown(document.getElementById("scatterY"), scatterYMetric);
+    buildMetricDropdown(element<HTMLSelectElement>("choroMetric"), choroMetric);
+    buildMetricDropdown(element<HTMLSelectElement>("scatterX"), scatterXMetric);
+    buildMetricDropdown(element<HTMLSelectElement>("scatterY"), scatterYMetric);
     buildCompareDropdowns();
 
     updateCompareTable();
@@ -114,17 +186,17 @@ export function initAtlas(){
   }).then(function(){
     wireEvents();
     setControlsEnabled(true);
-    document.getElementById("loadStatus").hidden = true;
+    element("loadStatus").hidden = true;
   }).catch(function(error){
     console.error("Atlas initialization failed:", error);
     setControlsEnabled(false);
-    var status = document.getElementById("loadStatus");
+    var status = element("loadStatus");
     status.textContent = error.message;
     status.hidden = false;
-    document.getElementById("loadRetry").hidden = false;
+    element("loadRetry").hidden = false;
   });
 
-  function buildMetricDropdown(sel, selected){
+  function buildMetricDropdown(sel: HTMLSelectElement, selected: string){
     sel.innerHTML = "";
     Object.keys(DATA.metricMeta).forEach(function(key){
       var opt = document.createElement("option");
@@ -136,14 +208,14 @@ export function initAtlas(){
   }
 
   function buildCompareDropdowns(){
-    var byContinent = {};
+    const byContinent: Record<string, Country[]> = {};
     COUNTRIES_SORTED.forEach(function(c){
       (byContinent[c.continent] = byContinent[c.continent] || []).push(c);
     });
     var continents = Object.keys(byContinent).sort();
 
     [0,1,2].forEach(function(slot){
-      var sel = document.getElementById("cmp" + slot);
+      var sel = element<HTMLSelectElement>("cmp" + slot);
       sel.innerHTML = "";
       var noneOpt = document.createElement("option");
       noneOpt.value = ""; noneOpt.textContent = "— none —";
@@ -163,31 +235,31 @@ export function initAtlas(){
   }
 
   function wireEvents(){
-    document.getElementById("yearSlider").addEventListener("input", function(e){
-      currentYearIdx = parseInt(e.target.value, 10);
+    element<HTMLInputElement>("yearSlider").addEventListener("input", function(e){
+      currentYearIdx = parseInt((e.currentTarget as HTMLInputElement | HTMLSelectElement).value, 10);
       onYearChange();
     });
-    document.getElementById("playBtn").addEventListener("click", togglePlay);
-    document.getElementById("choroMetric").addEventListener("change", function(e){
-      choroMetric = e.target.value;
+    element("playBtn").addEventListener("click", togglePlay);
+    element<HTMLSelectElement>("choroMetric").addEventListener("change", function(e){
+      choroMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderChoropleth();
     });
-    document.getElementById("scatterX").addEventListener("change", function(e){
-      scatterXMetric = e.target.value;
+    element<HTMLSelectElement>("scatterX").addEventListener("change", function(e){
+      scatterXMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderScatter();
     });
-    document.getElementById("scatterY").addEventListener("change", function(e){
-      scatterYMetric = e.target.value;
+    element<HTMLSelectElement>("scatterY").addEventListener("change", function(e){
+      scatterYMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderScatter();
     });
     [0,1,2].forEach(function(slot){
-      document.getElementById("cmp" + slot).addEventListener("change", function(e){
-        var iso = e.target.value;
+      element<HTMLSelectElement>("cmp" + slot).addEventListener("change", function(e){
+        var iso = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
         // avoid duplicate picks across slots
         [0,1,2].forEach(function(other){
           if (other !== slot && highlighted[other] === iso && iso !== "") {
             highlighted[other] = "";
-            document.getElementById("cmp" + other).value = "";
+            element<HTMLSelectElement>("cmp" + other).value = "";
           }
         });
         highlighted[slot] = iso;
@@ -208,15 +280,15 @@ export function initAtlas(){
     renderSmallMultiples();
   }
 
-  function setPlayState(playing){
-    document.getElementById("playLabel").textContent = playing ? "Pause" : "Play";
-    document.getElementById("playIcon").style.display = playing ? "none" : "block";
-    document.getElementById("pauseIcon").style.display = playing ? "block" : "none";
-    document.getElementById("playBtn").setAttribute("aria-pressed", String(playing));
+  function setPlayState(playing: boolean){
+    element("playLabel").textContent = playing ? "Pause" : "Play";
+    element("playIcon").style.display = playing ? "none" : "block";
+    element("pauseIcon").style.display = playing ? "block" : "none";
+    element("playBtn").setAttribute("aria-pressed", String(playing));
   }
 
   function togglePlay(){
-    var btn = document.getElementById("playBtn");
+    var btn = element("playBtn");
     if (playTimer){
       clearInterval(playTimer);
       playTimer = null;
@@ -229,13 +301,13 @@ export function initAtlas(){
     playTimer = setInterval(function(){
       currentYearIdx += 1;
       if (currentYearIdx > YEARS.length - 1) currentYearIdx = 0;
-      document.getElementById("yearSlider").value = currentYearIdx;
+      element<HTMLInputElement>("yearSlider").value = String(currentYearIdx);
       onYearChange();
     }, 650);
   }
 
   function onYearChange(){
-    document.getElementById("yearReadout").textContent = YEARS[currentYearIdx];
+    element("yearReadout").textContent = String(YEARS[currentYearIdx]);
     updateChoroplethYear();
     updateScatterYear();
     updateSmallMultipleMarkers();
@@ -243,14 +315,14 @@ export function initAtlas(){
   }
 
   // ---------- Choropleth ----------
-  function choroplethZ(metric){
+  function choroplethZ(metric: string){
     return COUNTRIES_SORTED.map(function(c){
       var v = valueAt(c.iso3, metric, currentYearIdx);
       return v === null || v === undefined ? null : v;
     });
   }
 
-  function metricRange(metric){
+  function metricRange(metric: string){
     // Capped at the 98th percentile (precomputed) rather than the true max,
     // so a handful of extreme outliers don't wash out every other country's
     // color. Plotly clips anything above zmax to the darkest swatch.
@@ -264,15 +336,15 @@ export function initAtlas(){
     var range = metricRange(choroMetric);
     var meta = DATA.metricMeta[choroMetric];
 
-    document.getElementById("choroSub").textContent =
+    element("choroSub").textContent =
       "Colored by " + meta.label.toLowerCase() + " (" + meta.unit + ") for the selected year.";
     var noDataNote = choroMetric === "renewables_share_energy"
       ? "Gray countries have no reliable energy-mix data for this metric."
       : "Gray countries have no data for this metric in this year.";
-    document.getElementById("choroCaption").textContent =
+    element("choroCaption").textContent =
       noDataNote + " The color scale caps at the 98th percentile so a few extreme outliers don't wash out everyone else — the highest values are shown pinned to the darkest shade.";
 
-    var trace = {
+    var trace: Data = {
       type: "choropleth",
       locationmode: "ISO-3",
       locations: locations,
@@ -293,7 +365,7 @@ export function initAtlas(){
     // showcountries draws every country's outline (from the same self-hosted
     // world_110m.json below), so a country with no value for this metric still
     // reads as "on the map, just uncolored" rather than vanishing into the ocean.
-    var layout = {
+    var layout: Partial<Layout> = {
       paper_bgcolor: t.surface,
       plot_bgcolor: t.surface,
       font: { color: t.text, family: t.fontFamily },
@@ -326,8 +398,8 @@ export function initAtlas(){
 
   // ---------- Scatter ----------
   function scatterFrameData(){
-    var contextIso=[], contextX=[], contextY=[], contextSize=[], contextText=[];
-    var seriesData = [[],[],[]]; // per highlighted slot: {iso,x,y,size,text}
+    const contextIso: string[] = [], contextX: number[] = [], contextY: number[] = [], contextSize: number[] = [], contextText: string[] = [];
+    const seriesData: Bubble[][] = [[],[],[]]; // per highlighted slot: {iso,x,y,size,text}
 
     COUNTRIES_SORTED.forEach(function(c){
       var x = valueAt(c.iso3, scatterXMetric, currentYearIdx);
@@ -356,7 +428,7 @@ export function initAtlas(){
     var f = scatterFrameData();
     var xMeta = DATA.metricMeta[scatterXMetric], yMeta = DATA.metricMeta[scatterYMetric];
 
-    var traces = [{
+    var traces: Data[] = [{
       type: "scattergl", mode: "markers", name: "Other countries",
       x: f.contextX, y: f.contextY, text: f.contextText,
       marker: { size: f.contextSize, sizemode:"area", sizeref: bubbleSizeref(), sizemin:3,
@@ -371,7 +443,7 @@ export function initAtlas(){
       var rows = f.seriesData[slot];
       if (!rows.length) return;
       traces.push({
-        type:"scattergl", mode:"markers+text", name: COUNTRIES_BY_ISO[iso].name,
+        type:"scattergl", mode:"text+markers", name: COUNTRIES_BY_ISO[iso].name,
         x: rows.map(function(r){return r.x;}), y: rows.map(function(r){return r.y;}),
         text: rows.map(function(r){return r.text;}), textposition:"top center",
         textfont: { color: t.text, size: 11, family: t.fontFamily },
@@ -382,7 +454,7 @@ export function initAtlas(){
       });
     });
 
-    var layout = {
+    var layout: Partial<Layout> = {
       paper_bgcolor: t.surface, plot_bgcolor: t.surface,
       font: { color: t.textSecondary, family: t.fontFamily, size:12 },
       margin: { l:64, r:20, t:10, b:52 },
@@ -407,7 +479,7 @@ export function initAtlas(){
   var SM_METRICS = ["co2_per_capita","co2","renewables_share_energy","gdp_per_capita","share_global_co2"];
 
   function renderSmallMultiples(){
-    var grid = document.getElementById("smGrid");
+    var grid = element("smGrid");
     var anyHighlighted = highlighted.some(function(i){ return !!i; });
     if (!anyHighlighted){
       grid.innerHTML = '<p class="empty-note">Pick at least one country above to see its trends.</p>';
@@ -427,15 +499,15 @@ export function initAtlas(){
     return Promise.all(SM_METRICS.map(renderSmallMultiple));
   }
 
-  function renderSmallMultiple(metric){
+  function renderSmallMultiple(metric: string){
     var t = theme();
-    var traces = [];
+    var traces: TrendTrace[] = [];
     [0,1,2].forEach(function(slot){
       var iso = highlighted[slot];
       if (!iso) return;
       var series = seriesAt(iso, metric);
       if (!series) return;
-      var xs=[], ys=[];
+      const xs: number[] = [], ys: number[] = [];
       series.forEach(function(v,i){ if (v!==null && v!==undefined){ xs.push(YEARS[i]); ys.push(v); } });
       if (!xs.length) return;
       traces.push({
@@ -447,17 +519,17 @@ export function initAtlas(){
       });
     });
 
-    var annotations = traces.map(function(tr){
+    var annotations: Partial<Annotations>[] = traces.map(function(tr){
       var lastX = tr.x[tr.x.length-1], lastY = tr.y[tr.y.length-1];
       return { x:lastX, y:lastY, text:tr.name, xanchor:"left", showarrow:false,
                 font:{color:tr.line.color, size:10, family:theme().fontFamily}, xshift:6 };
     });
 
     var currentYear = YEARS[currentYearIdx];
-    var shapes = [{ type:"line", x0:currentYear, x1:currentYear, y0:0, y1:1, yref:"paper",
+    var shapes: Partial<Shape>[] = [{ type:"line", x0:currentYear, x1:currentYear, y0:0, y1:1, yref:"paper",
                     line:{ color:t.textMuted, width:1, dash:"dot" } }];
 
-    var layout = {
+    var layout: Partial<Layout> = {
       paper_bgcolor: t.surface, plot_bgcolor: t.surface,
       font: { color: t.textSecondary, family: t.fontFamily, size:10 },
       margin: { l:34, r:44, t:6, b:22 },
@@ -478,9 +550,13 @@ export function initAtlas(){
     var currentYear = YEARS[currentYearIdx];
     SM_METRICS.forEach(function(metric){
       var elId = "sm-" + metric;
-      var el = document.getElementById(elId);
+      var el = document.getElementById(elId) as Partial<PlotlyHTMLElement> | null;
       if (!el || !el.data) return;
-      Plotly.relayout(elId, { "shapes[0].x0": currentYear, "shapes[0].x1": currentYear });
+      Plotly.relayout(elId, {
+        shapes: (el.layout?.shapes || []).map(shape => ({
+          ...shape, x0: currentYear, x1: currentYear
+        }))
+      });
     });
   }
 
@@ -488,15 +564,15 @@ export function initAtlas(){
   var TABLE_METRICS = ["co2_per_capita","co2","share_global_co2","gdp_per_capita","renewables_share_energy","population"];
 
   function updateCompareTable(){
-    var table = document.getElementById("compareTable");
-    var rows = highlighted.map(function(iso, slot){ return iso ? {iso:iso, slot:slot} : null; }).filter(Boolean);
+    var table = element("compareTable");
+    var rows = highlighted.map(function(iso, slot){ return iso ? {iso:iso, slot:slot} : null; }).filter(row => row !== null);
     if (!rows.length){
       table.innerHTML = '';
-      document.getElementById("compareEmpty").hidden = false;
+      element("compareEmpty").hidden = false;
       table.hidden = true;
       return;
     }
-    document.getElementById("compareEmpty").hidden = true;
+    element("compareEmpty").hidden = true;
     table.hidden = false;
     var thead = "<thead><tr><th>Country</th>" + TABLE_METRICS.map(function(m){
       return "<th>" + DATA.metricMeta[m].label + "</th>";
@@ -512,3 +588,6 @@ export function initAtlas(){
   }
 
 }
+
+initAtlas();
+</script>

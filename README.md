@@ -101,7 +101,7 @@ On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1
 
 The script downloads the [OWID CO₂ dataset](https://github.com/owid/co2-data) and [OWID energy dataset](https://github.com/owid/energy-data), caches them as `co2.csv` and `energy.csv`, and overwrites `public/dataset.json`.
 
-**Existing CSV files are reused.** To fetch newer upstream data, move or delete both cached CSV files before rerunning the script. The year range remains fixed at 1990–2023 unless you edit `YEAR_START` and `YEAR_END` in `build_dataset.py`. If you change the range or coverage, update the static year labels and coverage text in `src/pages/index.astro`, `src/components/AtlasControls.astro`, `src/scripts/atlas.js`, and this README as well.
+**Existing CSV files are reused.** To fetch newer upstream data, move or delete both cached CSV files before rerunning the script. The year range remains fixed at 1990–2023 unless you edit `YEAR_START` and `YEAR_END` in `build_dataset.py`. If you change the range or coverage, update the static year labels and coverage text in `src/components/AtlasDashboard.astro`, `src/components/AtlasControls.astro`, and this README as well.
 
 ### Processing steps
 
@@ -132,10 +132,10 @@ A `null` array entry means that observation is missing. A country may be absent 
 ```text
 carbon-atlas/
 ├── src/
-│   ├── components/       # Shared panels, controls, and metric selectors
+│   ├── components/       # Dashboard with its client script, plus shared UI
 │   ├── layouts/          # HTML document, metadata, and local fonts
-│   ├── pages/index.astro # Dashboard page
-│   ├── scripts/atlas.js  # Plotly charts, data loading, and interactions
+│   ├── pages/index.astro # Route composing the layout and dashboard
+│   ├── env.d.ts          # Types for the Plotly distribution package
 │   └── styles/global.css # Tailwind theme tokens and shared chart/table styles
 ├── public/
 │   ├── dataset.json     # Bundled country/year metric data
@@ -149,7 +149,7 @@ carbon-atlas/
 └── README.md
 ```
 
-The frontend uses **Astro 7.3.3**, **Tailwind CSS 4.3.3**, and **Plotly.js 2.35.2**. Astro generates static HTML; the browser controller handles the interactive charts without a React or Vue runtime. Tailwind uses its [official Vite integration for Astro](https://tailwindcss.com/docs/installation/framework-guides/astro). Plotly retains the existing version to preserve chart behavior and is bundled locally through npm.
+The frontend uses **Astro 7.3.3**, **Tailwind CSS 4.3.3**, and **Plotly.js 2.35.2**. `AtlasDashboard.astro` owns the dashboard markup and a typed, bundled client script for data loading, chart rendering, and synchronized interactions. Astro generates static HTML and compiles the component's script to browser JavaScript without a React or Vue runtime. Tailwind uses its [official Vite integration for Astro](https://tailwindcss.com/docs/installation/framework-guides/astro). Plotly retains the existing version to preserve chart behavior and is bundled locally through npm.
 
 ## Static hosting
 
