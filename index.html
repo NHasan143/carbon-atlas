@@ -1,0 +1,753 @@
+<title>Climate &amp; Energy Atlas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#f9f9f7;
+    --surface:#fcfcfb;
+    --surface-2:#f2f1ec;
+    --text-primary:#0b0b0b;
+    --text-secondary:#52514e;
+    --text-muted:#898781;
+    --border:rgba(11,11,11,0.10);
+    --grid:#e1e0d9;
+    --axis:#c3c2b7;
+    --accent:#2a78d6;
+    --accent-2:#eb6834;
+    --accent-3:#1baf7a;
+    --seq-100:#cde2fb; --seq-200:#9ec5f4; --seq-300:#6da7ec; --seq-400:#3987e5;
+    --seq-500:#256abf; --seq-600:#184f95; --seq-700:#0d366b;
+    --context-dot:#c3c2b7;
+    --focus-ring:#2a78d6;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0d0d0d;
+      --surface:#1a1a19;
+      --surface-2:#232322;
+      --text-primary:#ffffff;
+      --text-secondary:#c3c2b7;
+      --text-muted:#898781;
+      --border:rgba(255,255,255,0.10);
+      --grid:#2c2c2a;
+      --axis:#383835;
+      --accent:#3987e5;
+      --accent-2:#d95926;
+      --accent-3:#199e70;
+      --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
+      --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
+      --context-dot:#4a4a47;
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0d0d0d;
+    --surface:#1a1a19;
+    --surface-2:#232322;
+    --text-primary:#ffffff;
+    --text-secondary:#c3c2b7;
+    --text-muted:#898781;
+    --border:rgba(255,255,255,0.10);
+    --grid:#2c2c2a;
+    --axis:#383835;
+    --accent:#3987e5;
+    --accent-2:#d95926;
+    --accent-3:#199e70;
+    --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
+    --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
+    --context-dot:#4a4a47;
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text-primary);
+    font-family:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding-inline:20px;
+    padding-block:28px 60px;
+    max-width:1180px;
+    margin-inline:auto;
+  }
+  .mono, .tabular, table, .year-readout, .stat-value{
+    font-variant-numeric:tabular-nums;
+  }
+  .mono{ font-family:"IBM Plex Mono", ui-monospace, monospace; }
+
+  header.page{ margin-bottom:22px; }
+  header.page .eyebrow{
+    font-family:"IBM Plex Mono", ui-monospace, monospace;
+    font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 6px;
+  }
+  header.page h1{
+    font-size:clamp(26px,4vw,36px); line-height:1.15; margin:0 0 8px; font-weight:700;
+    text-wrap:balance;
+  }
+  header.page p{
+    color:var(--text-secondary); font-size:15px; max-width:62ch; margin:0; line-height:1.5;
+  }
+
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:22px;
+  }
+  .panel h2{
+    font-size:17px; margin:0 0 4px; font-weight:600;
+  }
+  .panel .sub{
+    color:var(--text-secondary); font-size:13.5px; margin:0 0 16px; max-width:70ch; line-height:1.5;
+  }
+  .panel .caption{
+    color:var(--text-muted); font-size:12.5px; margin-top:10px; line-height:1.5;
+  }
+
+  /* --- Global control bar --- */
+  .controls{
+    display:flex; flex-wrap:wrap; align-items:flex-end; gap:18px 26px;
+  }
+  .control-group{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .control-group label{
+    font-size:11.5px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase;
+    color:var(--text-muted);
+  }
+  select{
+    font:inherit; font-size:13.5px; color:var(--text-primary);
+    background:var(--surface-2); border:1px solid var(--border); border-radius:8px;
+    padding:7px 10px; min-width:0; max-width:220px;
+  }
+  select:focus-visible, input:focus-visible, button:focus-visible{
+    outline:2px solid var(--focus-ring); outline-offset:2px;
+  }
+  .swatch-select{ display:flex; align-items:center; gap:8px; }
+  .swatch{ width:11px; height:11px; border-radius:50%; flex:none; }
+
+  .year-block{ display:flex; align-items:center; gap:14px; flex:1 1 320px; }
+  #playBtn{
+    font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:9px 16px; flex:none; min-width:76px;
+  }
+  #playBtn:hover{ filter:brightness(1.08); }
+  .year-slider-wrap{ flex:1 1 auto; display:flex; align-items:center; gap:12px; }
+  input[type="range"]{
+    flex:1; height:4px; border-radius:2px; background:var(--grid);
+    appearance:none; -webkit-appearance:none; cursor:pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    appearance:none; -webkit-appearance:none;
+    width:16px; height:16px; border-radius:50%; background:var(--accent);
+    border:2px solid var(--surface); box-shadow:0 0 0 1px var(--accent);
+    margin-top:-6px;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%; background:var(--accent);
+    border:2px solid var(--surface); box-shadow:0 0 0 1px var(--accent);
+  }
+  .year-readout{
+    font-family:"IBM Plex Mono", monospace; font-weight:600; font-size:16px;
+    min-width:3.4em; text-align:right;
+  }
+
+  .compare-row{ display:flex; flex-wrap:wrap; gap:14px 22px; }
+
+  /* --- Comparison table --- */
+  .table-scroll{ overflow-x:auto; }
+  table.compare{ border-collapse:collapse; width:100%; font-size:13px; min-width:560px; }
+  table.compare th, table.compare td{
+    padding:8px 12px; text-align:right; border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  table.compare th:first-child, table.compare td:first-child{ text-align:left; }
+  table.compare thead th{
+    color:var(--text-muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.03em;
+  }
+  table.compare td.country-cell{ font-weight:600; display:flex; align-items:center; gap:8px; }
+  table.compare .swatch{ width:9px; height:9px; }
+  .empty-note{ color:var(--text-muted); font-size:13.5px; padding:14px 0; }
+
+  /* --- Chart grid --- */
+  .chart-full{ width:100%; height:460px; }
+  .chart-full.scatter{ height:520px; }
+  .sm-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:16px;
+  }
+  .sm-cell{ min-width:0; }
+  .sm-cell .chart-sm{ width:100%; height:190px; }
+  .sm-cell .sm-title{ font-size:12.5px; font-weight:600; color:var(--text-secondary); margin:0 0 2px; }
+
+  footer{
+    color:var(--text-muted); font-size:12.5px; margin-top:8px; line-height:1.6;
+  }
+  footer a{ color:var(--text-secondary); }
+
+  @media (max-width:640px){
+    select{ max-width:100%; }
+    .control-group{ flex:1 1 100%; }
+    .year-block{ flex:1 1 100%; }
+  }
+</style>
+
+<header class="page">
+  <p class="eyebrow">Interactive explorer &middot; 1990&ndash;2023</p>
+  <h1>Climate &amp; Energy Atlas</h1>
+  <p>Emissions, energy mix and GDP for 217 countries, built from Our World in Data's CO&#8322; and energy datasets. Pick up to three countries to compare, scrub the year, or press play.</p>
+</header>
+
+<section class="panel" id="controlsPanel">
+  <div class="controls">
+    <div class="year-block">
+      <button id="playBtn" type="button" aria-label="Play animation">&#9658; Play</button>
+      <div class="year-slider-wrap">
+        <input type="range" id="yearSlider" min="0" max="33" step="1" value="33" aria-label="Year">
+        <span class="year-readout" id="yearReadout">2023</span>
+      </div>
+    </div>
+  </div>
+  <div class="compare-row" style="margin-top:16px;">
+    <div class="control-group">
+      <label for="cmp0">Compare &mdash; series 1</label>
+      <div class="swatch-select"><span class="swatch" style="background:var(--accent)"></span><select id="cmp0"></select></div>
+    </div>
+    <div class="control-group">
+      <label for="cmp1">Compare &mdash; series 2</label>
+      <div class="swatch-select"><span class="swatch" style="background:var(--accent-2)"></span><select id="cmp1"></select></div>
+    </div>
+    <div class="control-group">
+      <label for="cmp2">Compare &mdash; series 3</label>
+      <div class="swatch-select"><span class="swatch" style="background:var(--accent-3)"></span><select id="cmp2"></select></div>
+    </div>
+  </div>
+  <p class="caption">Highlighted countries stay in the same three colors across every chart below. Everything else is shown in gray for context &mdash; that cap keeps colors tell-apart-able (a fourth or fifth hue starts to look the same to some readers).</p>
+</section>
+
+<section class="panel">
+  <h2>Now comparing</h2>
+  <p class="sub">Snapshot for the selected year across every metric in the atlas.</p>
+  <div class="table-scroll">
+    <table class="compare" id="compareTable"></table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>World map</h2>
+  <p class="sub" id="choroSub">One metric, every country, colored by value.</p>
+  <div class="control-group" style="margin-bottom:14px;">
+    <label for="choroMetric">Metric</label>
+    <select id="choroMetric"></select>
+  </div>
+  <div id="choroplethChart" class="chart-full"></div>
+  <p class="caption" id="choroCaption"></p>
+</section>
+
+<section class="panel">
+  <h2>GDP, emissions and population</h2>
+  <p class="sub">Each bubble is a country; bubble size is population. Drag the year slider above or press play to watch the whole world move.</p>
+  <div class="compare-row" style="margin-bottom:14px;">
+    <div class="control-group">
+      <label for="scatterX">X axis</label>
+      <select id="scatterX"></select>
+    </div>
+    <div class="control-group">
+      <label for="scatterY">Y axis</label>
+      <select id="scatterY"></select>
+    </div>
+  </div>
+  <div id="scatterChart" class="chart-full scatter"></div>
+</section>
+
+<section class="panel">
+  <h2>Trends side by side</h2>
+  <p class="sub">The full 1990&ndash;2023 history for your three countries, one small chart per metric. The dashed line marks the year selected above.</p>
+  <div class="sm-grid" id="smGrid"></div>
+</section>
+
+<footer>
+  Data: <a href="https://github.com/owid/co2-data" target="_blank" rel="noopener">Our World in Data &ndash; CO&#8322; and Greenhouse Gas Emissions</a> and
+  <a href="https://github.com/owid/energy-data" target="_blank" rel="noopener">Our World in Data &ndash; Energy</a>, both CC BY. Renewables-share data covers 79 countries with reliable energy-mix reporting; others show as no-data on the map and are omitted from that metric's comparisons.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var DATA = null;
+  var YEARS = [];
+  var COUNTRIES_BY_ISO = {};
+  var COUNTRIES_SORTED = [];
+  var currentYearIdx = 0;
+  var highlighted = ["USA","CHN","IND"]; // slot order = series 1/2/3
+  var SERIES_COLORS = [
+    getVar("--accent"), getVar("--accent-2"), getVar("--accent-3")
+  ];
+  var choroMetric = "co2_per_capita";
+  var scatterXMetric = "gdp_per_capita";
+  var scatterYMetric = "co2_per_capita";
+  var maxPopulation = 1;
+  var playTimer = null;
+
+  function getVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function theme(){
+    return {
+      surface: getVar("--surface"),
+      surface2: getVar("--surface-2"),
+      text: getVar("--text-primary"),
+      textSecondary: getVar("--text-secondary"),
+      textMuted: getVar("--text-muted"),
+      grid: getVar("--grid"),
+      axis: getVar("--axis"),
+      border: getVar("--border"),
+      context: getVar("--context-dot"),
+      seq: [getVar("--seq-100"),getVar("--seq-200"),getVar("--seq-300"),getVar("--seq-400"),getVar("--seq-500"),getVar("--seq-600"),getVar("--seq-700")],
+      series: [getVar("--accent"), getVar("--accent-2"), getVar("--accent-3")],
+      fontFamily: "IBM Plex Sans, system-ui, sans-serif"
+    };
+  }
+
+  function fmtValue(v, metric){
+    if (v === null || v === undefined || isNaN(v)) return "—";
+    if (metric === "co2_per_capita") return v.toFixed(2) + " t";
+    if (metric === "co2") return v.toLocaleString(undefined,{maximumFractionDigits:0}) + " Mt";
+    if (metric === "share_global_co2") return v.toFixed(2) + "%";
+    if (metric === "gdp_per_capita") return "$" + v.toLocaleString(undefined,{maximumFractionDigits:0});
+    if (metric === "renewables_share_energy") return v.toFixed(1) + "%";
+    if (metric === "population") return v.toLocaleString(undefined,{maximumFractionDigits:0});
+    return String(v);
+  }
+
+  function metricLabel(metric){
+    var m = DATA.metricMeta[metric];
+    return m ? (m.label + " (" + m.unit + ")") : metric;
+  }
+
+  function seriesAt(iso, metric){
+    var m = DATA.metrics[metric];
+    return m ? (m[iso] || null) : null;
+  }
+
+  function valueAt(iso, metric, yearIdx){
+    var s = seriesAt(iso, metric);
+    return s ? s[yearIdx] : null;
+  }
+
+  function axisType(metric){
+    return (metric === "gdp_per_capita" || metric === "population") ? "log" : "linear";
+  }
+
+  // ---------- bootstrap ----------
+  fetch("dataset.json").then(function(r){ return r.json(); }).then(function(d){
+    DATA = d;
+    YEARS = d.years;
+    d.countries.forEach(function(c){ COUNTRIES_BY_ISO[c.iso3] = c; });
+    COUNTRIES_SORTED = d.countries.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
+
+    Object.keys(d.metrics).forEach(function(metric){
+      Object.keys(d.metrics[metric]).forEach(function(iso){
+        d.metrics[metric][iso].forEach(function(v){
+          if (metric === "population" && v && v > maxPopulation) maxPopulation = v;
+        });
+      });
+    });
+
+    currentYearIdx = YEARS.length - 1;
+    document.getElementById("yearSlider").max = YEARS.length - 1;
+    document.getElementById("yearSlider").value = currentYearIdx;
+    document.getElementById("yearReadout").textContent = YEARS[currentYearIdx];
+
+    buildMetricDropdown(document.getElementById("choroMetric"), choroMetric);
+    buildMetricDropdown(document.getElementById("scatterX"), scatterXMetric);
+    buildMetricDropdown(document.getElementById("scatterY"), scatterYMetric);
+    buildCompareDropdowns();
+
+    renderChoropleth();
+    renderScatter();
+    renderSmallMultiples();
+    updateCompareTable();
+
+    wireEvents();
+  });
+
+  function buildMetricDropdown(sel, selected){
+    sel.innerHTML = "";
+    Object.keys(DATA.metricMeta).forEach(function(key){
+      var opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = DATA.metricMeta[key].label;
+      if (key === selected) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  function buildCompareDropdowns(){
+    var byContinent = {};
+    COUNTRIES_SORTED.forEach(function(c){
+      (byContinent[c.continent] = byContinent[c.continent] || []).push(c);
+    });
+    var continents = Object.keys(byContinent).sort();
+
+    [0,1,2].forEach(function(slot){
+      var sel = document.getElementById("cmp" + slot);
+      sel.innerHTML = "";
+      var noneOpt = document.createElement("option");
+      noneOpt.value = ""; noneOpt.textContent = "— none —";
+      sel.appendChild(noneOpt);
+      continents.forEach(function(cont){
+        var group = document.createElement("optgroup");
+        group.label = cont;
+        byContinent[cont].forEach(function(c){
+          var opt = document.createElement("option");
+          opt.value = c.iso3; opt.textContent = c.name;
+          group.appendChild(opt);
+        });
+        sel.appendChild(group);
+      });
+      sel.value = highlighted[slot] || "";
+    });
+  }
+
+  function wireEvents(){
+    document.getElementById("yearSlider").addEventListener("input", function(e){
+      currentYearIdx = parseInt(e.target.value, 10);
+      onYearChange();
+    });
+    document.getElementById("playBtn").addEventListener("click", togglePlay);
+    document.getElementById("choroMetric").addEventListener("change", function(e){
+      choroMetric = e.target.value;
+      renderChoropleth();
+    });
+    document.getElementById("scatterX").addEventListener("change", function(e){
+      scatterXMetric = e.target.value;
+      renderScatter();
+    });
+    document.getElementById("scatterY").addEventListener("change", function(e){
+      scatterYMetric = e.target.value;
+      renderScatter();
+    });
+    [0,1,2].forEach(function(slot){
+      document.getElementById("cmp" + slot).addEventListener("change", function(e){
+        var iso = e.target.value;
+        // avoid duplicate picks across slots
+        [0,1,2].forEach(function(other){
+          if (other !== slot && highlighted[other] === iso && iso !== "") {
+            highlighted[other] = "";
+            document.getElementById("cmp" + other).value = "";
+          }
+        });
+        highlighted[slot] = iso;
+        renderScatter();
+        renderSmallMultiples();
+        updateCompareTable();
+      });
+    });
+
+    var mq = window.matchMedia("(prefers-color-scheme: dark)");
+    if (mq.addEventListener) mq.addEventListener("change", reTheme);
+    new MutationObserver(reTheme).observe(document.documentElement, {attributes:true, attributeFilter:["data-theme"]});
+  }
+
+  function reTheme(){
+    renderChoropleth();
+    renderScatter();
+    renderSmallMultiples();
+  }
+
+  function togglePlay(){
+    var btn = document.getElementById("playBtn");
+    if (playTimer){
+      clearInterval(playTimer);
+      playTimer = null;
+      btn.innerHTML = "&#9658; Play";
+      return;
+    }
+    btn.innerHTML = "&#10074;&#10074; Pause";
+    playTimer = setInterval(function(){
+      currentYearIdx += 1;
+      if (currentYearIdx > YEARS.length - 1) currentYearIdx = 0;
+      document.getElementById("yearSlider").value = currentYearIdx;
+      onYearChange();
+    }, 650);
+  }
+
+  function onYearChange(){
+    document.getElementById("yearReadout").textContent = YEARS[currentYearIdx];
+    updateChoroplethYear();
+    updateScatterYear();
+    updateSmallMultipleMarkers();
+    updateCompareTable();
+  }
+
+  // ---------- Choropleth ----------
+  function choroplethZ(metric){
+    return COUNTRIES_SORTED.map(function(c){
+      var v = valueAt(c.iso3, metric, currentYearIdx);
+      return v === null || v === undefined ? null : v;
+    });
+  }
+
+  function metricRange(metric){
+    // Capped at the 98th percentile (precomputed) rather than the true max,
+    // so a handful of extreme outliers don't wash out every other country's
+    // color. Plotly clips anything above zmax to the darkest swatch.
+    return [0, DATA.metricMeta[metric].vmax];
+  }
+
+  function renderChoropleth(){
+    var t = theme();
+    var locations = COUNTRIES_SORTED.map(function(c){ return c.iso3; });
+    var z = choroplethZ(choroMetric);
+    var range = metricRange(choroMetric);
+    var meta = DATA.metricMeta[choroMetric];
+
+    document.getElementById("choroSub").textContent =
+      "Colored by " + meta.label.toLowerCase() + " (" + meta.unit + ") for the selected year.";
+    var noDataNote = choroMetric === "renewables_share_energy"
+      ? "Gray countries have no reliable energy-mix data for this metric."
+      : "Gray countries have no data for this metric in this year.";
+    document.getElementById("choroCaption").textContent =
+      noDataNote + " The color scale caps at the 98th percentile so a few extreme outliers don't wash out everyone else — the highest values are shown pinned to the darkest shade.";
+
+    var trace = {
+      type: "choropleth",
+      locationmode: "ISO-3",
+      locations: locations,
+      z: z,
+      zmin: range[0],
+      zmax: range[1],
+      colorscale: [[0,t.seq[0]],[1/6,t.seq[1]],[2/6,t.seq[2]],[3/6,t.seq[3]],[4/6,t.seq[4]],[5/6,t.seq[5]],[1,t.seq[6]]],
+      marker: { line: { color: t.border, width: 0.4 } },
+      colorbar: {
+        title: { text: meta.unit, font: { color: t.textSecondary, size: 11, family: t.fontFamily } },
+        tickfont: { color: t.textSecondary, size: 11, family: t.fontFamily },
+        outlinewidth: 0, thickness: 12, len: 0.7
+      },
+      hovertemplate: "%{text}<br>" + meta.label + ": %{z}<extra></extra>",
+      text: locations.map(function(iso){ return COUNTRIES_BY_ISO[iso].name; })
+    };
+
+    // showcountries draws every country's outline (from the same self-hosted
+    // world_110m.json below), so a country with no value for this metric still
+    // reads as "on the map, just uncolored" rather than vanishing into the ocean.
+    var layout = {
+      paper_bgcolor: t.surface,
+      plot_bgcolor: t.surface,
+      font: { color: t.text, family: t.fontFamily },
+      margin: { l:0, r:0, t:0, b:0 },
+      geo: {
+        scope: "world",
+        resolution: 110,
+        showframe: false,
+        showcoastlines: false,
+        showland: false,
+        showocean: false,
+        showcountries: true,
+        countrycolor: t.grid,
+        showlakes: false,
+        projection: { type: "natural earth" },
+        bgcolor: t.surface
+      }
+    };
+
+    // Plotly's default base-map atlas streams from Plotly's own CDN at draw
+    // time; topojsonURL redirects that one request to a same-origin file
+    // (world_110m.json, published next to this page) built from Natural Earth
+    // 110m data, so nothing is fetched from an external host at runtime.
+    Plotly.react("choroplethChart", [trace], layout, {displayModeBar:false, responsive:true, topojsonURL:"./"});
+  }
+
+  function updateChoroplethYear(){
+    Plotly.restyle("choroplethChart", { z: [choroplethZ(choroMetric)] });
+  }
+
+  // ---------- Scatter ----------
+  function scatterFrameData(){
+    var contextIso=[], contextX=[], contextY=[], contextSize=[], contextText=[];
+    var seriesData = [[],[],[]]; // per highlighted slot: {iso,x,y,size,text}
+
+    COUNTRIES_SORTED.forEach(function(c){
+      var x = valueAt(c.iso3, scatterXMetric, currentYearIdx);
+      var y = valueAt(c.iso3, scatterYMetric, currentYearIdx);
+      var pop = valueAt(c.iso3, "population", currentYearIdx);
+      if (x === null || y === null || x === undefined || y === undefined) return;
+      if (x <= 0 && axisType(scatterXMetric) === "log") return;
+      if (y <= 0 && axisType(scatterYMetric) === "log") return;
+      var slot = highlighted.indexOf(c.iso3);
+      var size = pop || (maxPopulation * 0.002);
+      if (slot === -1){
+        contextIso.push(c.iso3); contextX.push(x); contextY.push(y); contextSize.push(size); contextText.push(c.name);
+      } else {
+        seriesData[slot].push({x:x,y:y,size:size,text:c.name});
+      }
+    });
+    return { contextX:contextX, contextY:contextY, contextSize:contextSize, contextText:contextText, seriesData:seriesData };
+  }
+
+  function bubbleSizeref(){
+    return 2.0 * maxPopulation / Math.pow(46, 2);
+  }
+
+  function renderScatter(){
+    var t = theme();
+    var f = scatterFrameData();
+    var xMeta = DATA.metricMeta[scatterXMetric], yMeta = DATA.metricMeta[scatterYMetric];
+
+    var traces = [{
+      type: "scattergl", mode: "markers", name: "Other countries",
+      x: f.contextX, y: f.contextY, text: f.contextText,
+      marker: { size: f.contextSize, sizemode:"area", sizeref: bubbleSizeref(), sizemin:3,
+                color: t.context, opacity:0.55, line:{width:0} },
+      hovertemplate: "%{text}<br>" + xMeta.label + ": %{x}<br>" + yMeta.label + ": %{y}<extra></extra>",
+      showlegend:false
+    }];
+
+    [0,1,2].forEach(function(slot){
+      var iso = highlighted[slot];
+      if (!iso) return;
+      var rows = f.seriesData[slot];
+      if (!rows.length) return;
+      traces.push({
+        type:"scattergl", mode:"markers+text", name: COUNTRIES_BY_ISO[iso].name,
+        x: rows.map(function(r){return r.x;}), y: rows.map(function(r){return r.y;}),
+        text: rows.map(function(r){return r.text;}), textposition:"top center",
+        textfont: { color: t.text, size: 11, family: t.fontFamily },
+        marker: { size: rows.map(function(r){return r.size;}), sizemode:"area", sizeref: bubbleSizeref(), sizemin:6,
+                  color: SERIES_COLORS_LIVE()[slot], line:{ color:t.surface, width:1.5 } },
+        hovertemplate: "<b>%{text}</b><br>" + xMeta.label + ": %{x}<br>" + yMeta.label + ": %{y}<extra></extra>",
+        showlegend:false
+      });
+    });
+
+    var layout = {
+      paper_bgcolor: t.surface, plot_bgcolor: t.surface,
+      font: { color: t.textSecondary, family: t.fontFamily, size:12 },
+      margin: { l:64, r:20, t:10, b:52 },
+      xaxis: { title:{text:metricLabel(scatterXMetric)}, type:axisType(scatterXMetric),
+                gridcolor:t.grid, zerolinecolor:t.axis, linecolor:t.axis, tickfont:{color:t.textSecondary} },
+      yaxis: { title:{text:metricLabel(scatterYMetric)}, type:axisType(scatterYMetric),
+                gridcolor:t.grid, zerolinecolor:t.axis, linecolor:t.axis, tickfont:{color:t.textSecondary} }
+    };
+
+    Plotly.react("scatterChart", traces, layout, {displayModeBar:false, responsive:true});
+  }
+
+  function SERIES_COLORS_LIVE(){
+    return [getVar("--accent"), getVar("--accent-2"), getVar("--accent-3")];
+  }
+
+  function updateScatterYear(){
+    renderScatter();
+  }
+
+  // ---------- Small multiples ----------
+  var SM_METRICS = ["co2_per_capita","co2","renewables_share_energy","gdp_per_capita","share_global_co2"];
+
+  function renderSmallMultiples(){
+    var grid = document.getElementById("smGrid");
+    var anyHighlighted = highlighted.some(function(i){ return !!i; });
+    if (!anyHighlighted){
+      grid.innerHTML = '<p class="empty-note">Pick at least one country above to see its trends.</p>';
+      return;
+    }
+    if (grid.children.length !== SM_METRICS.length || grid.dataset.built !== "1"){
+      grid.innerHTML = "";
+      SM_METRICS.forEach(function(metric){
+        var cell = document.createElement("div");
+        cell.className = "sm-cell";
+        cell.innerHTML = '<p class="sm-title">'+DATA.metricMeta[metric].label+' ('+DATA.metricMeta[metric].unit+')</p>' +
+                          '<div class="chart-sm" id="sm-'+metric+'"></div>';
+        grid.appendChild(cell);
+      });
+      grid.dataset.built = "1";
+    }
+    SM_METRICS.forEach(renderSmallMultiple);
+  }
+
+  function renderSmallMultiple(metric){
+    var t = theme();
+    var traces = [];
+    [0,1,2].forEach(function(slot){
+      var iso = highlighted[slot];
+      if (!iso) return;
+      var series = seriesAt(iso, metric);
+      if (!series) return;
+      var xs=[], ys=[];
+      series.forEach(function(v,i){ if (v!==null && v!==undefined){ xs.push(YEARS[i]); ys.push(v); } });
+      if (!xs.length) return;
+      traces.push({
+        type:"scatter", mode:"lines", name: COUNTRIES_BY_ISO[iso].name,
+        x: xs, y: ys,
+        line: { color: SERIES_COLORS_LIVE()[slot], width:2, shape:"spline", smoothing:0.3 },
+        hovertemplate: "<b>"+COUNTRIES_BY_ISO[iso].name+"</b><br>%{x}: %{y}<extra></extra>",
+        showlegend:false
+      });
+    });
+
+    var annotations = traces.map(function(tr){
+      var lastX = tr.x[tr.x.length-1], lastY = tr.y[tr.y.length-1];
+      return { x:lastX, y:lastY, text:tr.name, xanchor:"left", showarrow:false,
+                font:{color:tr.line.color, size:10, family:theme().fontFamily}, xshift:6 };
+    });
+
+    var currentYear = YEARS[currentYearIdx];
+    var shapes = [{ type:"line", x0:currentYear, x1:currentYear, y0:0, y1:1, yref:"paper",
+                    line:{ color:t.textMuted, width:1, dash:"dot" } }];
+
+    var layout = {
+      paper_bgcolor: t.surface, plot_bgcolor: t.surface,
+      font: { color: t.textSecondary, family: t.fontFamily, size:10 },
+      margin: { l:34, r:44, t:6, b:22 },
+      xaxis: { gridcolor:"transparent", linecolor:t.axis, tickfont:{size:10}, tickvals:[1990,2005,2023] },
+      yaxis: { gridcolor:t.grid, zerolinecolor:t.axis, linecolor:"transparent", tickfont:{size:10} },
+      shapes: shapes,
+      annotations: annotations,
+      showlegend:false
+    };
+
+    var elId = "sm-" + metric;
+    if (document.getElementById(elId)){
+      Plotly.react(elId, traces, layout, {displayModeBar:false, responsive:true});
+    }
+  }
+
+  function updateSmallMultipleMarkers(){
+    var currentYear = YEARS[currentYearIdx];
+    SM_METRICS.forEach(function(metric){
+      var elId = "sm-" + metric;
+      var el = document.getElementById(elId);
+      if (!el || !el.data) return;
+      Plotly.relayout(elId, { "shapes[0].x0": currentYear, "shapes[0].x1": currentYear });
+    });
+  }
+
+  // ---------- Comparison table ----------
+  var TABLE_METRICS = ["co2_per_capita","co2","share_global_co2","gdp_per_capita","renewables_share_energy","population"];
+
+  function updateCompareTable(){
+    var table = document.getElementById("compareTable");
+    var rows = highlighted.map(function(iso, slot){ return iso ? {iso:iso, slot:slot} : null; }).filter(Boolean);
+    if (!rows.length){
+      table.innerHTML = '';
+      table.parentElement.innerHTML = '<p class="empty-note">Pick at least one country above.</p>';
+      return;
+    }
+    var thead = "<thead><tr><th>Country</th>" + TABLE_METRICS.map(function(m){
+      return "<th>" + DATA.metricMeta[m].label + "</th>";
+    }).join("") + "</tr></thead>";
+    var tbody = "<tbody>" + rows.map(function(r){
+      var c = COUNTRIES_BY_ISO[r.iso];
+      var cells = TABLE_METRICS.map(function(m){
+        return "<td>" + fmtValue(valueAt(r.iso, m, currentYearIdx), m) + "</td>";
+      }).join("");
+      return '<tr><td class="country-cell"><span class="swatch" style="background:' + SERIES_COLORS_LIVE()[r.slot] + '"></span>' + c.name + '</td>' + cells + '</tr>';
+    }).join("") + "</tbody>";
+    table.innerHTML = thead + tbody;
+  }
+
+})();
+</script>
