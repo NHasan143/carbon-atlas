@@ -18,17 +18,50 @@ The initial view shows 2023 and compares the United States, China, and India.
 
 ## Run locally
 
-You need Python 3 and a modern browser. The bundled data is ready to use; no build step, Node.js dependencies, or Python data-processing packages are required to serve the app.
+You need **Node.js 22.12.0 or newer** and npm (Node.js 24 LTS is recommended). Python is only needed if you want to rebuild the dataset.
 
 ```sh
 git clone https://github.com/NHasan143/carbon-atlas.git
 cd carbon-atlas
-python3 -m http.server 8000
+npm install
+npm run dev
 ```
 
-Open **http://localhost:8000**. Stop the server with `Ctrl+C`.
+Open **http://localhost:4321** (or the address printed in the terminal). Astro automatically updates the browser when you edit the frontend. Stop the server with `Ctrl+C`.
 
-Serve the project over HTTP instead of opening `index.html` directly: the app fetches its JSON files using relative URLs. An internet connection is needed to load Plotly.js from cdnjs and the IBM Plex fonts from Google Fonts. The dataset and map geometry are served locally.
+In VS Code, open the project folder and run these commands in **Terminal → New Terminal**. A Python virtual environment is not required for the frontend. The old `python -m http.server 8000` command does not run the Astro source project.
+
+Plotly, IBM Plex fonts, the dataset, and map geometry are all served from your app after installation; the dashboard no longer depends on a third-party CDN at runtime. If the chart library or dataset fails to load, the page displays an error and a reload link. Controls become available after initial chart rendering succeeds.
+
+### Commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the development server with live updates |
+| `npm run check` | Check Astro components and TypeScript configuration |
+| `npm run build` | Generate the static site in `dist/` |
+| `npm run preview` | Preview the production build locally |
+| `npm test` | Run browser regression tests against the production build |
+
+For a clean install using the committed dependency versions, use `npm ci`.
+
+### Browser tests
+
+Build the app, install Chromium once, and run the tests:
+
+```sh
+npm run build
+npx playwright install chromium
+npm test
+```
+
+You can also use an existing Chrome installation on macOS:
+
+```sh
+PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npm test
+```
+
+The tests cover chart rendering, Play/Pause, year synchronization, all metric choices, country selection and empty-state recovery, dark/light themes, mobile layout, and loading errors. The test server runs on port 4322.
 
 ## Explore the atlas
 
@@ -66,9 +99,9 @@ python build_dataset.py
 
 On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1` instead.
 
-The script downloads the [OWID CO₂ dataset](https://github.com/owid/co2-data) and [OWID energy dataset](https://github.com/owid/energy-data), caches them as `co2.csv` and `energy.csv`, and overwrites `dataset.json`.
+The script downloads the [OWID CO₂ dataset](https://github.com/owid/co2-data) and [OWID energy dataset](https://github.com/owid/energy-data), caches them as `co2.csv` and `energy.csv`, and overwrites `public/dataset.json`.
 
-**Existing CSV files are reused.** To fetch newer upstream data, move or delete both cached CSV files before rerunning the script. The year range remains fixed at 1990–2023 unless you edit `YEAR_START` and `YEAR_END` in `build_dataset.py`. If you change the range or coverage, update the static year labels and coverage text in `index.html` and this README as well.
+**Existing CSV files are reused.** To fetch newer upstream data, move or delete both cached CSV files before rerunning the script. The year range remains fixed at 1990–2023 unless you edit `YEAR_START` and `YEAR_END` in `build_dataset.py`. If you change the range or coverage, update the static year labels and coverage text in `src/pages/index.astro`, `src/components/AtlasControls.astro`, `src/scripts/atlas.js`, and this README as well.
 
 ### Processing steps
 
@@ -79,11 +112,11 @@ The script downloads the [OWID CO₂ dataset](https://github.com/owid/co2-data) 
 5. Export country metadata and rounded metric arrays, omitting all-null country/metric series.
 6. Calculate a fixed map color ceiling for each metric at approximately the 98th percentile of all available country-year values.
 
-The pipeline does not interpolate emissions or renewables shares. It does not regenerate `world_110m.json`. Upstream data and dependency versions are not pinned, so rebuilding may produce a different snapshot.
+The pipeline does not interpolate emissions or renewables shares. It does not regenerate `public/world_110m.json`. Upstream data and dependency versions are not pinned, so rebuilding may produce a different snapshot.
 
 ### JSON structure
 
-`dataset.json` uses a compact, column-oriented format:
+`public/dataset.json` uses a compact, column-oriented format:
 
 | Key | Contents |
 | --- | --- |
@@ -98,19 +131,41 @@ A `null` array entry means that observation is missing. A country may be absent 
 
 ```text
 carbon-atlas/
-├── index.html          # Page markup, styles, and interactive Plotly charts
-├── dataset.json        # Bundled country/year metric data
-├── world_110m.json      # Local TopoJSON geometry for the world map
-├── build_dataset.py    # Optional OWID download and transformation pipeline
-├── .gitignore          # Excludes local environments, caches, and raw downloads
+├── src/
+│   ├── components/       # Shared panels, controls, and metric selectors
+│   ├── layouts/          # HTML document, metadata, and local fonts
+│   ├── pages/index.astro # Dashboard page
+│   ├── scripts/atlas.js  # Plotly charts, data loading, and interactions
+│   └── styles/global.css # Tailwind theme tokens and shared chart/table styles
+├── public/
+│   ├── dataset.json     # Bundled country/year metric data
+│   └── world_110m.json   # Local TopoJSON geometry
+├── tests/               # Playwright browser regression checks
+├── astro.config.mjs     # Static output and Tailwind Vite integration
+├── package.json         # Dependencies and development commands
+├── package-lock.json    # Reproducible dependency versions
+├── playwright.config.js
+├── build_dataset.py     # Optional OWID data pipeline
 └── README.md
 ```
 
-The frontend uses plain HTML, CSS, and JavaScript with **Plotly.js 2.35.2**. There is no application server, database, or frontend build system.
+The frontend uses **Astro 7.3.3**, **Tailwind CSS 4.3.3**, and **Plotly.js 2.35.2**. Astro generates static HTML; the browser controller handles the interactive charts without a React or Vue runtime. Tailwind uses its [official Vite integration for Astro](https://tailwindcss.com/docs/installation/framework-guides/astro). Plotly retains the existing version to preserve chart behavior and is bundled locally through npm.
 
 ## Static hosting
 
-Upload `index.html`, `dataset.json`, and `world_110m.json` together to a static web host, preserving their relative paths. No server-side code is required. The Python script only runs when regenerating the dataset.
+```sh
+npm run build
+```
+
+Upload the **contents of `dist/`** to your static host. Keep the generated `_astro/` assets and JSON files together. No application server or database is required.
+
+For a host that serves the project under a subdirectory (such as GitHub Pages at `/carbon-atlas/`), build with:
+
+```sh
+BASE_PATH=/carbon-atlas/ npm run build
+```
+
+The chart controller uses Astro's base URL for both dataset and map requests. The Python script only runs when regenerating the dataset; rebuild the frontend after changing public data before deploying.
 
 ## Interpretation notes
 

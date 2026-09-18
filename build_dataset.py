@@ -12,11 +12,11 @@ Data sources (public domain / CC BY, refreshed daily by OWID):
   https://github.com/owid/energy-data
 
 Run:
-    pip install pandas country_converter --break-system-packages
+    pip install pandas country_converter
     python3 build_dataset.py
 
 Produces:
-    dataset.json   — the merged, cleaned, columnar dataset used by the app
+    public/dataset.json — the merged, cleaned, columnar dataset used by the app
 """
 
 import json
@@ -157,7 +157,8 @@ def main() -> None:
     df = load_source_data()
     payload = to_columnar_json(df)
 
-    out_path = HERE / "dataset.json"
+    out_path = HERE / "public" / "dataset.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, separators=(",", ":")))
 
     n_countries = len(payload["countries"])

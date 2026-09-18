@@ -1,0 +1,9 @@
+---
+interface Props { id: string; label: string; }
+const { id, label } = Astro.props;
+---
+
+<div class="flex min-w-0 flex-col gap-1.5 max-sm:basis-full">
+  <label for={id} class="text-[11.5px] font-semibold tracking-[0.03em] text-muted uppercase">{label}</label>
+  <select id={id} disabled></select>
+</div>

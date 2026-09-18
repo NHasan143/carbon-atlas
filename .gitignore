@@ -17,3 +17,10 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Astro / Node / browser tests
+node_modules/
+dist/
+.astro/
+playwright-report/
+test-results/
