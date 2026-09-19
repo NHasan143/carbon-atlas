@@ -2,57 +2,58 @@
 const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/videos/climate-atlas-hero.mp4`;
 ---
 
-<header class="hero relative isolate mb-[22px] flex min-h-[clamp(560px,72vh,760px)] overflow-hidden rounded-[14px] bg-[#0d1720] text-white">
-  <video
-    class="absolute inset-0 -z-30 size-full object-cover"
-    autoplay
-    muted
-    loop
-    playsinline
-    preload="metadata"
-    aria-hidden="true"
-  >
-    <source src={videoUrl} type="video/mp4" media="(prefers-reduced-motion: no-preference)" />
-  </video>
-
-  <div class="hero-wash absolute inset-0 -z-20"></div>
-  <div class="hero-vignette absolute inset-0 -z-10"></div>
-
-  <div class="flex w-full flex-col items-center px-6 pt-[clamp(72px,13vh,136px)] pb-8 text-center sm:px-10 sm:pb-10">
-    <div class="max-w-[820px]">
-      <p class="mb-5 font-mono text-[11px] font-semibold tracking-[0.16em] text-[#9ec5f4] uppercase sm:text-xs">
-        217 countries · 34 years · one shared atmosphere
-      </p>
-      <h1 class="text-[clamp(42px,8vw,88px)] leading-[0.95] font-bold tracking-[-0.04em] text-balance">
-        See how the world is changing.
+<header class="hero relative isolate m-2 min-h-[calc(100svh-16px)] overflow-hidden rounded-[24px] bg-black text-white md:m-4 md:min-h-[calc(100svh-32px)] md:rounded-[32px] lg:h-[calc(100svh-32px)] lg:min-h-[720px]">
+  <div class="hero-layout grid min-h-[inherit] w-full items-center gap-10 px-6 py-10 sm:px-10 sm:py-14 lg:h-full lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.84fr)] lg:gap-12 lg:px-14 lg:py-12 xl:gap-20 xl:px-20">
+    <div class="hero-copy max-w-[720px] lg:pl-[clamp(0px,2vw,28px)]">
+      <h1 class="hero-title text-[clamp(46px,6.2vw,92px)] leading-[0.9] tracking-[-0.045em] text-balance" aria-label="Climate, mapped.">
+        <span class="hero-title-line block">Climate,</span>
+        <span class="hero-title-line hero-title-accent block">mapped.</span>
       </h1>
-      <p class="mx-auto mt-6 max-w-[62ch] text-[clamp(16px,2vw,20px)] leading-relaxed text-[#e1e8ed] text-balance">
-        Explore the relationship between emissions, energy, prosperity, and population across more than three decades of global change.
+
+      <p class="mt-8 max-w-[580px] text-[clamp(16px,1.5vw,20px)] leading-relaxed text-[#e1e8ed] sm:mt-10">
+        Follow emissions, energy, prosperity, and population across 217 countries and 34 years of global change.
       </p>
+      <p class="mt-4 font-mono text-[11px] font-semibold tracking-[0.12em] text-[#9ec5f4] uppercase">
+        1990–2023 · Six connected metrics
+      </p>
+
+      <div class="hero-actions mt-8 flex w-full flex-col items-start gap-3 border-t border-white/18 pt-7 sm:w-auto sm:flex-row">
+        <a
+          href="#controlsPanel"
+          class="hero-button group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-white/45 bg-black px-7 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
+        >
+          Explore the atlas
+          <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:translate-y-0.5" viewBox="0 0 20 20" fill="none">
+            <path d="m5 8 5 5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+        <a
+          href="https://ourworldindata.org/donate"
+          target="_blank"
+          rel="noopener"
+          class="hero-button group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-white/45 bg-black px-7 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
+          aria-label="Donate to Our World in Data (opens in a new tab)"
+        >
+          Donate
+          <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="none">
+            <path d="M6 14 14 6M8 6h6v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
     </div>
 
-    <div class="mt-auto flex w-full flex-col items-center justify-center gap-3 pt-12 sm:flex-row">
-      <a
-        href="https://ourworldindata.org/donate"
-        target="_blank"
-        rel="noopener"
-        class="hero-button hero-button-primary group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
-        aria-label="Donate to Our World in Data (opens in a new tab)"
+    <div class="hero-media relative h-[320px] w-full overflow-hidden bg-black sm:h-[420px] lg:mr-[clamp(12px,2.5vw,40px)] lg:h-[min(72svh,680px)] lg:w-[min(100%,580px)] lg:justify-self-end">
+      <video
+        class="hero-video size-full object-contain object-center"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        aria-hidden="true"
       >
-        Donate
-        <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="none">
-          <path d="M6 14 14 6M8 6h6v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </a>
-      <a
-        href="#controlsPanel"
-        class="hero-button inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-white/45 bg-black/20 px-6 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
-      >
-        Explore the atlas
-        <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:translate-y-0.5" viewBox="0 0 20 20" fill="none">
-          <path d="m5 8 5 5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </a>
+        <source src={videoUrl} type="video/mp4" media="(prefers-reduced-motion: no-preference)" />
+      </video>
     </div>
   </div>
 </header>
@@ -62,38 +63,88 @@ const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/videos/climate-
     box-shadow: 0 28px 70px -36px rgb(3 15 25 / 0.8);
   }
 
-  .hero-wash {
-    background:
-      linear-gradient(180deg, rgb(3 12 20 / 0.42) 0%, rgb(3 12 20 / 0.16) 42%, rgb(3 12 20 / 0.88) 100%),
-      linear-gradient(90deg, rgb(3 12 20 / 0.36), transparent 36%, transparent 64%, rgb(3 12 20 / 0.36));
+  .hero-copy {
+    animation: hero-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both 120ms;
   }
 
-  .hero-vignette {
-    box-shadow: inset 0 0 120px rgb(0 0 0 / 0.28);
+  .hero-title {
+    font-family: 'Google Sans', sans-serif;
+    font-weight: 400;
+  }
+
+  .hero-title-line {
+    animation: title-rise 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-title-line:first-child {
+    animation-delay: 180ms;
+  }
+
+  .hero-title-accent {
+    animation-delay: 320ms;
+    background: linear-gradient(to right, #fff, #71717a);
+    background-clip: text;
+    color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-actions {
+    animation: hero-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both 260ms;
+  }
+
+  .hero-media {
+    animation: media-reveal 1100ms cubic-bezier(0.16, 1, 0.3, 1) both 180ms;
+  }
+
+  @keyframes hero-rise {
+    from { opacity: 0.01; transform: translateY(34px); filter: blur(8px); }
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+
+  @keyframes title-rise {
+    from { opacity: 0.01; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes media-reveal {
+    from { opacity: 0.01; transform: translateX(34px) scale(0.97); filter: blur(10px); }
+    to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
   }
 
   .hero-button {
     box-shadow: 0 12px 30px -16px rgb(0 0 0 / 0.7);
     transition:
-      transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
-      background-color 280ms cubic-bezier(0.16, 1, 0.3, 1),
-      border-color 280ms cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 280ms cubic-bezier(0.16, 1, 0.3, 1);
+      transform 300ms ease,
+      background-color 300ms ease,
+      border-color 300ms ease,
+      box-shadow 300ms ease;
   }
 
   .hero-button:hover {
-    transform: translateY(-2px);
-    border-color: rgb(255 255 255 / 0.78);
-    background-color: rgb(0 0 0 / 0.36);
-    box-shadow: 0 18px 38px -16px rgb(0 0 0 / 0.82);
+    transform: scale(1.05);
+    border-color: oklch(75% 0.25 145 / 0.8);
+    background-color: #000;
+    box-shadow:
+      0 0 0 1px oklch(75% 0.25 145 / 0.36),
+      0 0 28px oklch(75% 0.25 145 / 0.48),
+      0 18px 44px -14px oklch(75% 0.25 145 / 0.62);
   }
 
-  .hero-button-primary:hover {
-    background-color: #256abf;
+  .hero-button:focus-visible {
+    border-color: oklch(75% 0.25 145 / 0.8);
+    outline-color: var(--action-accent);
+    box-shadow:
+      0 0 0 1px oklch(75% 0.25 145 / 0.36),
+      0 0 28px oklch(75% 0.25 145 / 0.48);
   }
 
   @media (prefers-reduced-motion: reduce) {
     .hero video { display: none; }
+    .hero-copy,
+    .hero-actions,
+    .hero-title-line,
+    .hero-media { animation: none; }
     .hero-button,
     .hero-button svg { transition: none; }
   }

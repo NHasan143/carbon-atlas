@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-19T17:40:29Z",
+  "title": "Design System: Climate & Energy Atlas",
+  "extensions": {
+    "colorMeta": {
+      "paper-page": { "role": "neutral", "displayName": "Paper Page", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(50% 0.006 95)", "oklch(62% 0.006 95)", "oklch(74% 0.006 95)", "oklch(86% 0.006 95)", "oklch(95% 0.006 95)"] },
+      "paper-surface": { "role": "neutral", "displayName": "Paper Surface", "tonalRamp": ["oklch(15% 0.004 95)", "oklch(26% 0.004 95)", "oklch(38% 0.004 95)", "oklch(50% 0.004 95)", "oklch(62% 0.004 95)", "oklch(74% 0.004 95)", "oklch(86% 0.004 95)", "oklch(95% 0.004 95)"] },
+      "paper-field": { "role": "neutral", "displayName": "Paper Field", "tonalRamp": ["oklch(15% 0.012 95)", "oklch(26% 0.012 95)", "oklch(38% 0.012 95)", "oklch(50% 0.012 95)", "oklch(62% 0.012 95)", "oklch(74% 0.012 95)", "oklch(86% 0.012 95)", "oklch(95% 0.012 95)"] },
+      "ink": { "role": "neutral", "displayName": "Atlas Ink", "tonalRamp": ["oklch(15% 0 0)", "oklch(26% 0 0)", "oklch(38% 0 0)", "oklch(50% 0 0)", "oklch(62% 0 0)", "oklch(74% 0 0)", "oklch(86% 0 0)", "oklch(95% 0 0)"] },
+      "ink-secondary": { "role": "neutral", "displayName": "Secondary Ink", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(50% 0.006 95)", "oklch(62% 0.006 95)", "oklch(74% 0.006 95)", "oklch(86% 0.006 95)", "oklch(95% 0.006 95)"] },
+      "ink-muted": { "role": "neutral", "displayName": "Muted Ink", "tonalRamp": ["oklch(15% 0.012 95)", "oklch(26% 0.012 95)", "oklch(38% 0.012 95)", "oklch(50% 0.012 95)", "oklch(62% 0.012 95)", "oklch(74% 0.012 95)", "oklch(86% 0.012 95)", "oklch(95% 0.012 95)"] },
+      "hairline-light": { "role": "neutral", "displayName": "Light Hairline", "tonalRamp": ["oklch(15% 0 0 / 0.10)", "oklch(26% 0 0 / 0.10)", "oklch(38% 0 0 / 0.10)", "oklch(50% 0 0 / 0.10)", "oklch(62% 0 0 / 0.10)", "oklch(74% 0 0 / 0.10)", "oklch(86% 0 0 / 0.10)", "oklch(95% 0 0 / 0.10)"] },
+      "grid-light": { "role": "neutral", "displayName": "Light Grid", "tonalRamp": ["oklch(15% 0.010 95)", "oklch(26% 0.010 95)", "oklch(38% 0.010 95)", "oklch(50% 0.010 95)", "oklch(62% 0.010 95)", "oklch(74% 0.010 95)", "oklch(86% 0.010 95)", "oklch(95% 0.010 95)"] },
+      "axis-light": { "role": "neutral", "displayName": "Light Axis", "tonalRamp": ["oklch(15% 0.012 95)", "oklch(26% 0.012 95)", "oklch(38% 0.012 95)", "oklch(50% 0.012 95)", "oklch(62% 0.012 95)", "oklch(74% 0.012 95)", "oklch(86% 0.012 95)", "oklch(95% 0.012 95)"] },
+      "graphite-page": { "role": "neutral", "displayName": "Graphite Page", "tonalRamp": ["oklch(15% 0.003 95)", "oklch(26% 0.003 95)", "oklch(38% 0.003 95)", "oklch(50% 0.003 95)", "oklch(62% 0.003 95)", "oklch(74% 0.003 95)", "oklch(86% 0.003 95)", "oklch(95% 0.003 95)"] },
+      "graphite-surface": { "role": "neutral", "displayName": "Graphite Surface", "tonalRamp": ["oklch(15% 0.004 95)", "oklch(26% 0.004 95)", "oklch(38% 0.004 95)", "oklch(50% 0.004 95)", "oklch(62% 0.004 95)", "oklch(74% 0.004 95)", "oklch(86% 0.004 95)", "oklch(95% 0.004 95)"] },
+      "graphite-field": { "role": "neutral", "displayName": "Graphite Field", "tonalRamp": ["oklch(15% 0.005 95)", "oklch(26% 0.005 95)", "oklch(38% 0.005 95)", "oklch(50% 0.005 95)", "oklch(62% 0.005 95)", "oklch(74% 0.005 95)", "oklch(86% 0.005 95)", "oklch(95% 0.005 95)"] },
+      "paper-white": { "role": "neutral", "displayName": "Paper White", "tonalRamp": ["oklch(15% 0 0)", "oklch(26% 0 0)", "oklch(38% 0 0)", "oklch(50% 0 0)", "oklch(62% 0 0)", "oklch(74% 0 0)", "oklch(86% 0 0)", "oklch(95% 0 0)"] },
+      "graphite-secondary": { "role": "neutral", "displayName": "Graphite Secondary", "tonalRamp": ["oklch(15% 0.012 95)", "oklch(26% 0.012 95)", "oklch(38% 0.012 95)", "oklch(50% 0.012 95)", "oklch(62% 0.012 95)", "oklch(74% 0.012 95)", "oklch(86% 0.012 95)", "oklch(95% 0.012 95)"] },
+      "graphite-muted": { "role": "neutral", "displayName": "Graphite Muted", "tonalRamp": ["oklch(15% 0.014 95)", "oklch(26% 0.014 95)", "oklch(38% 0.014 95)", "oklch(50% 0.014 95)", "oklch(62% 0.014 95)", "oklch(74% 0.014 95)", "oklch(86% 0.014 95)", "oklch(95% 0.014 95)"] },
+      "hairline-dark": { "role": "neutral", "displayName": "Dark Hairline", "tonalRamp": ["oklch(15% 0 0 / 0.10)", "oklch(26% 0 0 / 0.10)", "oklch(38% 0 0 / 0.10)", "oklch(50% 0 0 / 0.10)", "oklch(62% 0 0 / 0.10)", "oklch(74% 0 0 / 0.10)", "oklch(86% 0 0 / 0.10)", "oklch(95% 0 0 / 0.10)"] },
+      "grid-dark": { "role": "neutral", "displayName": "Dark Grid", "tonalRamp": ["oklch(15% 0.005 95)", "oklch(26% 0.005 95)", "oklch(38% 0.005 95)", "oklch(50% 0.005 95)", "oklch(62% 0.005 95)", "oklch(74% 0.005 95)", "oklch(86% 0.005 95)", "oklch(95% 0.005 95)"] },
+      "axis-dark": { "role": "neutral", "displayName": "Dark Axis", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(50% 0.006 95)", "oklch(62% 0.006 95)", "oklch(74% 0.006 95)", "oklch(86% 0.006 95)", "oklch(95% 0.006 95)"] },
+      "context-dark": { "role": "neutral", "displayName": "Dark Context Dot", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(50% 0.006 95)", "oklch(62% 0.006 95)", "oklch(74% 0.006 95)", "oklch(86% 0.006 95)", "oklch(95% 0.006 95)"] },
+      "series-blue-light": { "role": "primary", "displayName": "Atlas Blue Light", "tonalRamp": ["oklch(15% 0.16 252)", "oklch(26% 0.16 252)", "oklch(38% 0.16 252)", "oklch(50% 0.16 252)", "oklch(62% 0.16 252)", "oklch(74% 0.16 252)", "oklch(86% 0.16 252)", "oklch(95% 0.16 252)"] },
+      "series-blue-dark": { "role": "primary", "displayName": "Atlas Blue Dark", "tonalRamp": ["oklch(15% 0.16 252)", "oklch(26% 0.16 252)", "oklch(38% 0.16 252)", "oklch(50% 0.16 252)", "oklch(62% 0.16 252)", "oklch(74% 0.16 252)", "oklch(86% 0.16 252)", "oklch(95% 0.16 252)"] },
+      "action-green": { "role": "primary", "displayName": "Living Green", "canonical": "oklch(75% 0.25 145 / 0.8)", "tonalRamp": ["oklch(15% 0.08 145)", "oklch(26% 0.12 145)", "oklch(38% 0.16 145)", "oklch(50% 0.20 145)", "oklch(62% 0.23 145)", "oklch(75% 0.25 145)", "oklch(86% 0.18 145)", "oklch(95% 0.08 145)"] },
+      "series-orange-light": { "role": "secondary", "displayName": "Signal Orange Light", "tonalRamp": ["oklch(15% 0.16 42)", "oklch(26% 0.16 42)", "oklch(38% 0.16 42)", "oklch(50% 0.16 42)", "oklch(62% 0.16 42)", "oklch(74% 0.16 42)", "oklch(86% 0.16 42)", "oklch(95% 0.16 42)"] },
+      "series-orange-dark": { "role": "secondary", "displayName": "Signal Orange Dark", "tonalRamp": ["oklch(15% 0.16 42)", "oklch(26% 0.16 42)", "oklch(38% 0.16 42)", "oklch(50% 0.16 42)", "oklch(62% 0.16 42)", "oklch(74% 0.16 42)", "oklch(86% 0.16 42)", "oklch(95% 0.16 42)"] },
+      "series-green-light": { "role": "tertiary", "displayName": "Field Green Light", "tonalRamp": ["oklch(15% 0.15 160)", "oklch(26% 0.15 160)", "oklch(38% 0.15 160)", "oklch(50% 0.15 160)", "oklch(62% 0.15 160)", "oklch(74% 0.15 160)", "oklch(86% 0.15 160)", "oklch(95% 0.15 160)"] },
+      "series-green-dark": { "role": "tertiary", "displayName": "Field Green Dark", "tonalRamp": ["oklch(15% 0.15 160)", "oklch(26% 0.15 160)", "oklch(38% 0.15 160)", "oklch(50% 0.15 160)", "oklch(62% 0.15 160)", "oklch(74% 0.15 160)", "oklch(86% 0.15 160)", "oklch(95% 0.15 160)"] },
+      "map-blue-light-1": { "role": "primary", "displayName": "Map Blue Light 1", "tonalRamp": ["oklch(15% 0.08 252)", "oklch(26% 0.08 252)", "oklch(38% 0.08 252)", "oklch(50% 0.08 252)", "oklch(62% 0.08 252)", "oklch(74% 0.08 252)", "oklch(86% 0.08 252)", "oklch(95% 0.08 252)"] },
+      "map-blue-light-2": { "role": "primary", "displayName": "Map Blue Light 2", "tonalRamp": ["oklch(15% 0.10 252)", "oklch(26% 0.10 252)", "oklch(38% 0.10 252)", "oklch(50% 0.10 252)", "oklch(62% 0.10 252)", "oklch(74% 0.10 252)", "oklch(86% 0.10 252)", "oklch(95% 0.10 252)"] },
+      "map-blue-light-3": { "role": "primary", "displayName": "Map Blue Light 3", "tonalRamp": ["oklch(15% 0.13 252)", "oklch(26% 0.13 252)", "oklch(38% 0.13 252)", "oklch(50% 0.13 252)", "oklch(62% 0.13 252)", "oklch(74% 0.13 252)", "oklch(86% 0.13 252)", "oklch(95% 0.13 252)"] },
+      "map-blue-light-4": { "role": "primary", "displayName": "Map Blue Light 4", "tonalRamp": ["oklch(15% 0.16 252)", "oklch(26% 0.16 252)", "oklch(38% 0.16 252)", "oklch(50% 0.16 252)", "oklch(62% 0.16 252)", "oklch(74% 0.16 252)", "oklch(86% 0.16 252)", "oklch(95% 0.16 252)"] },
+      "map-blue-light-5": { "role": "primary", "displayName": "Map Blue Light 5", "tonalRamp": ["oklch(15% 0.14 252)", "oklch(26% 0.14 252)", "oklch(38% 0.14 252)", "oklch(50% 0.14 252)", "oklch(62% 0.14 252)", "oklch(74% 0.14 252)", "oklch(86% 0.14 252)", "oklch(95% 0.14 252)"] },
+      "map-blue-light-6": { "role": "primary", "displayName": "Map Blue Light 6", "tonalRamp": ["oklch(15% 0.12 252)", "oklch(26% 0.12 252)", "oklch(38% 0.12 252)", "oklch(50% 0.12 252)", "oklch(62% 0.12 252)", "oklch(74% 0.12 252)", "oklch(86% 0.12 252)", "oklch(95% 0.12 252)"] },
+      "map-blue-light-7": { "role": "primary", "displayName": "Map Blue Light 7", "tonalRamp": ["oklch(15% 0.10 252)", "oklch(26% 0.10 252)", "oklch(38% 0.10 252)", "oklch(50% 0.10 252)", "oklch(62% 0.10 252)", "oklch(74% 0.10 252)", "oklch(86% 0.10 252)", "oklch(95% 0.10 252)"] },
+      "map-blue-dark-1": { "role": "primary", "displayName": "Map Blue Dark 1", "tonalRamp": ["oklch(15% 0.08 252)", "oklch(26% 0.08 252)", "oklch(38% 0.08 252)", "oklch(50% 0.08 252)", "oklch(62% 0.08 252)", "oklch(74% 0.08 252)", "oklch(86% 0.08 252)", "oklch(95% 0.08 252)"] },
+      "map-blue-dark-2": { "role": "primary", "displayName": "Map Blue Dark 2", "tonalRamp": ["oklch(15% 0.09 252)", "oklch(26% 0.09 252)", "oklch(38% 0.09 252)", "oklch(50% 0.09 252)", "oklch(62% 0.09 252)", "oklch(74% 0.09 252)", "oklch(86% 0.09 252)", "oklch(95% 0.09 252)"] },
+      "map-blue-dark-3": { "role": "primary", "displayName": "Map Blue Dark 3", "tonalRamp": ["oklch(15% 0.10 252)", "oklch(26% 0.10 252)", "oklch(38% 0.10 252)", "oklch(50% 0.10 252)", "oklch(62% 0.10 252)", "oklch(74% 0.10 252)", "oklch(86% 0.10 252)", "oklch(95% 0.10 252)"] },
+      "map-blue-dark-4": { "role": "primary", "displayName": "Map Blue Dark 4", "tonalRamp": ["oklch(15% 0.16 252)", "oklch(26% 0.16 252)", "oklch(38% 0.16 252)", "oklch(50% 0.16 252)", "oklch(62% 0.16 252)", "oklch(74% 0.16 252)", "oklch(86% 0.16 252)", "oklch(95% 0.16 252)"] },
+      "map-blue-dark-5": { "role": "primary", "displayName": "Map Blue Dark 5", "tonalRamp": ["oklch(15% 0.13 252)", "oklch(26% 0.13 252)", "oklch(38% 0.13 252)", "oklch(50% 0.13 252)", "oklch(62% 0.13 252)", "oklch(74% 0.13 252)", "oklch(86% 0.13 252)", "oklch(95% 0.13 252)"] },
+      "map-blue-dark-6": { "role": "primary", "displayName": "Map Blue Dark 6", "tonalRamp": ["oklch(15% 0.10 252)", "oklch(26% 0.10 252)", "oklch(38% 0.10 252)", "oklch(50% 0.10 252)", "oklch(62% 0.10 252)", "oklch(74% 0.10 252)", "oklch(86% 0.10 252)", "oklch(95% 0.10 252)"] },
+      "map-blue-dark-7": { "role": "primary", "displayName": "Map Blue Dark 7", "tonalRamp": ["oklch(15% 0.08 252)", "oklch(26% 0.08 252)", "oklch(38% 0.08 252)", "oklch(50% 0.08 252)", "oklch(62% 0.08 252)", "oklch(74% 0.08 252)", "oklch(86% 0.08 252)", "oklch(95% 0.08 252)"] },
+      "hero-midnight": { "role": "neutral", "displayName": "Hero Midnight", "tonalRamp": ["oklch(15% 0.025 240)", "oklch(26% 0.025 240)", "oklch(38% 0.025 240)", "oklch(50% 0.025 240)", "oklch(62% 0.025 240)", "oklch(74% 0.025 240)", "oklch(86% 0.025 240)", "oklch(95% 0.025 240)"] },
+      "hero-support": { "role": "neutral", "displayName": "Hero Support", "tonalRamp": ["oklch(15% 0.02 240)", "oklch(26% 0.02 240)", "oklch(38% 0.02 240)", "oklch(50% 0.02 240)", "oklch(62% 0.02 240)", "oklch(74% 0.02 240)", "oklch(86% 0.02 240)", "oklch(95% 0.02 240)"] },
+      "hero-meta": { "role": "primary", "displayName": "Hero Meta Blue", "tonalRamp": ["oklch(15% 0.10 252)", "oklch(26% 0.10 252)", "oklch(38% 0.10 252)", "oklch(50% 0.10 252)", "oklch(62% 0.10 252)", "oklch(74% 0.10 252)", "oklch(86% 0.10 252)", "oklch(95% 0.10 252)"] },
+      "hero-hover-overlay": { "role": "neutral", "displayName": "Hero Hover Overlay", "tonalRamp": ["rgba(0,0,0,0.85)", "rgba(0,0,0,0.72)", "rgba(0,0,0,0.60)", "rgba(0,0,0,0.48)", "rgba(0,0,0,0.36)", "rgba(0,0,0,0.24)", "rgba(0,0,0,0.12)", "rgba(0,0,0,0.04)"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Editorial Display", "purpose": "The bottom-anchored hero statement only." },
+      "headline": { "displayName": "Chapter Headline", "purpose": "Analytical section titles and major narrative turns." },
+      "body": { "displayName": "Reading Body", "purpose": "Explanations, captions, and supporting prose." },
+      "label": { "displayName": "Technical Label", "purpose": "Controls, table headers, field names, and compact metadata." },
+      "meta": { "displayName": "Hero Meta", "purpose": "Compact uppercase date range and metric count in the hero." },
+      "data": { "displayName": "Atlas Data", "purpose": "Years, measures, and prominent tabular values." }
+    },
+    "shadows": [
+      { "name": "hero-frame", "value": "0 28px 70px -36px rgb(3 15 25 / 0.8)", "purpose": "Grounds the full-viewport film frame against the page." },
+      { "name": "hero-vignette", "value": "inset 0 0 150px rgb(0 0 0 / 0.32)", "purpose": "Protects edge contrast over the hero video." },
+      { "name": "hero-action-rest", "value": "0 12px 30px -16px rgb(0 0 0 / 0.7)", "purpose": "Keeps hero actions legible over moving imagery." },
+      { "name": "hero-action-hover", "value": "0 0 0 1px oklch(75% 0.25 145 / 0.36), 0 0 28px oklch(75% 0.25 145 / 0.48), 0 18px 44px -14px oklch(75% 0.25 145 / 0.62)", "purpose": "Creates the Living Green light bloom around hero actions during hover." }
+    ],
+    "motion": [
+      { "name": "hero-rise", "value": "900ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Resolves hero copy and actions upward from a soft blur; the two title beats follow at 180ms and 320ms." },
+      { "name": "hero-action", "value": "300ms ease", "purpose": "Scales hero actions to 105%, recolors them, and deepens their shadow on hover." },
+      { "name": "control-focus", "value": "240ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Lifts and accents a focused country control." },
+      { "name": "table-row", "value": "200ms ease", "purpose": "Softens the background change on table-row hover." },
+      { "name": "year-playback-step", "value": "650ms", "purpose": "Advances the synchronized year playback cadence." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Explore Atlas Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The primary hero action that leads into the shared atlas controls.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#controlsPanel\">Explore the atlas <svg aria-hidden=\"true\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"m5 8 5 5 5-5\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" /></svg></a>",
+      "css": ".ds-btn-primary{display:inline-flex;min-height:48px;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border:0;border-radius:8px;background:oklch(75% .25 145 / .8);color:#071018;font:600 14px/1.25 'IBM Plex Sans',system-ui,sans-serif;text-decoration:none;box-shadow:0 12px 30px -16px rgb(0 0 0 / .7);transition:transform 300ms ease,box-shadow 300ms ease}.ds-btn-primary svg{width:16px;height:16px;transition:transform 300ms}.ds-btn-primary:hover{transform:scale(1.05);box-shadow:0 0 0 1px oklch(75% .25 145 / .36),0 0 28px oklch(75% .25 145 / .48),0 18px 44px -14px oklch(75% .25 145 / .62)}.ds-btn-primary:hover svg{transform:translateY(2px)}.ds-btn-primary:focus-visible{outline:2px solid oklch(75% .25 145 / .8);outline-offset:2px;box-shadow:0 0 28px oklch(75% .25 145 / .48)}@media(prefers-reduced-motion:reduce){.ds-btn-primary,.ds-btn-primary svg{transition:none}}"
+    },
+    {
+      "name": "Donate Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "The secondary hero action for an external donation destination.",
+      "html": "<a class=\"ds-btn-secondary\" href=\"#\">Donate <svg aria-hidden=\"true\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M6 14 14 6M8 6h6v6\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" /></svg></a>",
+      "css": ".ds-btn-secondary{display:inline-flex;min-height:48px;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border:1px solid rgb(255 255 255 / .45);border-radius:8px;background:rgb(0 0 0 / .2);color:#fff;font:600 14px/1.25 'IBM Plex Sans',system-ui,sans-serif;text-decoration:none;box-shadow:0 12px 30px -16px rgb(0 0 0 / .7);transition:transform 300ms ease,background-color 300ms ease,border-color 300ms ease,box-shadow 300ms ease}.ds-btn-secondary svg{width:16px;height:16px;transition:transform 300ms}.ds-btn-secondary:hover{transform:scale(1.05);border-color:oklch(75% .25 145 / .8);background:rgb(0 0 0 / .36);box-shadow:0 0 0 1px oklch(75% .25 145 / .36),0 0 28px oklch(75% .25 145 / .48),0 18px 44px -14px oklch(75% .25 145 / .62)}.ds-btn-secondary:hover svg{transform:translate(2px,-2px)}.ds-btn-secondary:focus-visible{outline:2px solid oklch(75% .25 145 / .8);outline-offset:2px;box-shadow:0 0 28px oklch(75% .25 145 / .48)}@media(prefers-reduced-motion:reduce){.ds-btn-secondary,.ds-btn-secondary svg{transition:none}}"
+    },
+    {
+      "name": "Playback Button",
+      "kind": "button",
+      "refersTo": "button-compact",
+      "description": "The compact action that starts or pauses synchronized year playback.",
+      "html": "<button class=\"ds-btn-play\" type=\"button\"><svg aria-hidden=\"true\" viewBox=\"0 0 12 12\"><path d=\"M2 1 11 6 2 11Z\" /></svg>Play</button>",
+      "css": ".ds-btn-play{display:inline-flex;min-width:76px;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border:0;border-radius:8px;background:oklch(75% .25 145 / .8);color:#071018;font:600 13px/1.25 'IBM Plex Sans',system-ui,sans-serif;cursor:pointer}.ds-btn-play svg{width:12px;height:12px;fill:currentColor}.ds-btn-play:hover{filter:brightness(1.1)}.ds-btn-play:focus-visible{outline:2px solid oklch(75% .25 145 / .8);outline-offset:2px}.ds-btn-play:disabled{cursor:wait;opacity:.55}"
+    },
+    {
+      "name": "Metric Select",
+      "kind": "input",
+      "refersTo": "select-field",
+      "description": "A bounded field for selecting a country or analytical metric.",
+      "html": "<label class=\"ds-field\"><span>Map metric</span><select><option>CO2 per capita</option><option>Total CO2 emissions</option></select></label>",
+      "css": ".ds-field{display:flex;min-width:0;flex-direction:column;gap:6px;color:var(--text-muted,#686660);font:600 11.5px/1.25 'IBM Plex Sans',system-ui,sans-serif;letter-spacing:.03em;text-transform:uppercase}.ds-field select{max-width:220px;padding:7px 10px;border:1px solid var(--border,rgba(11,11,11,.1));border-radius:8px;background:var(--surface-2,#f2f1ec);color:var(--text-primary,#0b0b0b);font:400 13.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;text-transform:none}.ds-field select:focus-visible{outline:2px solid oklch(75% .25 145 / .8);outline-offset:2px}.ds-field select:disabled{cursor:wait;opacity:.55}"
+    },
+    {
+      "name": "Country Control",
+      "kind": "card",
+      "refersTo": "control-card",
+      "description": "A country selector paired with its persistent series identity.",
+      "html": "<div class=\"ds-country-control\"><div class=\"ds-country-label\"><label for=\"ds-country\">Country 1</label><span aria-hidden=\"true\"></span></div><select id=\"ds-country\"><option>United States</option></select></div>",
+      "css": ".ds-country-control{display:flex;min-width:0;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--border,rgba(11,11,11,.1));border-radius:12px;background:var(--surface-2,#f2f1ec);transition:border-color 240ms cubic-bezier(.16,1,.3,1),transform 240ms cubic-bezier(.16,1,.3,1)}.ds-country-control:focus-within{border-color:oklch(75% .25 145 / .8);transform:translateY(-2px)}.ds-country-label{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--text-secondary,#52514e);font:600 12px/1.25 'IBM Plex Sans',system-ui,sans-serif}.ds-country-label span{width:11px;height:11px;flex:none;border-radius:999px;background:var(--accent,#2a78d6)}.ds-country-control select{width:100%;padding:7px 10px;border:1px solid var(--border,rgba(11,11,11,.1));border-radius:8px;background:var(--surface-2,#f2f1ec);color:var(--text-primary,#0b0b0b);font:400 13.5px/1.5 'IBM Plex Sans',system-ui,sans-serif}.ds-country-control select:focus-visible{outline:2px solid oklch(75% .25 145 / .8);outline-offset:2px}"
+    },
+    {
+      "name": "Section Heading",
+      "kind": "custom",
+      "description": "The editorial opening for each analytical chapter.",
+      "html": "<header class=\"ds-section-heading\"><h2>World map</h2><p>Move from a single value to the global pattern. Every country is held to one consistent scale across time.</p></header>",
+      "css": ".ds-section-heading{display:grid;gap:12px;padding-bottom:28px;border-bottom:1px solid var(--border,rgba(11,11,11,.1));color:var(--text-primary,#0b0b0b);font-family:'IBM Plex Sans',system-ui,sans-serif}.ds-section-heading h2{max-width:18ch;margin:0;font-size:clamp(28px,4vw,46px);font-weight:700;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}.ds-section-heading p{max-width:62ch;margin:0;color:var(--text-secondary,#52514e);font-size:15px;line-height:1.625}@media(min-width:1024px){.ds-section-heading{grid-template-columns:minmax(0,1fr) minmax(260px,.65fr);align-items:end;gap:48px}.ds-section-heading p{justify-self:end}}"
+    },
+    {
+      "name": "Year Toolbar",
+      "kind": "card",
+      "description": "A compact status strip that pairs context with a prominent selected year.",
+      "html": "<div class=\"ds-year-toolbar\"><span>Selected year</span><strong>2023</strong></div>",
+      "css": ".ds-year-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-radius:12px;background:var(--surface-2,#f2f1ec);color:var(--text-primary,#0b0b0b)}.ds-year-toolbar span{color:var(--text-muted,#686660);font:600 12px/1.25 'IBM Plex Sans',system-ui,sans-serif}.ds-year-toolbar strong{font:600 20px/1.25 'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Chart Stage",
+      "kind": "card",
+      "refersTo": "chart-stage",
+      "description": "The bounded neutral surface that contains maps and analytical plots.",
+      "html": "<div class=\"ds-chart-stage\" role=\"img\" aria-label=\"Chart preview\"><div class=\"ds-chart-grid\"><span></span><span></span><span></span></div><svg viewBox=\"0 0 300 120\" aria-hidden=\"true\"><path d=\"M8 95 C55 80 75 88 112 58 S180 42 212 60 S262 31 292 24\" fill=\"none\" stroke=\"var(--accent,#2a78d6)\" stroke-width=\"3\" /></svg></div>",
+      "css": ".ds-chart-stage{position:relative;min-width:0;height:220px;overflow:hidden;padding:16px;border:1px solid var(--border,rgba(11,11,11,.1));border-radius:12px;background:var(--surface,#fcfcfb);color:var(--text-primary,#0b0b0b)}.ds-chart-stage svg{position:absolute;inset:20px;width:calc(100% - 40px);height:calc(100% - 40px)}.ds-chart-grid{position:absolute;inset:20px;display:grid;grid-template-rows:repeat(3,1fr)}.ds-chart-grid span{border-bottom:1px solid var(--grid,#e1e0d9)}"
+    },
+    {
+      "name": "Pinned Comparison Table",
+      "kind": "custom",
+      "description": "A horizontally scrollable metric table that keeps country identity visible.",
+      "html": "<div class=\"ds-table-frame\"><div class=\"ds-table-scroll\"><table><thead><tr><th>Country</th><th>CO2 per capita</th><th>Total CO2</th><th>Population</th></tr></thead><tbody><tr><td><span></span>United States</td><td>14.32 t</td><td>4,912 Mt</td><td>343,477,330</td></tr><tr><td><span></span>China</td><td>8.56 t</td><td>12,172 Mt</td><td>1,422,584,930</td></tr></tbody></table></div></div>",
+      "css": ".ds-table-frame{padding:12px;border:1px solid var(--border,rgba(11,11,11,.1));border-radius:12px;background:var(--surface-2,#f2f1ec);color:var(--text-primary,#0b0b0b);font-family:'IBM Plex Sans',system-ui,sans-serif}.ds-table-scroll{overflow-x:auto;scrollbar-color:var(--axis,#c3c2b7) transparent;scrollbar-width:thin}.ds-table-frame table{width:100%;min-width:560px;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}.ds-table-frame th,.ds-table-frame td{padding:16px;border-bottom:1px solid var(--border,rgba(11,11,11,.1));text-align:right;white-space:nowrap}.ds-table-frame th{color:var(--text-muted,#686660);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}.ds-table-frame th:first-child,.ds-table-frame td:first-child{position:sticky;left:0;z-index:2;background:var(--surface-2,#f2f1ec);text-align:left}.ds-table-frame td:first-child{display:flex;align-items:center;gap:10px;font-weight:600}.ds-table-frame td:first-child span{width:9px;height:9px;border-radius:999px;background:var(--accent,#2a78d6)}.ds-table-frame tbody tr{transition:background-color 200ms}.ds-table-frame tbody tr:hover{background:var(--surface,#fcfcfb)}.ds-table-frame tbody tr:last-child td{border-bottom:0}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Editorial Field Atlas",
+    "overview": "The system pairs the authority of a printed reference atlas with the immediacy of a living climate record. A framed, full-viewport filmic hero establishes scale and urgency; everything below it becomes quieter, flatter, and more exact so the data can carry the argument.\n\nIBM Plex gives the experience a direct editorial voice without losing technical credibility. Strong headlines, compact labels, mono numerals, generous chapter spacing, and bounded analytical stages create a clear reading rhythm. Light mode feels like warm paper and ink; dark mode feels like graphite and illuminated plotting marks.",
+    "keyCharacteristics": [
+      "Immersive framed motion at the opening, followed by restrained analytical chapters.",
+      "Bottom-anchored editorial composition with a split headline and supporting column.",
+      "Warm paper light surfaces and near-black graphite dark surfaces.",
+      "Blue, orange, and green country series that stay synchronized across every view.",
+      "Flat, bordered controls and plot stages with generous whitespace between chapters.",
+      "Compact labels and monospaced, tabular numerals for fast data scanning."
+    ],
+    "rules": [
+      { "name": "The Three-Country Rule", "body": "Blue is always country one, orange country two, and green country three. Never reorder or repurpose these hues within a view.", "section": "colors" },
+      { "name": "The Quiet Field Rule", "body": "Use neutral surfaces and hairlines for structure. Saturated color must encode action, selection, magnitude, or focus.", "section": "colors" },
+      { "name": "The Theme Pair Rule", "body": "Light and dark modes preserve semantic roles and relative contrast; they do not introduce a separate brand palette.", "section": "colors" },
+      { "name": "The Data Has a Different Voice Rule", "body": "Use IBM Plex Mono only for years, measures, and compact technical metadata; prose and navigation stay in IBM Plex Sans.", "section": "typography" },
+      { "name": "The Tight Headline Rule", "body": "Large editorial headings use heavy weight, compact line height, and negative tracking. Do not imitate their density in body copy.", "section": "typography" },
+      { "name": "The Open Chapter Rule", "body": "Section spacing and hairlines define the story. Use cards for controls, tables, and plots, not as a wrapper around every chapter.", "section": "layout" },
+      { "name": "The Pinned Context Rule", "body": "When a data region must scroll horizontally, keep the identifying label visible and provide a plain-language scroll hint on small screens.", "section": "layout" },
+      { "name": "The Cinematic Exception Rule", "body": "Ambient shadow belongs to the hero and its over-video actions. Analytical surfaces use tone and borders instead.", "section": "elevation" },
+      { "name": "The Nested Radius Rule", "body": "Larger outer surfaces receive the larger radius. Inner controls step down in radius so layers remain visually ordered.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do keep Explore the atlas as the primary action before Donate.",
+      "Do preserve blue, orange, and green slot order in controls, tables, bubbles, and trend lines.",
+      "Do use warm paper and graphite surface stacks with one-pixel hairlines for analytical structure.",
+      "Do pair monospaced tabular numerals with plain-language labels and notes.",
+      "Do maintain open chapter spacing, bounded controls, and bounded plot stages at every viewport.",
+      "Do keep mobile maps legible and comparison tables horizontally scrollable with the country column pinned.",
+      "Do disable motion and the hero video when reduced motion is requested."
+    ],
+    "donts": [
+      "Don't use decorative color where it could be mistaken for a series, selection, magnitude, or focus state.",
+      "Don't add ambient shadows to analytical cards, tables, toolbars, or chart stages.",
+      "Don't wrap every chapter in a card or compress the whitespace that separates the analytical story.",
+      "Don't change a country's assigned hue between views or rely on color without a nearby country name.",
+      "Don't let large chart canvases force the mobile page wider than the viewport.",
+      "Don't use the hero's cinematic motion language inside the analytical chapters."
+    ]
+  }
+}

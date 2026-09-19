@@ -5,9 +5,16 @@ const data = JSON.parse(readFileSync(new URL('../public/dataset.json', import.me
 
 async function openAtlas(page) {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'See how the world is changing.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Climate, mapped.' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Explore the atlas' })).toHaveAttribute('href', '#controlsPanel');
   await expect(page.getByRole('link', { name: /Donate to Our World in Data/ })).toHaveAttribute('href', 'https://ourworldindata.org/donate');
+  const heroActions = await page.locator('.hero-actions a').allTextContents();
+  expect(heroActions.map(label => label.trim())).toEqual(['Explore the atlas', 'Donate']);
+  await expect(page.getByRole('heading', { name: 'Compare three countries' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Now comparing' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'World map' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'GDP, emissions and population' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Trends side by side' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
   await expect(page.locator('.js-plotly-plot')).toHaveCount(7);
   await expect(page.locator('.choroplethlayer path').first()).toBeVisible();
@@ -38,6 +45,7 @@ test('renders locally and keeps Play, Pause, slider, table, map and trends synch
   await page.waitForTimeout(850);
   await expect(page.locator('#yearReadout')).toHaveText(paused);
   await setYear(page, 10);
+  await expect(page.locator('[data-year-output]')).toHaveText(['2000', '2000', '2000', '2000']);
   const mapValue = await page.locator('#choroplethChart').evaluate(el => {
     const trace = el.data[0];
     return trace.z[trace.locations.indexOf('USA')];
