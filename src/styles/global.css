@@ -2,6 +2,7 @@
 
 @theme inline {
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Playfair Display Variable", "Playfair Display", Georgia, "Times New Roman", serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --color-page: var(--bg);
   --color-surface: var(--surface);
@@ -122,7 +123,7 @@
 .atlas-section { scroll-margin-top: 24px; }
 
 .controls-section {
-  margin-bottom: clamp(56px, 8vw, 96px);
+  margin-bottom: clamp(24px, 3vw, 40px);
   padding-inline: clamp(20px, 4vw, 48px);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -135,16 +136,10 @@
 }
 
 .map-section {
-  padding-block: clamp(72px, 10vw, 128px);
   border-block: 1px solid var(--border);
 }
 
-.relationship-section {
-  padding-block: clamp(72px, 9vw, 112px);
-}
-
 .trends-section {
-  padding-block: clamp(72px, 10vw, 128px);
   border-top: 1px solid var(--border);
 }
 

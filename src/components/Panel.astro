@@ -9,10 +9,10 @@ interface Props {
 const { id, title, description, descriptionId, class: className = '' } = Astro.props;
 ---
 
-<section id={id} class:list={["atlas-section relative mb-8 px-1 py-10 sm:px-4 sm:py-14 lg:px-6 lg:py-20", className]}>
+<section id={id} class:list={["atlas-section relative mb-6 px-1 py-8 sm:px-4 sm:py-10 lg:px-6 lg:py-12", className]}>
   {(title || description) && (
     <header class="section-heading mb-8 grid gap-3 border-b border-line pb-7 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.65fr)] lg:items-end lg:gap-12">
-      {title && <h2 class="max-w-[18ch] text-[clamp(28px,4vw,46px)] leading-[1.02] font-bold tracking-[-0.035em] text-balance">{title}</h2>}
+      {title && <h2 class="max-w-[18ch] font-display text-[clamp(30px,4.2vw,50px)] leading-[1.06] font-semibold tracking-[-0.015em] text-balance">{title}</h2>}
       {description && <p id={descriptionId} class="max-w-[62ch] text-[15px] leading-relaxed text-secondary lg:justify-self-end">{description}</p>}
     </header>
   )}

@@ -1,13 +1,25 @@
 ---
-const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/videos/climate-atlas-hero.mp4`;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const videoUrl = `${base}/videos/climate-atlas-hero.mp4`;
+const posterUrl = `${base}/videos/climate-atlas-hero-poster.jpg`;
+const rotatingWords = ['mapped.', 'measured.', 'compared.', 'decoded.'];
 ---
 
-<header class="hero relative isolate m-2 min-h-[calc(100svh-16px)] overflow-hidden rounded-[24px] bg-black text-white md:m-4 md:min-h-[calc(100svh-32px)] md:rounded-[32px] lg:h-[calc(100svh-32px)] lg:min-h-[720px]">
-  <div class="hero-layout grid min-h-[inherit] w-full items-center gap-10 px-6 py-10 sm:px-10 sm:py-14 lg:h-full lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.84fr)] lg:gap-12 lg:px-14 lg:py-12 xl:gap-20 xl:px-20">
-    <div class="hero-copy max-w-[720px] lg:pl-[clamp(0px,2vw,28px)]">
-      <h1 class="hero-title text-[clamp(46px,6.2vw,92px)] leading-[0.9] tracking-[-0.045em] text-balance" aria-label="Climate, mapped.">
-        <span class="hero-title-line block">Climate,</span>
-        <span class="hero-title-line hero-title-accent block">mapped.</span>
+<header id="top" class="hero relative isolate m-2 min-h-[calc(100svh-16px)] overflow-hidden rounded-[24px] bg-black text-white md:m-4 md:min-h-[calc(100svh-32px)] md:rounded-[32px] lg:h-[calc(100svh-32px)] lg:min-h-[720px]">
+  <div class="hero-layout grid min-h-[inherit] w-full items-center gap-10 px-6 py-10 sm:px-10 sm:py-14 lg:h-full lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10 lg:px-14 lg:py-12 xl:gap-14 xl:px-16">
+    <div class="hero-copy relative z-10 max-w-[720px] lg:pl-[clamp(0px,2vw,28px)]">
+      <h1 class="hero-title leading-[0.9] tracking-[-0.045em] whitespace-nowrap">
+        <span class="sr-only">The planet, {rotatingWords[0]}</span>
+        <span class="hero-title-line inline-block" aria-hidden="true">The planet,</span>{' '}
+        <span class="hero-title-line hero-rotator" aria-hidden="true" data-hero-rotator>
+          {rotatingWords.map((word, wordIndex) => (
+            <span class:list={['hero-word', { 'is-active': wordIndex === 0 }]} data-hero-word>
+              {[...word].map((letter, i) => (
+                <span class="hero-letter" style={`--i:${i}`}>{letter}</span>
+              ))}
+            </span>
+          ))}
+        </span>
       </h1>
 
       <p class="mt-8 max-w-[580px] text-[clamp(16px,1.5vw,20px)] leading-relaxed text-[#e1e8ed] sm:mt-10">
@@ -28,11 +40,11 @@ const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/videos/climate-
           </svg>
         </a>
         <a
-          href="https://ourworldindata.org/donate"
+          href="https://wise.com/pay/me/mdnaymulh4"
           target="_blank"
-          rel="noopener"
+          rel="noopener noreferrer"
           class="hero-button group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-white/45 bg-black px-7 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
-          aria-label="Donate to Our World in Data (opens in a new tab)"
+          aria-label="Donate via Wise (opens in a new tab)"
         >
           Donate
           <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="none">
@@ -42,9 +54,10 @@ const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/videos/climate-
       </div>
     </div>
 
-    <div class="hero-media relative h-[320px] w-full overflow-hidden bg-black sm:h-[420px] lg:mr-[clamp(12px,2.5vw,40px)] lg:h-[min(72svh,680px)] lg:w-[min(100%,580px)] lg:justify-self-end">
+    <div class="hero-media relative aspect-[21/20] w-full sm:aspect-[4/3] lg:aspect-auto lg:h-full lg:self-stretch">
       <video
-        class="hero-video size-full object-contain object-center"
+        class="hero-video"
+        poster={posterUrl}
         autoplay
         muted
         loop
@@ -64,12 +77,42 @@ const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/videos/climate-
   }
 
   .hero-copy {
+    container-type: inline-size;
     animation: hero-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both 120ms;
   }
 
   .hero-title {
-    font-family: 'Google Sans', sans-serif;
+    font-family: 'Google Sans Variable', 'Google Sans', sans-serif;
     font-weight: 400;
+    /* Sized from the copy column so the longest line ("The planet, compared.") holds one line. */
+    font-size: clamp(24px, 10.6cqi, 96px);
+  }
+
+  /* The subject sits centred on black, so size the frame by height and let
+     its empty sides spill past the column: the plant fills the column width. */
+  .hero-media {
+    container-type: size;
+  }
+
+  .hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: min(100cqh, 88cqw);
+    width: auto;
+    max-width: none;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    translate: -50% -50%;
+    mask-image:
+      linear-gradient(to right, transparent 4%, #000 16%, #000 84%, transparent 96%),
+      linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent);
+    mask-composite: intersect;
+    -webkit-mask-composite: source-in;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-video { height: min(88cqh, 88cqw); }
   }
 
   .hero-title-line {
@@ -80,13 +123,55 @@ const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/videos/climate-
     animation-delay: 180ms;
   }
 
-  .hero-title-accent {
+  /* Every word shares one grid cell, so the line is always as wide as the
+     longest word and nothing shifts when the word changes. */
+  .hero-rotator {
+    display: inline-grid;
     animation-delay: 320ms;
-    background: linear-gradient(to right, #fff, #71717a);
+  }
+
+  .hero-word {
+    grid-area: 1 / 1;
+    perspective: 520px;
+  }
+
+  .hero-letter {
+    display: inline-block;
+    /* Extend the clipped background below the 0.9 line box so descenders keep their fill. */
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+    background: linear-gradient(180deg, oklch(100% 0 0) 0%, oklch(85% 0.1 150) 100%);
     background-clip: text;
+    text-shadow:
+      0 0 45px oklch(75% 0.25 145 / 0.35),
+      0 0 15px oklch(75% 0.25 145 / 0.15);
     color: transparent;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    opacity: 0;
+    transform: translateY(0.42em) rotateX(-60deg);
+    transform-origin: 50% 100%;
+    filter: blur(10px);
+    transition:
+      opacity 520ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 760ms cubic-bezier(0.16, 1, 0.3, 1),
+      filter 620ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: calc(var(--i) * 32ms + 200ms);
+  }
+
+  .is-active .hero-letter {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+
+  .is-leaving .hero-letter {
+    opacity: 0;
+    transform: translateY(-0.32em);
+    filter: blur(10px);
+    transition-duration: 360ms;
+    transition-timing-function: cubic-bezier(0.7, 0, 0.84, 0);
+    transition-delay: calc(var(--i) * 20ms);
   }
 
   .hero-actions {
@@ -140,12 +225,55 @@ const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/videos/climate-
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero video { display: none; }
     .hero-copy,
     .hero-actions,
     .hero-title-line,
     .hero-media { animation: none; }
+    .hero-letter { transition: none; }
     .hero-button,
     .hero-button svg { transition: none; }
   }
 </style>
+
+<script>
+  const rotator = document.querySelector('[data-hero-rotator]');
+  const words = rotator ? [...rotator.querySelectorAll<HTMLElement>('[data-hero-word]')] : [];
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const INTERVAL = 2000;
+
+  if (rotator && words.length > 1) {
+    let index = 0;
+    let timer = 0;
+    let inView = true;
+
+    const advance = () => {
+      const leaving = words[index];
+      index = (index + 1) % words.length;
+      leaving.classList.replace('is-active', 'is-leaving');
+      words[index].classList.remove('is-leaving');
+      words[index].classList.add('is-active');
+      // Drop the leaving state once it has faded, so the word re-enters from below next time.
+      window.setTimeout(() => leaving.classList.remove('is-leaving'), 700);
+    };
+
+    const sync = () => {
+      const shouldRun = inView && !document.hidden && !reducedMotion.matches;
+      if (shouldRun && !timer) timer = window.setInterval(advance, INTERVAL);
+      if (!shouldRun && timer) {
+        window.clearInterval(timer);
+        timer = 0;
+      }
+    };
+
+    // Pause while the hero is off screen or the tab is hidden.
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([entry]) => {
+        inView = entry.isIntersecting;
+        sync();
+      }).observe(rotator);
+    }
+    document.addEventListener('visibilitychange', sync);
+    reducedMotion.addEventListener('change', sync);
+    sync();
+  }
+</script>
