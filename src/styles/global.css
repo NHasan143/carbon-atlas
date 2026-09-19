@@ -115,24 +115,23 @@
   .sm-cell { @apply min-w-0 rounded-xl border border-line bg-surface p-4; }
   .chart-sm { @apply h-[230px] w-full; }
   .sm-title { @apply mb-3 text-[12.5px] font-semibold text-secondary; }
-  .trend-grid .sm-cell { @apply md:col-span-1 lg:col-span-2; }
-  .trend-grid .sm-cell:nth-child(1),
-  .trend-grid .sm-cell:nth-child(2) { @apply lg:col-span-3; }
 }
 
 .atlas-section { scroll-margin-top: 24px; }
 
 .controls-section {
   margin-bottom: clamp(24px, 3vw, 40px);
-  padding-inline: clamp(20px, 4vw, 48px);
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--surface);
 }
 
-.snapshot-section {
-  max-width: 1120px;
-  margin-inline: auto;
+/* Subtract the card's 1px border so its content lines up with the open sections. */
+@media (min-width: 640px) {
+  .controls-section { padding-inline: 15px; }
+}
+@media (min-width: 1024px) {
+  .controls-section { padding-inline: 23px; }
 }
 
 .map-section {
@@ -163,6 +162,8 @@
 
 @media (max-width: 639px) {
   .atlas-shell { padding-inline: 10px; }
+  /* The control card is bordered, so it needs more inset than open sections. */
+  .controls-section { padding-inline: 16px; }
   .chart-sidebar > :first-child { min-width: 0; flex: 1; }
   .chart-sidebar select { width: 100%; }
   .chart-sm { height: 220px; }

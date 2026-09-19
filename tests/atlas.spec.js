@@ -16,7 +16,7 @@ async function openAtlas(page) {
   await expect(page.getByRole('heading', { name: 'GDP, Emissions and Population' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The Trends Side by Side' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
-  await expect(page.locator('.js-plotly-plot')).toHaveCount(7);
+  await expect(page.locator('.js-plotly-plot')).toHaveCount(8);
   await expect(page.locator('.choroplethlayer path').first()).toBeVisible();
 }
 
@@ -79,7 +79,7 @@ test('all map and scatter metrics work and country selection recovers from empty
   await page.selectOption('#cmp0', 'USA');
   await expect(page.locator('#compareEmpty')).toBeHidden();
   await expect(page.locator('#compareTable tbody tr')).toHaveCount(1);
-  await expect(page.locator('#smGrid .js-plotly-plot')).toHaveCount(5);
+  await expect(page.locator('#smGrid .js-plotly-plot')).toHaveCount(6);
   await setYear(page, 0);
 });
 
