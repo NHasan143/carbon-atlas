@@ -9,6 +9,43 @@ import '@fontsource/ibm-plex-mono/500.css';
 import '@fontsource/ibm-plex-mono/600.css';
 import '@fontsource-variable/playfair-display/wght.css';
 import '@fontsource-variable/google-sans/wght.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Carbon Atlas — The planet, mapped.',
+  description = 'Compare CO₂ emissions, renewables, GDP and population across 217 countries from 1990 to 2024, with an interactive map, bubble chart and trends.',
+} = Astro.props;
+
+const siteName = 'Carbon Atlas';
+const socialDescription = 'Compare any three countries across CO₂ emissions, renewable energy, GDP and population, 1990–2024. Built on open data from Our World in Data and the World Bank.';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL(`${base}/og-image.jpg`, Astro.site).href;
+const ogImageAlt = 'Carbon Atlas: "The planet, mapped." beside a dew-covered sprout on black, with the line "CO₂, energy, GDP and population across 217 countries, 1990–2024."';
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: siteName,
+  url: canonical,
+  description,
+  image: ogImage,
+  applicationCategory: 'EducationalApplication',
+  operatingSystem: 'Any',
+  browserRequirements: 'Requires JavaScript',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  author: { '@type': 'Person', name: 'Naymul Hasan', url: 'https://github.com/NHasan143' },
+  temporalCoverage: '1990/2024',
+  isBasedOn: [
+    'https://github.com/owid/co2-data',
+    'https://github.com/owid/energy-data',
+    'https://ourworldindata.org/grapher/gdp-per-capita-worldbank',
+  ],
+};
 ---
 
 <!doctype html>
@@ -16,8 +53,36 @@ import '@fontsource-variable/google-sans/wght.css';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Explore CO₂ emissions, renewable energy, GDP, and population across 217 countries from 1990–2024 with the interactive Climate & Energy Atlas." />
-    <title>Climate &amp; Energy Atlas</title>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Naymul Hasan" />
+    <link rel="canonical" href={canonical} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f9f9f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={socialDescription} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={socialDescription} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    <link rel="icon" href={`${base}/favicon.ico`} sizes="48x48" />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={`${base}/apple-touch-icon.png`} />
   </head>
   <body class="min-w-0 overflow-x-hidden bg-page font-sans text-ink">
     <main><slot /></main>
