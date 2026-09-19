@@ -12,10 +12,10 @@ import Panel from './Panel.astro';
   <div class="atlas-shell mx-auto max-w-[1280px] px-4 pt-20 pb-16 sm:px-6 lg:pt-28">
     <AtlasControls />
 
-    <Panel id="nowComparing" title="Now comparing" description="A precise snapshot of every atlas metric for your selected countries and year." class="snapshot-section">
+    <Panel id="nowComparing" title="The Comparison" description="A precise snapshot of every atlas metric for your selected countries and year." class="snapshot-section">
       <div class="section-toolbar">
         <span>Selected year</span>
-        <strong data-year-output>2023</strong>
+        <strong data-year-output>2024</strong>
       </div>
       <div class="table-frame">
         <p id="compareScrollHint" class="table-scroll-hint">Swipe sideways to see every metric. Country names stay pinned.</p>
@@ -26,13 +26,13 @@ import Panel from './Panel.astro';
       </div>
     </Panel>
 
-    <Panel id="worldMap" title="World map" description="Move from a single value to the global pattern. Every country is held to one consistent scale across time." descriptionId="choroSub" class="map-section">
+    <Panel id="worldMap" title="The World View" description="Move from a single value to the global pattern. Every country is held to one consistent scale across time." descriptionId="choroSub" class="map-section">
       <div class="map-layout grid gap-6 lg:grid-cols-[230px_minmax(0,1fr)] lg:items-stretch">
         <aside class="chart-sidebar flex items-end justify-between gap-5 rounded-xl bg-field p-5 lg:flex-col lg:items-stretch lg:gap-8">
           <MetricSelect id="choroMetric" label="Map metric" />
           <div>
             <span class="block text-xs font-semibold text-muted">Selected year</span>
-            <strong class="mt-1 block font-mono text-3xl tabular-nums" data-year-output>2023</strong>
+            <strong class="mt-1 block font-mono text-3xl tabular-nums" data-year-output>2024</strong>
           </div>
         </aside>
         <div class="chart-stage min-w-0 rounded-xl border border-line bg-surface p-2 sm:p-4">
@@ -42,7 +42,7 @@ import Panel from './Panel.astro';
       <p id="choroCaption" class="mt-5 max-w-[90ch] text-[12.5px] leading-relaxed text-muted"></p>
     </Panel>
 
-    <Panel id="relationship" title="GDP, emissions and population" description="Each bubble is a country and its area represents population. Change either axis to test a different relationship." class="relationship-section">
+    <Panel id="relationship" title="GDP, Emissions and Population" singleLine description="Each bubble is a country and its area represents population. Change either axis to test a different relationship." class="relationship-section">
       <div class="chart-toolbar mb-6 flex flex-wrap items-end justify-between gap-5 rounded-xl bg-field p-5">
         <div class="flex flex-1 flex-wrap gap-4">
           <MetricSelect id="scatterX" label="Horizontal axis" />
@@ -50,7 +50,7 @@ import Panel from './Panel.astro';
         </div>
         <div class="text-right">
           <span class="block text-xs font-semibold text-muted">Selected year</span>
-          <strong class="mt-1 block font-mono text-2xl tabular-nums" data-year-output>2023</strong>
+          <strong class="mt-1 block font-mono text-2xl tabular-nums" data-year-output>2024</strong>
         </div>
       </div>
       <div class="chart-stage min-w-0 rounded-xl border border-line bg-surface p-2 sm:p-4">
@@ -58,17 +58,18 @@ import Panel from './Panel.astro';
       </div>
     </Panel>
 
-    <Panel id="trends" title="Trends side by side" description="Read the complete 1990–2023 record for the same countries. The dashed marker keeps your selected year visible across every metric." class="trends-section">
+    <Panel id="trends" title="The Trends Side by Side" description="Read the complete 1990–2024 record for the same countries. The dashed marker keeps your selected year visible across every metric." class="trends-section">
       <div class="section-toolbar mb-6">
         <span>Cross-chart marker</span>
-        <strong data-year-output>2023</strong>
+        <strong data-year-output>2024</strong>
       </div>
       <div id="smGrid" class="trend-grid grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6"></div>
     </Panel>
 
     <footer class="mx-auto mt-12 max-w-[1000px] border-t border-line pt-8 text-[12.5px] leading-[1.7] text-muted">
       Data: <a class="text-secondary underline" href="https://github.com/owid/co2-data" target="_blank" rel="noopener">Our World in Data – CO₂ and Greenhouse Gas Emissions</a> and
-      <a class="text-secondary underline" href="https://github.com/owid/energy-data" target="_blank" rel="noopener">Our World in Data – Energy</a>, both CC BY. Renewables-share data covers 79 countries with reliable energy-mix reporting; others show as no-data on the map and are omitted from that metric's comparisons.
+      <a class="text-secondary underline" href="https://github.com/owid/energy-data" target="_blank" rel="noopener">Our World in Data – Energy</a>, and
+      <a class="text-secondary underline" href="https://ourworldindata.org/grapher/gdp-per-capita-worldbank" target="_blank" rel="noopener">World Bank – GDP per capita, PPP (constant 2021 international $)</a> via Our World in Data, all CC BY. Renewables-share data covers 79 countries with reliable energy-mix reporting; others show as no-data on the map and are omitted from that metric's comparisons.
     </footer>
   </div>
 
@@ -581,7 +582,7 @@ function initAtlas(){
       paper_bgcolor: t.surface, plot_bgcolor: t.surface,
       font: { color: t.textSecondary, family: t.fontFamily, size:10 },
       margin: { l:34, r:44, t:6, b:22 },
-      xaxis: { gridcolor:"transparent", linecolor:t.axis, tickfont:{size:10}, tickvals:[1990,2005,2023] },
+      xaxis: { gridcolor:"transparent", linecolor:t.axis, tickfont:{size:10}, tickvals:[YEARS[0], Math.round((YEARS[0] + YEARS[YEARS.length - 1]) / 2), YEARS[YEARS.length - 1]] },
       yaxis: { gridcolor:t.grid, zerolinecolor:t.axis, linecolor:"transparent", tickfont:{size:10} },
       shapes: shapes,
       annotations: annotations,

@@ -23,10 +23,10 @@ const rotatingWords = ['mapped.', 'measured.', 'compared.', 'decoded.'];
       </h1>
 
       <p class="mt-8 max-w-[580px] text-[clamp(16px,1.5vw,20px)] leading-relaxed text-[#e1e8ed] sm:mt-10">
-        Follow emissions, energy, prosperity, and population across 217 countries and 34 years of global change.
+        Follow emissions, energy, prosperity, and population across 217 countries and 35 years of global change.
       </p>
       <p class="mt-4 font-mono text-[11px] font-semibold tracking-[0.12em] text-[#9ec5f4] uppercase">
-        1990–2023 · Six connected metrics
+        1990–2024 · Six connected metrics
       </p>
 
       <div class="hero-actions mt-8 flex w-full flex-col items-start gap-3 border-t border-white/18 pt-7 sm:w-auto sm:flex-row">
@@ -132,7 +132,6 @@ const rotatingWords = ['mapped.', 'measured.', 'compared.', 'decoded.'];
 
   .hero-word {
     grid-area: 1 / 1;
-    perspective: 520px;
   }
 
   .hero-letter {
@@ -149,14 +148,13 @@ const rotatingWords = ['mapped.', 'measured.', 'compared.', 'decoded.'];
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     opacity: 0;
-    transform: translateY(0.42em) rotateX(-60deg);
-    transform-origin: 50% 100%;
-    filter: blur(10px);
+    transform: translateY(0.22em);
+    filter: blur(8px);
     transition:
-      opacity 520ms cubic-bezier(0.16, 1, 0.3, 1),
-      transform 760ms cubic-bezier(0.16, 1, 0.3, 1),
-      filter 620ms cubic-bezier(0.16, 1, 0.3, 1);
-    transition-delay: calc(var(--i) * 32ms + 200ms);
+      opacity 1100ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 1300ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: calc(var(--i) * 45ms + 380ms);
   }
 
   .is-active .hero-letter {
@@ -167,11 +165,11 @@ const rotatingWords = ['mapped.', 'measured.', 'compared.', 'decoded.'];
 
   .is-leaving .hero-letter {
     opacity: 0;
-    transform: translateY(-0.32em);
-    filter: blur(10px);
-    transition-duration: 360ms;
-    transition-timing-function: cubic-bezier(0.7, 0, 0.84, 0);
-    transition-delay: calc(var(--i) * 20ms);
+    transform: translateY(-0.14em);
+    filter: blur(8px);
+    transition-duration: 700ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+    transition-delay: calc(var(--i) * 28ms);
   }
 
   .hero-actions {
@@ -239,7 +237,7 @@ const rotatingWords = ['mapped.', 'measured.', 'compared.', 'decoded.'];
   const rotator = document.querySelector('[data-hero-rotator]');
   const words = rotator ? [...rotator.querySelectorAll<HTMLElement>('[data-hero-word]')] : [];
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const INTERVAL = 2000;
+  const INTERVAL = 3600;
 
   if (rotator && words.length > 1) {
     let index = 0;
@@ -253,7 +251,7 @@ const rotatingWords = ['mapped.', 'measured.', 'compared.', 'decoded.'];
       words[index].classList.remove('is-leaving');
       words[index].classList.add('is-active');
       // Drop the leaving state once it has faded, so the word re-enters from below next time.
-      window.setTimeout(() => leaving.classList.remove('is-leaving'), 700);
+      window.setTimeout(() => leaving.classList.remove('is-leaving'), 1200);
     };
 
     const sync = () => {

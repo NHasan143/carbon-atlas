@@ -11,10 +11,10 @@ async function openAtlas(page) {
   const heroActions = await page.locator('.hero-actions a').allTextContents();
   expect(heroActions.map(label => label.trim())).toEqual(['Explore the atlas', 'Donate']);
   await expect(page.getByRole('heading', { name: 'Compare three countries' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Now comparing' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'World map' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'GDP, emissions and population' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Trends side by side' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'The Comparison' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'The World View' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'GDP, Emissions and Population' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'The Trends Side by Side' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
   await expect(page.locator('.js-plotly-plot')).toHaveCount(7);
   await expect(page.locator('.choroplethlayer path').first()).toBeVisible();
@@ -37,9 +37,9 @@ test('renders locally and keeps Play, Pause, slider, table, map and trends synch
   });
   await openAtlas(page);
   await expect(page.locator('#compareTable tbody tr')).toHaveCount(3);
-  await expect(page.locator('#yearReadout')).toHaveText('2023');
+  await expect(page.locator('#yearReadout')).toHaveText('2024');
   await page.getByRole('button', { name: 'Play animation' }).click();
-  await expect(page.locator('#yearReadout')).not.toHaveText('2023');
+  await expect(page.locator('#yearReadout')).not.toHaveText('2024');
   await page.getByRole('button', { name: 'Pause animation' }).click();
   const paused = await page.locator('#yearReadout').textContent();
   await page.waitForTimeout(850);
@@ -93,7 +93,7 @@ test('themes update chart colors and mobile layout remains usable', async ({ pag
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await expect(page.locator('#cmp0')).toBeVisible();
   await page.getByRole('button', { name: 'Play animation' }).click();
-  await expect(page.locator('#yearReadout')).not.toHaveText('2023');
+  await expect(page.locator('#yearReadout')).not.toHaveText('2024');
   await page.getByRole('button', { name: 'Pause animation' }).click();
   await page.screenshot({ path: 'test-results/atlas-mobile-dark.png', fullPage: true });
 });

@@ -2,14 +2,15 @@
 Climate & Energy Explorer — data pipeline
 ==========================================
 
-Downloads Our World in Data's CO2/GHG emissions dataset and energy dataset,
-merges them into one clean per-country/per-year table, and exports a compact
+Downloads Our World in Data's CO2/GHG emissions dataset, energy dataset and
+World Bank GDP per capita series, merges them into one clean per-country/per-year table, and exports a compact
 JSON file that powers an interactive explorer (animated choropleth, small
 multiples, and a Gapminder-style scatter with a year slider).
 
 Data sources (public domain / CC BY, refreshed daily by OWID):
   https://github.com/owid/co2-data
   https://github.com/owid/energy-data
+  https://ourworldindata.org/grapher/gdp-per-capita-worldbank (World Bank WDI, CC BY 4.0)
 
 Run:
     pip install pandas country_converter
@@ -31,15 +32,21 @@ CO2_URL = "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.
 ENERGY_URL = "https://raw.githubusercontent.com/owid/energy-data/master/owid-energy-data.csv"
 CO2_LOCAL = HERE / "co2.csv"
 ENERGY_LOCAL = HERE / "energy.csv"
+# World Bank GDP per capita, PPP (constant 2021 international $), via OWID.
+# It runs to the latest year for ~200 countries, where OWID's co2-data GDP
+# (Maddison Project) stops earlier and covers fewer countries.
+GDP_URL = ("https://ourworldindata.org/grapher/gdp-per-capita-worldbank.csv"
+           "?v=1&csvType=full&useColumnShortNames=true")
+GDP_LOCAL = HERE / "gdp_worldbank.csv"
 
-YEAR_START, YEAR_END = 1990, 2023
+YEAR_START, YEAR_END = 1990, 2024
 
 # Metric definitions: source column -> (json key, friendly label, unit, decimals)
 METRICS = {
     "co2_per_capita":         ("CO2 per capita",            "t / person",  2),
     "co2":                    ("Total CO2 emissions",       "Mt / year",   1),
     "share_global_co2":       ("Share of global CO2",       "%",           2),
-    "gdp_per_capita":         ("GDP per capita",             "int-$",      0),
+    "gdp_per_capita":         ("GDP per capita",             "2021 int-$", 0),
     "renewables_share_energy": ("Renewables share of energy", "%",         1),
     "population":             ("Population",                 "people",     0),
 }
@@ -49,16 +56,20 @@ def fetch_if_missing(url: str, dest: Path) -> None:
     if dest.exists():
         return
     print(f"Downloading {url} -> {dest}")
-    urllib.request.urlretrieve(url, dest)
+    # ourworldindata.org rejects urllib's default user agent.
+    request = urllib.request.Request(url, headers={"User-Agent": "carbon-atlas-build/1.0"})
+    with urllib.request.urlopen(request) as response:
+        dest.write_bytes(response.read())
 
 
 def load_source_data() -> pd.DataFrame:
     fetch_if_missing(CO2_URL, CO2_LOCAL)
     fetch_if_missing(ENERGY_URL, ENERGY_LOCAL)
+    fetch_if_missing(GDP_URL, GDP_LOCAL)
 
     co2 = pd.read_csv(
         CO2_LOCAL,
-        usecols=["country", "year", "iso_code", "population", "gdp", "co2",
+        usecols=["country", "year", "iso_code", "population", "co2",
                  "co2_per_capita", "share_global_co2"],
     )
     energy = pd.read_csv(
@@ -72,25 +83,27 @@ def load_source_data() -> pd.DataFrame:
     co2 = co2[co2["iso_code"].notna() & ~co2["iso_code"].str.startswith("OWID_")]
     co2 = co2[(co2["year"] >= YEAR_START) & (co2["year"] <= YEAR_END)]
 
-    df = co2.merge(energy, on=["iso_code", "year"], how="left")
+    gdp = pd.read_csv(GDP_LOCAL, usecols=["code", "year", "ny_gdp_pcap_pp_kd"]).rename(
+        columns={"code": "iso_code", "ny_gdp_pcap_pp_kd": "gdp_per_capita"}
+    )
+
+    df = (co2.merge(energy, on=["iso_code", "year"], how="left")
+             .merge(gdp, on=["iso_code", "year"], how="left"))
 
     # --- Handle missing data -------------------------------------------------
-    # Population and GDP move smoothly year to year, so short gaps (<=3 yrs)
-    # are safe to fill by linear interpolation within each country's own
-    # series. Emissions and renewables-share are NOT interpolated: a gap
-    # there usually means the underlying survey doesn't exist for that
-    # country/year, and inventing a trend would misrepresent the source.
+    # Population and GDP per capita move smoothly year to year, so short
+    # interior gaps (<=3 yrs) are safe to fill by linear interpolation within
+    # each country's own series. limit_area="inside" keeps this to gaps
+    # between two real values: the last reported year is never carried
+    # forward into years the source hasn't published. Emissions and
+    # renewables-share are NOT interpolated: a gap there usually means the
+    # underlying survey doesn't exist for that country/year, and inventing a
+    # trend would misrepresent the source.
     df = df.sort_values(["iso_code", "year"])
-    df["population"] = df.groupby("iso_code")["population"].transform(
-        lambda s: s.interpolate(limit=3)
-    )
-    df["gdp"] = df.groupby("iso_code")["gdp"].transform(
-        lambda s: s.interpolate(limit=3)
-    )
-
-    df["gdp_per_capita"] = df["gdp"] / df["population"]
-    df.loc[~df["gdp_per_capita"].replace([float("inf"), float("-inf")], pd.NA).notna(),
-           "gdp_per_capita"] = pd.NA
+    for col in ("population", "gdp_per_capita"):
+        df[col] = df.groupby("iso_code")[col].transform(
+            lambda s: s.interpolate(limit=3, limit_area="inside")
+        )
 
     # --- Continent, for grouping the country picker --------------------------
     iso3_list = df["iso_code"].unique().tolist()
