@@ -3,33 +3,35 @@ import Panel from './Panel.astro';
 const colors = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)'];
 ---
 
-<Panel id="controlsPanel">
+<Panel id="controlsPanel" title="Compare three countries" description="Choose the places and year you want to examine. Every view below updates from this shared control room." class="controls-section">
   <p id="loadStatus" role="status" class="mb-3">Loading the atlas…</p>
   <p id="loadRetry" hidden class="mb-3"><a href="" class="text-accent underline">Reload the atlas</a></p>
   <noscript><p class="mb-3">Enable JavaScript to explore the charts and compare countries.</p></noscript>
-  <div class="flex flex-wrap items-end gap-x-[26px] gap-y-[18px]">
-    <div class="flex min-w-0 flex-[1_1_320px] items-center gap-3.5">
-      <button id="playBtn" type="button" aria-label="Play animation" aria-pressed="false" disabled class="flex min-w-[76px] shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-[9px] text-[13px] font-semibold text-white hover:brightness-110">
+  <div class="rounded-xl bg-field px-4 py-5 sm:px-6">
+    <div class="flex min-w-0 items-center gap-3.5">
+      <button id="playBtn" type="button" aria-label="Play animation" aria-pressed="false" disabled class="flex min-w-[76px] shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-[var(--action-accent)] px-4 py-[9px] text-[13px] font-semibold text-[#071018] hover:brightness-110">
         <svg id="playIcon" aria-hidden="true" class="size-3" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1 11 6 2 11Z" /></svg>
         <svg id="pauseIcon" aria-hidden="true" class="size-3" style="display:none" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1h3v10H2zM7 1h3v10H7z" /></svg>
         <span id="playLabel">Play</span>
       </button>
       <div class="flex min-w-0 flex-auto items-center gap-3">
-        <input type="range" id="yearSlider" min="0" max="33" step="1" value="33" aria-label="Year" disabled />
-        <span id="yearReadout" class="min-w-[3.4em] text-right font-mono text-base font-semibold tabular-nums">2023</span>
+        <input type="range" id="yearSlider" min="0" max="34" step="1" value="34" aria-label="Year" disabled />
+        <span id="yearReadout" class="min-w-[3.4em] text-right font-mono text-lg font-semibold tabular-nums">2024</span>
       </div>
     </div>
   </div>
-  <div class="mt-4 flex flex-wrap gap-x-[22px] gap-y-3.5">
+  <div class="mt-6 grid gap-3 md:grid-cols-3">
     {colors.map((color, slot) => (
-      <div class="flex min-w-0 flex-col gap-1.5 max-sm:basis-full">
-        <label for={`cmp${slot}`} class="text-[11.5px] font-semibold tracking-[0.03em] text-muted uppercase">Compare — series {slot + 1}</label>
-        <div class="flex items-center gap-2">
+      <div class="country-control flex min-w-0 flex-col gap-3 rounded-xl border border-line bg-field p-4">
+        <div class="flex items-center justify-between gap-3">
+          <label for={`cmp${slot}`} class="text-xs font-semibold text-secondary">Country {slot + 1}</label>
           <span class="swatch" style={{ background: color }}></span>
-          <select id={`cmp${slot}`} class="max-sm:flex-1" disabled></select>
+        </div>
+        <div class="flex items-center gap-2">
+          <select id={`cmp${slot}`} class="w-full max-w-none flex-1" disabled></select>
         </div>
       </div>
     ))}
   </div>
-  <p class="mt-2.5 text-[12.5px] leading-normal text-muted">Highlighted countries stay in the same three colors across every chart below. Everything else is shown in gray for context — that cap keeps colors tell-apart-able (a fourth or fifth hue starts to look the same to some readers).</p>
+  <p class="mt-5 max-w-[80ch] text-[12.5px] leading-relaxed text-muted">Highlighted countries keep these three colors across every chart below. Everything else appears in gray for context; three distinct hues remain easier to tell apart than a larger palette.</p>
 </Panel>

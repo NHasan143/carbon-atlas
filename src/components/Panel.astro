@@ -4,12 +4,29 @@ interface Props {
   title?: string;
   description?: string;
   descriptionId?: string;
+  class?: string;
+  /** Keep the title on one line, scaling it down only where the width runs out. */
+  singleLine?: boolean;
 }
-const { id, title, description, descriptionId } = Astro.props;
+const { id, title, description, descriptionId, class: className = '', singleLine = false } = Astro.props;
 ---
 
-<section id={id} class="mb-[22px] rounded-[14px] border border-line bg-surface p-5">
-  {title && <h2 class="mb-1 text-[17px] font-semibold">{title}</h2>}
-  {description && <p id={descriptionId} class="mb-4 max-w-[70ch] text-[13.5px] leading-normal text-secondary">{description}</p>}
+<section id={id} class:list={["atlas-section relative mb-6 px-1 py-8 sm:px-4 sm:py-10 lg:px-6 lg:py-12", className]}>
+  {(title || description) && (
+    <header class:list={[
+      'section-heading @container mb-8 grid gap-3 border-b border-line pb-7 lg:items-end lg:gap-12',
+      singleLine ? 'lg:grid-cols-[auto_minmax(240px,1fr)]' : 'lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.65fr)]',
+    ]}>
+      {title && (
+        <h2 class:list={[
+          'font-display leading-[1.06] font-semibold tracking-[-0.015em]',
+          singleLine
+            ? 'text-[length:min(clamp(30px,4.2vw,50px),6.4cqi)] whitespace-nowrap'
+            : 'max-w-[18ch] text-[clamp(30px,4.2vw,50px)] text-balance',
+        ]}>{title}</h2>
+      )}
+      {description && <p id={descriptionId} class="max-w-[62ch] text-[15px] leading-relaxed text-secondary lg:justify-self-end">{description}</p>}
+    </header>
+  )}
   <slot />
 </section>
