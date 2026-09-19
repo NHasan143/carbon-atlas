@@ -1,14 +1,11 @@
 ---
 import AtlasControls from './AtlasControls.astro';
+import Hero from './Hero.astro';
 import MetricSelect from './MetricSelect.astro';
 import Panel from './Panel.astro';
 ---
 
-  <header class="mb-[22px]">
-    <p class="mb-1.5 font-mono text-xs tracking-[0.08em] text-accent uppercase">Interactive explorer · 1990–2023</p>
-    <h1 class="mb-2 text-[clamp(26px,4vw,36px)] leading-[1.15] font-bold text-balance">Climate &amp; Energy Atlas</h1>
-    <p class="max-w-[62ch] text-[15px] leading-normal text-secondary">Emissions, energy mix and GDP for 217 countries, built from Our World in Data's CO₂ and energy datasets. Pick up to three countries to compare, scrub the year, or press play.</p>
-  </header>
+  <Hero />
 
   <AtlasControls />
 

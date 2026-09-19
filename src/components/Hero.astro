@@ -1,0 +1,100 @@
+---
+const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/videos/climate-atlas-hero.mp4`;
+---
+
+<header class="hero relative isolate mb-[22px] flex min-h-[clamp(560px,72vh,760px)] overflow-hidden rounded-[14px] bg-[#0d1720] text-white">
+  <video
+    class="absolute inset-0 -z-30 size-full object-cover"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    aria-hidden="true"
+  >
+    <source src={videoUrl} type="video/mp4" media="(prefers-reduced-motion: no-preference)" />
+  </video>
+
+  <div class="hero-wash absolute inset-0 -z-20"></div>
+  <div class="hero-vignette absolute inset-0 -z-10"></div>
+
+  <div class="flex w-full flex-col items-center px-6 pt-[clamp(72px,13vh,136px)] pb-8 text-center sm:px-10 sm:pb-10">
+    <div class="max-w-[820px]">
+      <p class="mb-5 font-mono text-[11px] font-semibold tracking-[0.16em] text-[#9ec5f4] uppercase sm:text-xs">
+        217 countries · 34 years · one shared atmosphere
+      </p>
+      <h1 class="text-[clamp(42px,8vw,88px)] leading-[0.95] font-bold tracking-[-0.04em] text-balance">
+        See how the world is changing.
+      </h1>
+      <p class="mx-auto mt-6 max-w-[62ch] text-[clamp(16px,2vw,20px)] leading-relaxed text-[#e1e8ed] text-balance">
+        Explore the relationship between emissions, energy, prosperity, and population across more than three decades of global change.
+      </p>
+    </div>
+
+    <div class="mt-auto flex w-full flex-col items-center justify-center gap-3 pt-12 sm:flex-row">
+      <a
+        href="https://ourworldindata.org/donate"
+        target="_blank"
+        rel="noopener"
+        class="hero-button hero-button-primary group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
+        aria-label="Donate to Our World in Data (opens in a new tab)"
+      >
+        Donate
+        <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="none">
+          <path d="M6 14 14 6M8 6h6v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+      <a
+        href="#controlsPanel"
+        class="hero-button inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-white/45 bg-black/20 px-6 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
+      >
+        Explore the atlas
+        <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:translate-y-0.5" viewBox="0 0 20 20" fill="none">
+          <path d="m5 8 5 5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .hero {
+    box-shadow: 0 28px 70px -36px rgb(3 15 25 / 0.8);
+  }
+
+  .hero-wash {
+    background:
+      linear-gradient(180deg, rgb(3 12 20 / 0.42) 0%, rgb(3 12 20 / 0.16) 42%, rgb(3 12 20 / 0.88) 100%),
+      linear-gradient(90deg, rgb(3 12 20 / 0.36), transparent 36%, transparent 64%, rgb(3 12 20 / 0.36));
+  }
+
+  .hero-vignette {
+    box-shadow: inset 0 0 120px rgb(0 0 0 / 0.28);
+  }
+
+  .hero-button {
+    box-shadow: 0 12px 30px -16px rgb(0 0 0 / 0.7);
+    transition:
+      transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 280ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 280ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hero-button:hover {
+    transform: translateY(-2px);
+    border-color: rgb(255 255 255 / 0.78);
+    background-color: rgb(0 0 0 / 0.36);
+    box-shadow: 0 18px 38px -16px rgb(0 0 0 / 0.82);
+  }
+
+  .hero-button-primary:hover {
+    background-color: #256abf;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero video { display: none; }
+    .hero-button,
+    .hero-button svg { transition: none; }
+  }
+</style>

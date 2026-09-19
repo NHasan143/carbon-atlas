@@ -16,6 +16,18 @@ The bundled dataset contains **217 countries and territories**, **34 years (1990
 
 The initial view shows 2023 and compares the United States, China, and India.
 
+## Hero video
+
+Place your video at:
+
+```text
+public/videos/climate-atlas-hero.mp4
+```
+
+Use an MP4 with H.264 video, ideally 1920×1080, 10–20 seconds long, and below roughly 8–12 MB. A seamless loop works best. Keep the main subject near the center so the cover crop remains useful on mobile screens. The video is decorative, muted, loops automatically, and is hidden when a visitor prefers reduced motion. Until the file is added, the hero displays its dark fallback background.
+
+The hero's **Donate** button links to [Our World in Data's official donation page](https://ourworldindata.org/donate), supporting the nonprofit source behind the atlas data. **Explore the atlas** scrolls to the year and country controls.
+
 ## Run locally
 
 You need **Node.js 22.12.0 or newer** and npm (Node.js 24 LTS is recommended). Python is only needed if you want to rebuild the dataset.

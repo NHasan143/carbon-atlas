@@ -5,6 +5,9 @@ const data = JSON.parse(readFileSync(new URL('../public/dataset.json', import.me
 
 async function openAtlas(page) {
   await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'See how the world is changing.' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Explore the atlas' })).toHaveAttribute('href', '#controlsPanel');
+  await expect(page.getByRole('link', { name: /Donate to Our World in Data/ })).toHaveAttribute('href', 'https://ourworldindata.org/donate');
   await expect(page.getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
   await expect(page.locator('.js-plotly-plot')).toHaveCount(7);
   await expect(page.locator('.choroplethlayer path').first()).toBeVisible();
