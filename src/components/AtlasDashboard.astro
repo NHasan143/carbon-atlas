@@ -39,7 +39,7 @@ import Panel from './Panel.astro';
           <div id="choroplethChart" class="h-[340px] w-full sm:h-[540px]" aria-label="World map of the selected metric"></div>
         </div>
       </div>
-      <p id="choroCaption" class="mt-5 max-w-[90ch] text-[12.5px] leading-relaxed text-muted"></p>
+      <p id="choroCaption" class="mx-auto mt-5 max-w-[90ch] text-center text-[12.5px] leading-relaxed text-balance text-muted"></p>
     </Panel>
 
     <Panel id="relationship" title="GDP, Emissions and Population" singleLine description="Each bubble is a country and its area represents population. Change either axis to test a different relationship." class="relationship-section">
@@ -63,7 +63,7 @@ import Panel from './Panel.astro';
         <span>Cross-chart marker</span>
         <strong data-year-output>2024</strong>
       </div>
-      <div id="smGrid" class="trend-grid grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6"></div>
+      <div id="smGrid" class="trend-grid grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
     </Panel>
 
     <footer class="mx-auto mt-12 max-w-[1000px] border-t border-line pt-8 text-[12.5px] leading-[1.7] text-muted">
@@ -324,22 +324,33 @@ function initAtlas(){
     });
   }
 
+  function stopPlayback(){
+    if (playTimer) clearInterval(playTimer);
+    playTimer = null;
+    setPlayState(false);
+    element("playBtn").setAttribute("aria-label", "Play animation");
+  }
+
+  function setYear(idx: number){
+    currentYearIdx = idx;
+    element<HTMLInputElement>("yearSlider").value = String(currentYearIdx);
+    onYearChange();
+  }
+
+  // Play runs a single pass up to the latest year, then stops. Starting from
+  // the latest year rewinds to the first so the pass covers the full record.
   function togglePlay(){
-    var btn = element("playBtn");
     if (playTimer){
-      clearInterval(playTimer);
-      playTimer = null;
-      setPlayState(false);
-      btn.setAttribute("aria-label", "Play animation");
+      stopPlayback();
       return;
     }
+    var lastIdx = YEARS.length - 1;
+    if (currentYearIdx >= lastIdx) setYear(0);
     setPlayState(true);
-    btn.setAttribute("aria-label", "Pause animation");
+    element("playBtn").setAttribute("aria-label", "Pause animation");
     playTimer = setInterval(function(){
-      currentYearIdx += 1;
-      if (currentYearIdx > YEARS.length - 1) currentYearIdx = 0;
-      element<HTMLInputElement>("yearSlider").value = String(currentYearIdx);
-      onYearChange();
+      setYear(Math.min(currentYearIdx + 1, lastIdx));
+      if (currentYearIdx >= lastIdx) stopPlayback();
     }, 650);
   }
 
@@ -525,7 +536,8 @@ function initAtlas(){
   }
 
   // ---------- Small multiples ----------
-  var SM_METRICS = ["co2_per_capita","co2","renewables_share_energy","gdp_per_capita","share_global_co2"];
+  // Row one: emissions. Row two: the economy, people, and energy context behind them.
+  var SM_METRICS = ["co2_per_capita","co2","share_global_co2","gdp_per_capita","population","renewables_share_energy"];
 
   function renderSmallMultiples(){
     var grid = element("smGrid");
@@ -563,7 +575,7 @@ function initAtlas(){
         type:"scatter", mode:"lines", name: COUNTRIES_BY_ISO[iso].name,
         x: xs, y: ys,
         line: { color: SERIES_COLORS_LIVE()[slot], width:2, shape:"spline", smoothing:0.3 },
-        hovertemplate: "<b>"+COUNTRIES_BY_ISO[iso].name+"</b><br>%{x}: %{y}<extra></extra>",
+        hovertemplate: "<b>"+COUNTRIES_BY_ISO[iso].name+"</b><br>%{x}: %{y" + (metric === "population" ? ":,.0f" : "") + "}<extra></extra>",
         showlegend:false
       });
     });
@@ -573,6 +585,7 @@ function initAtlas(){
       return { x:lastX, y:lastY, text:tr.name, xanchor:"left", showarrow:false,
                 font:{color:tr.line.color, size:10, family:theme().fontFamily}, xshift:6 };
     });
+    separateEndLabels(annotations, traces, metric);
 
     var currentYear = YEARS[currentYearIdx];
     var shapes: Partial<Shape>[] = [{ type:"line", x0:currentYear, x1:currentYear, y0:0, y1:1, yref:"paper",
@@ -583,7 +596,8 @@ function initAtlas(){
       font: { color: t.textSecondary, family: t.fontFamily, size:10 },
       margin: { l:34, r:44, t:6, b:22 },
       xaxis: { gridcolor:"transparent", linecolor:t.axis, tickfont:{size:10}, tickvals:[YEARS[0], Math.round((YEARS[0] + YEARS[YEARS.length - 1]) / 2), YEARS[YEARS.length - 1]] },
-      yaxis: { gridcolor:t.grid, zerolinecolor:t.axis, linecolor:"transparent", tickfont:{size:10} },
+      // "B" reads 1.4B for population where SI notation would print 1.4G.
+      yaxis: { gridcolor:t.grid, zerolinecolor:t.axis, linecolor:"transparent", tickfont:{size:10}, exponentformat:"B" },
       shapes: shapes,
       annotations: annotations,
       showlegend:false
@@ -593,6 +607,35 @@ function initAtlas(){
     if (document.getElementById(elId)){
       return Plotly.react(elId, traces, layout, {displayModeBar:false, responsive:true});
     }
+  }
+
+  // Countries that end on similar values (China and India on population) would
+  // print their end labels on top of each other. Push labels apart vertically,
+  // keeping each as close to its line's end as the minimum gap allows.
+  function separateEndLabels(annotations: Partial<Annotations>[], traces: TrendTrace[], metric: string){
+    if (annotations.length < 2) return;
+    var el = document.getElementById("sm-" + metric);
+    var plotHeight = Math.max(80, (el ? el.clientHeight : 230) - 28);
+    var allY = traces.reduce(function(acc: number[], tr){ return acc.concat(tr.y); }, []);
+    var min = Math.min(...allY), max = Math.max(...allY);
+    var span = max - min || 1;
+    var MIN_GAP = 13;
+    var labels = annotations.map(function(a){
+      var px = ((a.y as number) - min) / span * plotHeight;
+      return { a: a, px: px, placed: px };
+    }).sort(function(p, q){ return p.px - q.px; });
+    for (var i = 1; i < labels.length; i++){
+      labels[i].placed = Math.max(labels[i].placed, labels[i-1].placed + MIN_GAP);
+    }
+    // If pushing up ran past the top, slide the whole stack back down.
+    var overflow = labels[labels.length-1].placed - plotHeight;
+    if (overflow > 0){
+      labels[labels.length-1].placed -= overflow;
+      for (var j = labels.length - 2; j >= 0; j--){
+        labels[j].placed = Math.min(labels[j].placed, labels[j+1].placed - MIN_GAP);
+      }
+    }
+    labels.forEach(function(l){ l.a.yshift = Math.round(l.placed - l.px); });
   }
 
   function updateSmallMultipleMarkers(){
