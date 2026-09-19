@@ -1,6 +1,8 @@
 # Carbon Atlas
 
-An interactive climate and energy explorer for comparing emissions, energy mix, economic output, and population across countries. The interface is titled **Climate & Energy Atlas** and uses data from Our World in Data.
+An interactive climate and energy explorer for comparing emissions, energy mix, economic output, and population across countries. It uses data from Our World in Data and the World Bank.
+
+**Live site:** https://carbon-atlas-brown.vercel.app/
 
 The bundled dataset contains **217 countries and territories**, **35 years (1990–2024)**, and **six metrics**. Coverage varies by metric and year.
 
@@ -176,6 +178,14 @@ For a host that serves the project under a subdirectory (such as GitHub Pages at
 ```sh
 BASE_PATH=/carbon-atlas/ npm run build
 ```
+
+Link previews (Open Graph and X/Twitter cards), the canonical URL, and structured data use absolute URLs built from `SITE_URL` plus `BASE_PATH`. `SITE_URL` defaults to the production site, `https://carbon-atlas-brown.vercel.app`, which Vercel serves from the root, so no `BASE_PATH` is needed there. For any other host, set both to match the deployment:
+
+```sh
+SITE_URL=https://nhasan143.github.io BASE_PATH=/carbon-atlas/ npm run build
+```
+
+The social preview image is `public/og-image.jpg` (1200×630).
 
 The chart controller uses Astro's base URL for both dataset and map requests. The Python script only runs when regenerating the dataset; rebuild the frontend after changing public data before deploying.
 
