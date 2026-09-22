@@ -35,6 +35,14 @@
     --focus-ring:oklch(75% 0.25 145 / 0.8);
     --trend-good:oklch(54% 0.1 155);
     --trend-bad:oklch(55% 0.12 27);
+    /* Change map: -1 sits next to "about the same", -3 is the strongest.
+       Hex, not oklch: Plotly cannot parse oklch and silently swaps in its own scale.
+       The middle band is sand-tinted so "about the same" never reads as the gray "no data". */
+    --band-mid:#eee4cb;
+    --band-good-1:#acd7ba; --band-good-2:#5ca477; --band-good-3:#236e44;
+    --band-bad-1:#f6c3bc; --band-bad-2:#dc7c72; --band-bad-3:#ab413a;
+    --band-growth-1:#c1cee9; --band-growth-2:#7d95c7; --band-growth-3:#445e99;
+    --band-decline-1:#e3cdb5; --band-decline-2:#b49168; --band-decline-3:#7d5c35;
     color-scheme:light;
   }
   @media (prefers-color-scheme: dark){
@@ -56,6 +64,11 @@
       --context-dot:#4a4a47;
       --trend-good:oklch(76% 0.1 155);
       --trend-bad:oklch(72% 0.11 27);
+      --band-mid:#595240;
+      --band-good-1:#31573f; --band-good-2:#488760; --band-good-3:#6ebf8c;
+      --band-bad-1:#6e3d38; --band-bad-2:#af5c53; --band-bad-3:#e9897e;
+      --band-growth-1:#404d69; --band-growth-2:#6077a7; --band-growth-3:#8faae4;
+      --band-decline-1:#5b4935; --band-decline-2:#8e7150; --band-decline-3:#c8a47a;
       color-scheme:dark;
     }
   }
@@ -77,6 +90,11 @@
     --context-dot:#4a4a47;
     --trend-good:oklch(76% 0.1 155);
     --trend-bad:oklch(72% 0.11 27);
+    --band-mid:#595240;
+    --band-good-1:#31573f; --band-good-2:#488760; --band-good-3:#6ebf8c;
+    --band-bad-1:#6e3d38; --band-bad-2:#af5c53; --band-bad-3:#e9897e;
+    --band-growth-1:#404d69; --band-growth-2:#6077a7; --band-growth-3:#8faae4;
+    --band-decline-1:#5b4935; --band-decline-2:#8e7150; --band-decline-3:#c8a47a;
     color-scheme:dark;
   }
 
@@ -123,6 +141,37 @@
   .compare .trend svg { @apply size-full; }
   .compare .trend-good { color: var(--trend-good); }
   .compare .trend-bad { color: var(--trend-bad); }
+  /* Phones and tablets: one row per country, value at the right edge.
+     Desktop sidebar: name, value and rank stacked. */
+  .map-focus-item { @apply grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2.5; }
+  .map-focus-item .swatch { @apply self-center; }
+  .map-focus-name { @apply truncate text-[13px] font-semibold; }
+  .map-focus-value { @apply text-right text-[14px] tabular-nums; }
+  .map-focus-rank { @apply col-start-2 col-end-4 text-[11.5px] text-muted; }
+  @media (min-width: 1024px) {
+    .map-focus-item { grid-template-columns: auto minmax(0, 1fr); }
+    .map-focus-item .swatch { align-self: baseline; }
+    .map-focus-value { grid-column: 2; text-align: left; font-size: 15px; }
+    .map-focus-rank { grid-column: 2; }
+  }
+  /* Level / Change switch: native radios, so arrow keys and screen readers work as expected. */
+  .segmented { @apply grid grid-cols-2 gap-[3px] rounded-[10px] border border-line bg-page p-[3px]; }
+  .segmented label {
+    @apply relative flex min-h-9 cursor-pointer items-center justify-center rounded-[7px] px-3 text-[13px] font-semibold text-secondary;
+    transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1), color 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .segmented input { @apply absolute inset-0 m-0 cursor-pointer opacity-0; }
+  .segmented label:has(:checked) { @apply bg-surface text-ink; box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 3px 8px -3px rgb(0 0 0 / 0.14); }
+  .segmented label:has(:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+  .segmented label:has(:disabled) { @apply cursor-default opacity-60; }
+  @media (pointer: coarse) { .segmented label { min-height: 44px; } }
+
+  /* Map legend: one labelled block per band, so every shade states its range. */
+  .map-legend { @apply px-2 pt-3 pb-1 sm:px-3; }
+  .map-legend-title { @apply text-[12px] font-semibold text-secondary; }
+  .map-legend-list { @apply mt-2 flex flex-wrap gap-x-4 gap-y-2; }
+  .map-legend-chip { @apply flex items-center gap-1.5 text-[11.5px] text-muted tabular-nums; }
+  .map-legend-swatch { @apply h-2.5 w-4 shrink-0 rounded-[3px]; box-shadow: inset 0 0 0 1px var(--border); }
   .sm-cell { @apply min-w-0 rounded-xl border border-line bg-surface p-4; }
   .chart-sm { @apply h-[230px] w-full; }
   .sm-title { @apply mb-3 text-[12.5px] font-semibold text-secondary; }

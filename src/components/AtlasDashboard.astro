@@ -28,15 +28,27 @@ import Panel from './Panel.astro';
 
     <Panel id="worldMap" title="The World View" description="Move from a single value to the global pattern. Every country is held to one consistent scale across time." descriptionId="choroSub" class="map-section">
       <div class="map-layout grid gap-6 lg:grid-cols-[230px_minmax(0,1fr)] lg:items-stretch">
-        <aside class="chart-sidebar flex items-end justify-between gap-5 rounded-xl bg-field p-5 lg:flex-col lg:items-stretch lg:gap-8">
+        <aside class="chart-sidebar flex flex-wrap items-end justify-between gap-5 rounded-xl bg-field p-5 lg:flex-col lg:flex-nowrap lg:items-stretch lg:justify-start lg:gap-8">
           <MetricSelect id="choroMetric" label="Map metric" />
-          <div>
+          <fieldset class="map-view min-w-0 max-lg:order-2 max-lg:basis-full">
+            <legend class="text-[11.5px] font-semibold tracking-[0.03em] text-muted uppercase">Map view</legend>
+            <div class="segmented mt-1.5">
+              <label><input type="radio" name="mapView" value="level" checked disabled />Level</label>
+              <label><input type="radio" name="mapView" value="change" disabled />Change</label>
+            </div>
+          </fieldset>
+          <div class="map-focus max-lg:order-3 max-lg:basis-full">
+            <span class="block text-xs font-semibold text-muted">Your countries</span>
+            <ol id="choroFocus" class="mt-3 grid gap-3 lg:gap-4"></ol>
+          </div>
+          <div class="lg:mt-auto">
             <span class="block text-xs font-semibold text-muted">Selected year</span>
             <strong class="mt-1 block font-mono text-3xl tabular-nums" data-year-output>2024</strong>
           </div>
         </aside>
         <div class="chart-stage min-w-0 rounded-xl border border-line bg-surface p-2 sm:p-4">
-          <div id="choroplethChart" class="h-[340px] w-full sm:h-[540px]" aria-label="World map of the selected metric"></div>
+          <div id="choroplethChart" class="h-[210px] w-full sm:h-[360px] lg:h-[460px]" role="img" aria-label="World map of the selected metric"></div>
+          <div id="choroLegend" class="map-legend"></div>
         </div>
       </div>
       <p id="choroCaption" class="mx-auto mt-5 max-w-[90ch] text-center text-[12.5px] leading-relaxed text-balance text-muted"></p>
@@ -117,6 +129,10 @@ function initAtlas(){
   let YEARS: number[] = [];
   const COUNTRIES_BY_ISO: Record<string, Country> = {};
   let COUNTRIES_SORTED: Country[] = [];
+  // ISO codes that have a shape in world_110m.json. Plotly's hover throws on
+  // any location it cannot draw, so every map layer lists only these.
+  let MAP_ISOS = new Set<string>();
+  let MAP_COUNTRIES: Country[] = [];
   var currentYearIdx = 0;
   var highlighted = ["USA","CHN","IND"]; // slot order = series 1/2/3
   var choroMetric = "co2_per_capita";
@@ -178,7 +194,7 @@ function initAtlas(){
 
   // ---------- bootstrap ----------
   function setControlsEnabled(enabled: boolean){
-    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button, #controlsPanel input, #controlsPanel select, #choroMetric, #scatterX, #scatterY").forEach(function(control){
+    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button, #controlsPanel input, #controlsPanel select, #choroMetric, input[name=mapView], #scatterX, #scatterY").forEach(function(control){
       control.disabled = !enabled;
     });
   }
@@ -191,17 +207,27 @@ function initAtlas(){
     }).catch(function(){
       throw new Error("The chart library could not load. Reload the atlas to try again.");
     }),
+    // Same file Plotly draws from, so its own request is served from cache.
+    fetch(assetBase + "world_110m.json").then(function(response){
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.json() as Promise<{ objects: { countries: { geometries: { id?: string }[] } } }>;
+    }).then(function(topo){
+      topo.objects.countries.geometries.forEach(function(g){ if (g.id) MAP_ISOS.add(g.id); });
+    }).catch(function(){
+      throw new Error("The map could not load. Check your connection and reload the atlas.");
+    }),
     fetch(assetBase + "dataset.json").then(function(response){
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json() as Promise<AtlasData>;
     }).catch(function(){
       throw new Error("The atlas data could not load. Check your connection and reload the atlas.");
     })
-  ]).then(function([, d]){
+  ]).then(function([, , d]){
     DATA = d;
     YEARS = d.years;
     d.countries.forEach(function(c){ COUNTRIES_BY_ISO[c.iso3] = c; });
     COUNTRIES_SORTED = d.countries.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
+    MAP_COUNTRIES = COUNTRIES_SORTED.filter(function(c){ return MAP_ISOS.has(c.iso3); });
 
     Object.keys(d.metrics).forEach(function(metric){
       Object.keys(d.metrics[metric]).forEach(function(iso){
@@ -284,6 +310,10 @@ function initAtlas(){
       choroMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderChoropleth();
     });
+    document.querySelectorAll<HTMLInputElement>("input[name=mapView]").forEach(function(input){
+      input.checked = input.value === mapView;
+      input.addEventListener("change", function(){ if (input.checked) setMapView(input.value as MapView); });
+    });
     element<HTMLSelectElement>("scatterX").addEventListener("change", function(e){
       scatterXMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderScatter();
@@ -303,6 +333,7 @@ function initAtlas(){
           }
         });
         highlighted[slot] = iso;
+        renderChoropleth();
         renderScatter();
         renderSmallMultiples();
         updateCompareTable();
@@ -373,63 +404,197 @@ function initAtlas(){
   }
 
   // ---------- Choropleth ----------
-  function choroplethZ(metric: string){
-    return COUNTRIES_SORTED.map(function(c){
-      var v = valueAt(c.iso3, metric, currentYearIdx);
-      return v === null || v === undefined ? null : v;
-    });
+  type MapView = "level" | "change";
+  interface BandSpec { edges: number[]; labels: string[]; }
+  interface ChangeSpec extends BandSpec { mode: "pct" | "pts"; }
+  interface MapCell { z: number | null; detail: string; band: number; }
+
+  var mapView: MapView = new URLSearchParams(window.location.search).get("view") === "change" ? "change" : "level";
+
+  // Fixed round-number bands, so a shade means the same range in every year.
+  // Skewed metrics step by multiples so the largest countries separate.
+  // `edges` are the thresholds between bands: a value joins the first band
+  // whose upper edge is above it.
+  var LEVEL_BANDS: Record<string, BandSpec> = {
+    co2_per_capita: { edges: [1, 2, 5, 10, 20], labels: ["Under 1", "1–2", "2–5", "5–10", "10–20", "20+"] },
+    co2: { edges: [1, 10, 100, 1000, 10000], labels: ["Under 1", "1–10", "10–100", "100–1,000", "1,000–10,000", "10,000+"] },
+    share_global_co2: { edges: [0.01, 0.1, 1, 5, 20], labels: ["Under 0.01", "0.01–0.1", "0.1–1", "1–5", "5–20", "20+"] },
+    gdp_per_capita: { edges: [2500, 5000, 10000, 25000, 50000], labels: ["Under $2.5k", "$2.5k–5k", "$5k–10k", "$10k–25k", "$25k–50k", "$50k+"] },
+    renewables_share_energy: { edges: [5, 10, 20, 40, 60], labels: ["Under 5", "5–10", "10–20", "20–40", "40–60", "60+"] },
+    population: { edges: [1e6, 1e7, 5e7, 1e8, 1e9], labels: ["Under 1M", "1M–10M", "10M–50M", "50M–100M", "100M–1B", "1B+"] }
+  };
+
+  // Change since 1990: percent for amounts, percentage points for metrics
+  // that are already shares (a percent of a percent would mislead).
+  var PCT_CHANGE: ChangeSpec = { mode: "pct", edges: [-50, -20, -5, 5, 50, 100],
+    labels: ["Down 50%+", "Down 20–50%", "Down 5–20%", "Within ±5%", "Up 5–50%", "Up 50–100%", "Doubled or more"] };
+  var CHANGE_BANDS: Record<string, ChangeSpec> = {
+    co2_per_capita: PCT_CHANGE,
+    co2: PCT_CHANGE,
+    gdp_per_capita: PCT_CHANGE,
+    population: PCT_CHANGE,
+    share_global_co2: { mode: "pts", edges: [-1, -0.1, 0.1, 1],
+      labels: ["Down 1+ pts", "Down 0.1–1 pts", "Within ±0.1 pts", "Up 0.1–1 pts", "Up 1+ pts"] },
+    renewables_share_energy: { mode: "pts", edges: [-5, -1, 1, 5, 15],
+      labels: ["Down 5+ pts", "Down 1–5 pts", "Within ±1 pt", "Up 1–5 pts", "Up 5–15 pts", "Up 15+ pts"] }
+  };
+
+  function bandIndex(edges: number[], v: number){
+    return edges.filter(function(edge){ return v >= edge; }).length;
   }
 
-  function metricRange(metric: string){
-    // Capped at the 98th percentile (precomputed) rather than the true max,
-    // so a handful of extreme outliers don't wash out every other country's
-    // color. Plotly clips anything above zmax to the darkest swatch.
-    return [0, DATA.metricMeta[metric].vmax];
+  function hasNumber(v: number | null | undefined): v is number {
+    return v !== null && v !== undefined && !isNaN(v);
+  }
+
+  // The "about the same" band sits between the negative and positive edges.
+  function middleBand(spec: ChangeSpec){
+    return spec.edges.filter(function(edge){ return edge < 0; }).length;
+  }
+
+  function fmtChange(delta: number, spec: ChangeSpec, metric: string){
+    var sign = delta > 0 ? "+" : delta < 0 ? "−" : "";
+    var size = Math.abs(delta);
+    if (spec.mode === "pct") return sign + size.toFixed(size < 10 ? 1 : 0) + "%";
+    return sign + size.toFixed(metric === "share_global_co2" ? 2 : 1) + " pts";
+  }
+
+  function changeVerdict(metric: string, band: number, spec: ChangeSpec){
+    var mid = middleBand(spec);
+    if (band === mid) return "About the same";
+    var rising = band > mid;
+    var better = PLANET_BETTER_WHEN[metric];
+    if (!better) return rising ? "Growth" : "Decline";
+    return (rising ? "up" : "down") === better ? "Better for the planet" : "Worse for the planet";
+  }
+
+  function mapCell(iso: string): MapCell {
+    var meta = DATA.metricMeta[choroMetric];
+    var year = YEARS[currentYearIdx];
+    var v = valueAt(iso, choroMetric, currentYearIdx);
+    if (!hasNumber(v)) return { z: null, band: -1, detail: "No data for " + year };
+    if (mapView === "level"){
+      var band = bandIndex(LEVEL_BANDS[choroMetric].edges, v);
+      return { z: band + 0.5, band: band, detail: meta.label + ": " + fmtValue(v, choroMetric) };
+    }
+    var spec = CHANGE_BANDS[choroMetric];
+    var base = valueAt(iso, choroMetric, 0);
+    if (!hasNumber(base)) return { z: null, band: -1, detail: "No " + YEARS[0] + " value to compare" };
+    if (spec.mode === "pct" && base === 0) return { z: null, band: -1, detail: "Zero in " + YEARS[0] + ", so no percent change" };
+    var delta = spec.mode === "pct" ? (v - base) / base * 100 : v - base;
+    var changeBand = bandIndex(spec.edges, delta);
+    return {
+      z: changeBand + 0.5,
+      band: changeBand,
+      detail: meta.label + ": " + fmtChange(delta, spec, choroMetric) + " since " + YEARS[0] +
+        "<br>" + fmtValue(base, choroMetric) + " → " + fmtValue(v, choroMetric) +
+        "<br>" + changeVerdict(choroMetric, changeBand, spec)
+    };
+  }
+
+  // Strongest shade at the ends, lightest next to "about the same".
+  function rampPick(ramp: string[], count: number){
+    return count >= 3 ? ramp.slice(0, 3) : count === 2 ? [ramp[0], ramp[2]] : count === 1 ? [ramp[1]] : [];
+  }
+
+  function bandColors(): string[] {
+    var t = theme();
+    if (mapView === "level") return [t.seq[0], t.seq[1], t.seq[2], t.seq[3], t.seq[5], t.seq[6]];
+    var spec = CHANGE_BANDS[choroMetric];
+    var mid = middleBand(spec);
+    var ramp = function(name: string){ return [getVar("--band-" + name + "-1"), getVar("--band-" + name + "-2"), getVar("--band-" + name + "-3")]; };
+    var better = PLANET_BETTER_WHEN[choroMetric];
+    var low = better ? ramp(better === "down" ? "good" : "bad") : ramp("decline");
+    var high = better ? ramp(better === "down" ? "bad" : "good") : ramp("growth");
+    return rampPick(low, mid).reverse()
+      .concat([getVar("--band-mid")])
+      .concat(rampPick(high, spec.labels.length - mid - 1));
+  }
+
+  // Plotly draws bands as a stepped colour scale over band indices.
+  function steppedScale(colors: string[]): [number, string][] {
+    var n = colors.length;
+    var stops: [number, string][] = [];
+    colors.forEach(function(color, i){ stops.push([i / n, color], [(i + 1) / n, color]); });
+    return stops;
+  }
+
+  function mapCells(){
+    return MAP_COUNTRIES.map(function(c){ return mapCell(c.iso3); });
+  }
+
+  function missingData(cells: MapCell[]){
+    var isos: string[] = [], reasons: string[] = [];
+    cells.forEach(function(cell, i){
+      if (cell.z === null){ isos.push(MAP_COUNTRIES[i].iso3); reasons.push(cell.detail); }
+    });
+    return { isos: isos, reasons: reasons };
   }
 
   function renderChoropleth(){
     var t = theme();
-    var isCompact = window.matchMedia("(max-width: 640px)").matches;
-    var locations = COUNTRIES_SORTED.map(function(c){ return c.iso3; });
-    var z = choroplethZ(choroMetric);
-    var range = metricRange(choroMetric);
-    var meta = DATA.metricMeta[choroMetric];
+    var locations = MAP_COUNTRIES.map(function(c){ return c.iso3; });
+    var names = locations.map(function(iso){ return COUNTRIES_BY_ISO[iso].name; });
+    var cells = mapCells();
+    var colors = bandColors();
+    var hoverlabel = { bgcolor: t.surface, bordercolor: t.border, font: { color: t.text, family: t.fontFamily, size: 12 } };
 
-    element("choroSub").textContent =
-      "Colored by " + meta.label.toLowerCase() + " (" + meta.unit + ") for the selected year.";
-    var noDataNote = choroMetric === "renewables_share_energy"
-      ? "Gray countries have no reliable energy-mix data for this metric."
-      : "Gray countries have no data for this metric in this year.";
-    element("choroCaption").textContent =
-      noDataNote + " The color scale caps at the 98th percentile so a few extreme outliers don't wash out everyone else — the highest values are shown pinned to the darkest shade.";
-
-    var trace: Data = {
+    var trace = {
       type: "choropleth",
       locationmode: "ISO-3",
       locations: locations,
-      z: z,
-      zmin: range[0],
-      zmax: range[1],
-      colorscale: [[0,t.seq[0]],[1/6,t.seq[1]],[2/6,t.seq[2]],[3/6,t.seq[3]],[4/6,t.seq[4]],[5/6,t.seq[5]],[1,t.seq[6]]],
-      marker: { line: { color: t.border, width: 0.4 } },
-      colorbar: isCompact ? {
-        title: { text: meta.unit, font: { color: t.textSecondary, size: 10, family: t.fontFamily } },
-        orientation: "h",
-        x: 0.5,
-        xanchor: "center",
-        y: -0.08,
-        len: 0.72,
-        thickness: 9,
-        tickfont: { color: t.textSecondary, size: 9, family: t.fontFamily },
-        outlinewidth: 0
-      } : {
-        title: { text: meta.unit, font: { color: t.textSecondary, size: 11, family: t.fontFamily } },
-        tickfont: { color: t.textSecondary, size: 11, family: t.fontFamily },
-        outlinewidth: 0, thickness: 12, len: 0.7
-      },
-      hovertemplate: "%{text}<br>" + meta.label + ": %{z}<extra></extra>",
-      text: locations.map(function(iso){ return COUNTRIES_BY_ISO[iso].name; })
+      z: cells.map(function(cell){ return cell.z; }),
+      zmin: 0,
+      zmax: colors.length,
+      colorscale: steppedScale(colors),
+      showscale: false,
+      marker: { line: { color: t.surface, width: 0.5 } },
+      text: names,
+      customdata: cells.map(function(cell){ return cell.detail; }),
+      hovertemplate: "<b>%{text}</b><br>%{customdata}<extra></extra>",
+      hoverlabel: hoverlabel
+    } as Data;
+
+    // Countries without a value get their own neutral fill, so "no data"
+    // never reads as the lowest shade. (The self-hosted atlas has no land layer.)
+    var missing = missingData(cells);
+    var noDataTrace = {
+      type: "choropleth",
+      locationmode: "ISO-3",
+      // An empty choropleth breaks Plotly's hover, so hide it when every country reports.
+      visible: missing.isos.length > 0,
+      locations: missing.isos,
+      z: missing.isos.map(function(){ return 1; }),
+      colorscale: [[0, t.grid], [1, t.grid]],
+      showscale: false,
+      marker: { line: { color: t.surface, width: 0.5 } },
+      text: missing.isos.map(function(iso){ return COUNTRIES_BY_ISO[iso].name; }),
+      customdata: missing.reasons,
+      hovertemplate: "<b>%{text}</b><br>%{customdata}<extra></extra>",
+      hoverlabel: hoverlabel
+    } as Data;
+
+    // The three selected countries are outlined in their series colours, the
+    // same identity they carry in the table, bubble chart and trends.
+    // A wider page-coloured stroke underneath keeps each outline legible
+    // even where it crosses a fill of the same hue.
+    var focusIsos = highlighted.filter(function(iso){ return iso && MAP_ISOS.has(iso); });
+    var outline = function(iso: string, color: string, width: number){
+      return {
+        type: "choropleth",
+        locationmode: "ISO-3",
+        locations: [iso],
+        z: [1],
+        colorscale: [[0, "rgba(0,0,0,0)"], [1, "rgba(0,0,0,0)"]],
+        showscale: false,
+        marker: { line: { color: color, width: width } },
+        hoverinfo: "skip"
+      } as Data;
     };
+    var focusTraces: Data[] = focusIsos.map(function(iso){ return outline(iso, t.surface, 4); })
+      .concat(highlighted.map(function(iso, slot){
+        return iso && MAP_ISOS.has(iso) ? outline(iso, SERIES_COLORS_LIVE()[slot], 1.8) : null;
+      }).filter((trace): trace is Data => trace !== null));
 
     // showcountries draws every country's outline (from the same self-hosted
     // world_110m.json below), so a country with no value for this metric still
@@ -438,7 +603,7 @@ function initAtlas(){
       paper_bgcolor: t.surface,
       plot_bgcolor: t.surface,
       font: { color: t.text, family: t.fontFamily },
-      margin: isCompact ? { l:0, r:0, t:0, b:52 } : { l:0, r:0, t:0, b:0 },
+      margin: { l:0, r:0, t:0, b:0 },
       geo: {
         scope: "world",
         resolution: 110,
@@ -447,22 +612,139 @@ function initAtlas(){
         showland: false,
         showocean: false,
         showcountries: true,
-        countrycolor: t.grid,
+        countrycolor: t.surface,
         showlakes: false,
         projection: { type: "natural earth" },
+        // Antarctica carries no data; cropping it gives the inhabited world the room.
+        lataxis: { range: [-57, 84] },
         bgcolor: t.surface
       }
     };
 
+    updateMapText();
+    renderMapLegend(colors);
+    updateChoroplethReadout();
     // Plotly's default base-map atlas streams from Plotly's own CDN at draw
     // time; topojsonURL redirects that one request to a same-origin file
     // (world_110m.json, published next to this page) built from Natural Earth
     // 110m data, so nothing is fetched from an external host at runtime.
-    return Plotly.react("choroplethChart", [trace], layout, {displayModeBar:false, responsive:true, topojsonURL:assetBase});
+    return Plotly.react("choroplethChart", ([trace, noDataTrace] as Data[]).concat(focusTraces), layout, {displayModeBar:false, responsive:true, topojsonURL:assetBase});
   }
 
   function updateChoroplethYear(){
-    Plotly.restyle("choroplethChart", { z: [choroplethZ(choroMetric)] });
+    var cells = mapCells();
+    var missing = missingData(cells);
+    Plotly.restyle("choroplethChart", {
+      z: [cells.map(function(cell){ return cell.z; })],
+      customdata: [cells.map(function(cell){ return cell.detail; })]
+    }, [0]);
+    // Restyle takes one array per trace; Plotly's types model single values only.
+    Plotly.restyle("choroplethChart", {
+      visible: [missing.isos.length > 0],
+      locations: [missing.isos],
+      z: [missing.isos.map(function(){ return 1; })],
+      text: [missing.isos.map(function(iso){ return COUNTRIES_BY_ISO[iso].name; })],
+      customdata: [missing.reasons]
+    } as unknown as Data, [1]);
+    updateMapText();
+    updateChoroplethReadout();
+  }
+
+  function setMapView(view: MapView){
+    mapView = view;
+    // Keep the view in the address so a shared link opens the same map.
+    var url = new URL(window.location.href);
+    if (view === "change") url.searchParams.set("view", "change"); else url.searchParams.delete("view");
+    window.history.replaceState(null, "", url);
+    renderChoropleth();
+  }
+
+  function updateMapText(){
+    var meta = DATA.metricMeta[choroMetric];
+    var year = YEARS[currentYearIdx];
+    var isShare = CHANGE_BANDS[choroMetric].mode === "pts";
+    element("choroSub").textContent = mapView === "level"
+      ? "Colored by " + meta.label + " (" + meta.unit + ") for the selected year."
+      : "Colored by the change in " + meta.label + " since " + YEARS[0] + ".";
+    var noDataNote = choroMetric === "renewables_share_energy"
+      ? "Gray countries have no reliable energy-mix data for this metric."
+      : "Gray countries have no data for this metric in this year.";
+    element("choroCaption").textContent = mapView === "level"
+      ? "Shades use fixed bands, so a color means the same range in every year. " + noDataNote
+      : "Each country's change from " + YEARS[0] + " to the selected year" +
+        (isShare ? ", in percentage points because this metric is already a share" : "") +
+        ". Gray countries have no value for one of those years.";
+    element("choroplethChart").setAttribute("aria-label", mapView === "level"
+      ? "World map of " + meta.label + " (" + meta.unit + ") in " + year + ". Values and ranks for your selected countries are listed beside the map."
+      : "World map of the change in " + meta.label + " from " + YEARS[0] + " to " + year + ". The change for your selected countries is listed beside the map.");
+  }
+
+  function renderMapLegend(colors: string[]){
+    var meta = DATA.metricMeta[choroMetric];
+    var spec = mapView === "level" ? LEVEL_BANDS[choroMetric] : CHANGE_BANDS[choroMetric];
+    var title = mapView === "level"
+      ? meta.label + " (" + meta.unit + ")"
+      : "Change since " + YEARS[0] + (PLANET_BETTER_WHEN[choroMetric]
+        ? ": green is better for the planet, red is worse"
+        : ": growth or decline, not better or worse");
+    var chips = spec.labels.map(function(label, i){
+      return '<li class="map-legend-chip"><span class="map-legend-swatch" style="background:' + colors[i] + '"></span>' + label + '</li>';
+    }).join("");
+    element("choroLegend").innerHTML =
+      '<p class="map-legend-title">' + title + '</p>' +
+      '<ul class="map-legend-list">' + chips +
+      '<li class="map-legend-chip"><span class="map-legend-swatch" style="background:' + theme().grid + '"></span>No data</li></ul>';
+  }
+
+  function ordinal(n: number){
+    var tens = n % 100, ones = n % 10;
+    if (tens >= 11 && tens <= 13) return n + "th";
+    return n + (ones === 1 ? "st" : ones === 2 ? "nd" : ones === 3 ? "rd" : "th");
+  }
+
+  // The exact figure for each selected country, with its world rank (Level)
+  // or its change and verdict (Change): the map's answer without hovering,
+  // and its text alternative for screen readers.
+  function updateChoroplethReadout(){
+    var year = YEARS[currentYearIdx];
+    var colors = SERIES_COLORS_LIVE();
+    var list = element("choroFocus");
+    if (!highlighted.some(Boolean)){
+      list.innerHTML = '<li class="text-[12.5px] text-muted">Pick countries above to see where they stand.</li>';
+      return;
+    }
+    if (mapView === "change" && currentYearIdx === 0){
+      list.innerHTML = '<li class="text-[12.5px] text-muted">Move the year past ' + YEARS[0] + ' to see change.</li>';
+      return;
+    }
+    var reported = COUNTRIES_SORTED
+      .map(function(c){ return valueAt(c.iso3, choroMetric, currentYearIdx); })
+      .filter(hasNumber);
+    var spec = CHANGE_BANDS[choroMetric];
+    list.innerHTML = highlighted.map(function(iso, slot){
+      if (!iso) return "";
+      var v = valueAt(iso, choroMetric, currentYearIdx);
+      var value = "—", note = "No data for " + year;
+      if (mapView === "level" && hasNumber(v)){
+        var current = v;
+        value = fmtValue(current, choroMetric);
+        note = ordinal(reported.filter(function(other){ return other > current; }).length + 1) + " highest of " + reported.length;
+      } else if (mapView === "change" && hasNumber(v)){
+        var base = valueAt(iso, choroMetric, 0);
+        if (!hasNumber(base) || (spec.mode === "pct" && base === 0)){
+          note = "No " + YEARS[0] + " value to compare";
+        } else {
+          var delta = spec.mode === "pct" ? (v - base) / base * 100 : v - base;
+          value = fmtChange(delta, spec, choroMetric);
+          note = "Since " + YEARS[0] + " · " + changeVerdict(choroMetric, bandIndex(spec.edges, delta), spec).toLowerCase();
+        }
+      }
+      return '<li class="map-focus-item">' +
+        '<span class="swatch" style="background:' + colors[slot] + '"></span>' +
+        '<span class="map-focus-name">' + COUNTRIES_BY_ISO[iso].name + '</span>' +
+        '<span class="map-focus-value">' + value + '</span>' +
+        '<span class="map-focus-rank">' + note + '</span></li>';
+    }).join("");
   }
 
   // ---------- Scatter ----------
