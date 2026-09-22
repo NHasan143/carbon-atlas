@@ -6,7 +6,7 @@ const rotatingWords = ['mapped.', 'measured.', 'compared.', 'decoded.'];
 ---
 
 <header id="top" class="hero relative isolate m-2 min-h-[calc(100svh-16px)] overflow-hidden rounded-[24px] bg-black text-white md:m-4 md:min-h-[calc(100svh-32px)] md:rounded-[32px] lg:h-[calc(100svh-32px)] lg:min-h-[720px]">
-  <div class="hero-layout grid min-h-[inherit] w-full items-center gap-10 px-6 py-10 sm:px-10 sm:py-14 lg:h-full lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10 lg:px-14 lg:py-12 xl:gap-14 xl:px-16">
+  <div class="hero-layout grid min-h-[inherit] w-full content-center gap-y-6 px-6 py-10 sm:gap-y-10 sm:px-10 sm:py-14 lg:h-full lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-x-10 lg:gap-y-0 lg:px-14 lg:py-12 xl:gap-x-14 xl:px-16">
     <div class="hero-copy relative z-10 max-w-[720px] lg:pl-[clamp(0px,2vw,28px)]">
       <h1 class="hero-title leading-[0.9] tracking-[-0.045em] whitespace-nowrap">
         <span class="sr-only">The planet, {rotatingWords[0]}</span>
@@ -28,30 +28,6 @@ const rotatingWords = ['mapped.', 'measured.', 'compared.', 'decoded.'];
       <p class="mt-4 font-mono text-[11px] font-semibold tracking-[0.12em] text-[#9ec5f4] uppercase">
         1990–2024 · Six connected metrics
       </p>
-
-      <div class="hero-actions mt-8 flex w-full flex-col items-start gap-3 border-t border-white/18 pt-7 sm:w-auto sm:flex-row">
-        <a
-          href="#controlsPanel"
-          class="hero-button group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-white/45 bg-black px-7 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
-        >
-          Explore the atlas
-          <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:translate-y-0.5" viewBox="0 0 20 20" fill="none">
-            <path d="m5 8 5 5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </a>
-        <a
-          href="https://wise.com/pay/me/mdnaymulh4"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="hero-button group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-white/45 bg-black px-7 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
-          aria-label="Donate via Wise (opens in a new tab)"
-        >
-          Donate
-          <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="none">
-            <path d="M6 14 14 6M8 6h6v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </a>
-      </div>
     </div>
 
     <div class="hero-media relative aspect-[21/20] w-full sm:aspect-[4/3] lg:aspect-auto lg:h-full lg:self-stretch">
@@ -68,12 +44,72 @@ const rotatingWords = ['mapped.', 'measured.', 'compared.', 'decoded.'];
         <source src={videoUrl} type="video/mp4" media="(prefers-reduced-motion: no-preference)" />
       </video>
     </div>
+
+    <div class="hero-actions relative z-10 flex w-full max-w-[720px] flex-col items-start gap-3 sm:w-auto sm:flex-row lg:mt-8 lg:ml-[clamp(0px,2vw,28px)]">
+      <a
+        href="#controlsPanel"
+        class="hero-button group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-white/45 bg-black px-7 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
+      >
+        Explore the atlas
+        <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:translate-y-0.5" viewBox="0 0 20 20" fill="none">
+          <path d="m5 8 5 5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+      <a
+        href="https://wise.com/pay/me/mdnaymulh4"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hero-button group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-white/45 bg-black px-7 py-3 text-sm font-semibold text-white no-underline sm:w-auto"
+        aria-label="Donate via Wise (opens in a new tab)"
+      >
+        Donate
+        <svg aria-hidden="true" class="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="none">
+          <path d="M6 14 14 6M8 6h6v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </div>
   </div>
 </header>
 
 <style>
   .hero {
     box-shadow: 0 28px 70px -36px rgb(3 15 25 / 0.8);
+  }
+
+  /* Mobile reads top to bottom: headline, video, then the actions.
+     From lg the copy and actions share the left column, centred beside the media. */
+  .hero-copy { grid-area: copy; }
+  .hero-media { grid-area: media; }
+  .hero-actions { grid-area: actions; }
+
+  /* The video already separates copy from actions on small screens;
+     the rule only earns its place beside it on desktop. */
+  @media (min-width: 1024px) {
+    .hero-actions {
+      position: relative;
+      padding-top: 1.75rem;
+    }
+
+    .hero-actions::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5rem;
+      height: 1px;
+      background: oklch(75% 0.25 145 / 0.8);
+    }
+  }
+
+  .hero-layout {
+    grid-template-areas: 'copy' 'media' 'actions';
+  }
+
+  @media (min-width: 1024px) {
+    .hero-layout {
+      grid-template-rows: 1fr auto auto 1fr;
+      grid-template-areas: '. media' 'copy media' 'actions media' '. media';
+    }
   }
 
   .hero-copy {

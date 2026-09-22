@@ -67,9 +67,18 @@ import Panel from './Panel.astro';
     </Panel>
 
     <footer class="mx-auto mt-12 max-w-[1000px] border-t border-line pt-8 text-[12.5px] leading-[1.7] text-muted">
-      Data: <a class="text-secondary underline" href="https://github.com/owid/co2-data" target="_blank" rel="noopener">Our World in Data – CO₂ and Greenhouse Gas Emissions</a> and
-      <a class="text-secondary underline" href="https://github.com/owid/energy-data" target="_blank" rel="noopener">Our World in Data – Energy</a>, and
+      <p>
+      Data: <a class="text-secondary underline" href="https://github.com/owid/co2-data" target="_blank" rel="noopener">Our World in Data – CO₂ and Greenhouse Gas Emissions</a> and{' '}
+      <a class="text-secondary underline" href="https://github.com/owid/energy-data" target="_blank" rel="noopener">Our World in Data – Energy</a>, and{' '}
       <a class="text-secondary underline" href="https://ourworldindata.org/grapher/gdp-per-capita-worldbank" target="_blank" rel="noopener">World Bank – GDP per capita, PPP (constant 2021 international $)</a> via Our World in Data, all CC BY. Renewables-share data covers 79 countries with reliable energy-mix reporting; others show as no-data on the map and are omitted from that metric's comparisons.
+      </p>
+      <p class="mt-6 flex items-center justify-center gap-1 pb-2 text-[13px] text-secondary">
+        Made with
+        <svg class="size-3.5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" role="img" aria-label="love">
+          <path d="M10 17.5s-6.5-3.9-6.5-8.6A3.7 3.7 0 0 1 10 6.6a3.7 3.7 0 0 1 6.5 2.3c0 4.7-6.5 8.6-6.5 8.6Z" />
+        </svg>
+        by <a class="text-ink underline decoration-accent underline-offset-4" href="https://github.com/NHasan143" target="_blank" rel="noopener noreferrer">Naymul Hasan</a>
+      </p>
     </footer>
   </div>
 
