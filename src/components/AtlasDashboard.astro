@@ -9,10 +9,10 @@ import Panel from './Panel.astro';
   <Hero />
   <BackToTop />
 
-  <div class="atlas-shell mx-auto max-w-[1280px] px-4 pt-20 pb-16 sm:px-6 lg:pt-28">
+  <div class="atlas-shell mx-auto max-w-[1280px] px-4 pt-20 pb-6 sm:px-6 lg:pt-28">
     <AtlasControls />
 
-    <Panel id="nowComparing" title="The Comparison" description="A precise snapshot of every atlas metric for your selected countries and year." class="snapshot-section">
+    <Panel id="nowComparing" title="The Comparison" description="A precise snapshot of every atlas metric for your selected countries and year. Arrows show the change from the year before: green is better for the planet, red is worse." class="snapshot-section">
       <div class="section-toolbar">
         <span>Selected year</span>
         <strong data-year-output>2024</strong>
@@ -72,7 +72,7 @@ import Panel from './Panel.astro';
       <a class="text-secondary underline" href="https://github.com/owid/energy-data" target="_blank" rel="noopener">Our World in Data – Energy</a>, and{' '}
       <a class="text-secondary underline" href="https://ourworldindata.org/grapher/gdp-per-capita-worldbank" target="_blank" rel="noopener">World Bank – GDP per capita, PPP (constant 2021 international $)</a> via Our World in Data, all CC BY. Renewables-share data covers 79 countries with reliable energy-mix reporting; others show as no-data on the map and are omitted from that metric's comparisons.
       </p>
-      <p class="mt-6 flex items-center justify-center gap-1 pb-2 text-[13px] text-secondary">
+      <p class="mt-6 flex items-center justify-center gap-1 text-[13px] text-secondary">
         Made with
         <svg class="size-3.5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" role="img" aria-label="love">
           <path d="M10 17.5s-6.5-3.9-6.5-8.6A3.7 3.7 0 0 1 10 6.6a3.7 3.7 0 0 1 6.5 2.3c0 4.7-6.5 8.6-6.5 8.6Z" />
@@ -664,6 +664,37 @@ function initAtlas(){
   // ---------- Comparison table ----------
   var TABLE_METRICS = ["co2_per_capita","co2","share_global_co2","gdp_per_capita","renewables_share_energy","population"];
 
+  var TREND_PATHS = {
+    up: "M10 15.5V4.5M5.5 9 10 4.5 14.5 9",
+    down: "M10 4.5v11M5.5 11 10 15.5 14.5 11"
+  };
+
+  // Which direction helps the planet. GDP and population have no clear
+  // planetary reading, so their arrows stay neutral.
+  var PLANET_BETTER_WHEN: Record<string, "up" | "down"> = {
+    co2_per_capita: "down",
+    co2: "down",
+    share_global_co2: "down",
+    renewables_share_energy: "up"
+  };
+
+  // Direction measured against the previous year.
+  function trendMark(iso: string, metric: string, value: number | null){
+    var prev = currentYearIdx > 0 ? valueAt(iso, metric, currentYearIdx - 1) : null;
+    if (value === null || value === undefined || prev === null || prev === undefined || isNaN(value) || isNaN(prev) || value === prev){
+      return '<span class="trend" aria-hidden="true"></span>';
+    }
+    var dir: "up" | "down" = value > prev ? "up" : "down";
+    var change = prev !== 0 ? Math.abs((value - prev) / prev * 100) : null;
+    var detail = (dir === "up" ? "Up" : "Down") + (change !== null ? " " + (change < 0.1 ? "under 0.1" : change.toFixed(1)) + "%" : "") + " from " + YEARS[currentYearIdx - 1];
+    var better = PLANET_BETTER_WHEN[metric];
+    var impact = better ? (dir === better ? "good" : "bad") : "";
+    if (impact) detail += impact === "good" ? ", better for the planet" : ", worse for the planet";
+    return '<span class="trend' + (impact ? " trend-" + impact : "") + '" title="' + detail + '">' +
+      '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="' + TREND_PATHS[dir] + '" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      '<span class="sr-only">' + detail + '</span></span>';
+  }
+
   function updateCompareTable(){
     var table = element("compareTable");
     var rows = highlighted.map(function(iso, slot){ return iso ? {iso:iso, slot:slot} : null; }).filter(row => row !== null);
@@ -681,7 +712,8 @@ function initAtlas(){
     var tbody = "<tbody>" + rows.map(function(r){
       var c = COUNTRIES_BY_ISO[r.iso];
       var cells = TABLE_METRICS.map(function(m){
-        return "<td>" + fmtValue(valueAt(r.iso, m, currentYearIdx), m) + "</td>";
+        var v = valueAt(r.iso, m, currentYearIdx);
+        return '<td><span class="metric-value">' + fmtValue(v, m) + trendMark(r.iso, m, v) + "</span></td>";
       }).join("");
       return '<tr><td class="country-cell"><span class="swatch" style="background:' + SERIES_COLORS_LIVE()[r.slot] + '"></span>' + c.name + '</td>' + cells + '</tr>';
     }).join("") + "</tbody>";

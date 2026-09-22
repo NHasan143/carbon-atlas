@@ -33,6 +33,8 @@
     --seq-500:#2368b8; --seq-600:#184f95; --seq-700:#0d366b;
     --context-dot:#c3c2b7;
     --focus-ring:oklch(75% 0.25 145 / 0.8);
+    --trend-good:oklch(54% 0.1 155);
+    --trend-bad:oklch(55% 0.12 27);
     color-scheme:light;
   }
   @media (prefers-color-scheme: dark){
@@ -52,6 +54,8 @@
       --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
       --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
       --context-dot:#4a4a47;
+      --trend-good:oklch(76% 0.1 155);
+      --trend-bad:oklch(72% 0.11 27);
       color-scheme:dark;
     }
   }
@@ -71,6 +75,8 @@
     --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
     --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
     --context-dot:#4a4a47;
+    --trend-good:oklch(76% 0.1 155);
+    --trend-bad:oklch(72% 0.11 27);
     color-scheme:dark;
   }
 
@@ -102,7 +108,7 @@
   .table-frame { @apply mt-4 rounded-xl border border-line bg-field p-2 sm:p-3; }
   .table-scroll-hint { @apply mb-2 px-2 py-1 text-xs font-medium text-muted sm:hidden; }
   .table-scroll { scrollbar-color: var(--axis) transparent; scrollbar-width: thin; }
-  .compare { @apply w-full min-w-[760px] border-collapse text-[13px] tabular-nums; }
+  .compare { @apply w-full min-w-[860px] border-collapse text-[13px] tabular-nums; }
   .compare :is(th, td) { @apply border-b border-line px-4 py-4 text-right whitespace-nowrap; }
   .compare :is(th, td):first-child { @apply text-left; }
   .compare :is(th, td):first-child { position: sticky; left: 0; z-index: 2; background: var(--surface-2); }
@@ -112,6 +118,11 @@
   .compare tbody tr { @apply transition-colors duration-200 hover:bg-surface; }
   .compare .country-cell { @apply flex items-center gap-2.5 font-semibold; }
   .compare .swatch { @apply size-[9px]; }
+  .compare .metric-value { @apply inline-flex items-center justify-end gap-1.5; }
+  .compare .trend { @apply relative inline-flex size-3.5 shrink-0 text-muted; }
+  .compare .trend svg { @apply size-full; }
+  .compare .trend-good { color: var(--trend-good); }
+  .compare .trend-bad { color: var(--trend-bad); }
   .sm-cell { @apply min-w-0 rounded-xl border border-line bg-surface p-4; }
   .chart-sm { @apply h-[230px] w-full; }
   .sm-title { @apply mb-3 text-[12.5px] font-semibold text-secondary; }
