@@ -46,11 +46,14 @@ test('renders locally and keeps Play, Pause, slider, table, map and trends synch
   await expect(page.locator('#yearReadout')).toHaveText(paused);
   await setYear(page, 10);
   await expect(page.locator('[data-year-output]')).toHaveText(['2000', '2000', '2000', '2000']);
-  const mapValue = await page.locator('#choroplethChart').evaluate(el => {
+  const usaMap = await page.locator('#choroplethChart').evaluate(el => {
     const trace = el.data[0];
-    return trace.z[trace.locations.indexOf('USA')];
+    const i = trace.locations.indexOf('USA');
+    return { z: trace.z[i], detail: trace.customdata[i] };
   });
-  expect(mapValue).toBe(data.metrics.co2_per_capita.USA[10]);
+  const usa2000 = data.metrics.co2_per_capita.USA[10];
+  expect(usaMap.detail).toContain(usa2000.toFixed(2));
+  expect(usaMap.z).toBe([1, 2, 5, 10, 20].filter(edge => usa2000 >= edge).length + 0.5);
   expect(await page.locator('#sm-co2').evaluate(el => el.layout.shapes[0].x0)).toBe(2000);
   await expect(page.locator('#compareTable tbody tr').first()).toContainText(data.metrics.co2_per_capita.USA[10].toFixed(2));
   expect(errors).toEqual([]);
@@ -81,6 +84,43 @@ test('all map and scatter metrics work and country selection recovers from empty
   await expect(page.locator('#compareTable tbody tr')).toHaveCount(1);
   await expect(page.locator('#smGrid .js-plotly-plot')).toHaveCount(6);
   await setYear(page, 0);
+});
+
+test('the map switches between level bands and change since 1990', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await openAtlas(page);
+  await expect(page.locator('#choroLegend')).toContainText('20+');
+  await expect(page.locator('#choroLegend')).toContainText('No data');
+  await expect(page.locator('#choroFocus')).toContainText('highest of');
+
+  await page.getByRole('radio', { name: 'Change' }).check();
+  await expect(page).toHaveURL(/view=change/);
+  await expect(page.locator('#choroSub')).toContainText('since 1990');
+  await expect(page.locator('#choroLegend')).toContainText('Within ±5%');
+  await expect(page.locator('#choroLegend')).toContainText('better for the planet');
+  const usa = data.metrics.co2_per_capita.USA;
+  const change = (usa[usa.length - 1] - usa[0]) / usa[0] * 100;
+  const usaDetail = await page.locator('#choroplethChart').evaluate(el => el.data[0].customdata[el.data[0].locations.indexOf('USA')]);
+  expect(usaDetail).toContain('since 1990');
+  expect(usaDetail).toContain(change < 0 ? 'Better for the planet' : 'Worse for the planet');
+
+  // Share metrics change in percentage points; GDP and population are never judged.
+  await page.selectOption('#choroMetric', 'renewables_share_energy');
+  await expect(page.locator('#choroLegend')).toContainText('pts');
+  await page.selectOption('#choroMetric', 'population');
+  await expect(page.locator('#choroLegend')).toContainText('not better or worse');
+  await expect(page.locator('#choroFocus')).not.toContainText('planet');
+
+  await setYear(page, 0);
+  await expect(page.locator('#choroFocus')).toContainText('Move the year past 1990');
+
+  await page.getByRole('radio', { name: 'Level' }).check();
+  await expect(page).not.toHaveURL(/view=change/);
+  await page.goto('/?view=change');
+  await expect(page.getByRole('radio', { name: 'Change' })).toBeChecked({ timeout: 30000 });
+  await expect(page.locator('#choroSub')).toContainText('since 1990');
+  expect(errors).toEqual([]);
 });
 
 test('themes update chart colors and mobile layout remains usable', async ({ page }) => {
