@@ -61,7 +61,7 @@ test('all map and scatter metrics work and country selection recovers from empty
   await openAtlas(page);
   for (const metric of Object.keys(data.metricMeta)) {
     await page.selectOption('#choroMetric', metric);
-    await expect(page.locator('#choroSub')).toContainText(data.metricMeta[metric].label.toLowerCase());
+    await expect(page.locator('#choroSub')).toContainText(data.metricMeta[metric].label);
     await page.selectOption('#scatterX', metric);
     await page.selectOption('#scatterY', metric);
     await expect.poll(() => page.locator('#scatterChart').evaluate(el => el.layout.xaxis.title.text)).toContain(data.metricMeta[metric].label);

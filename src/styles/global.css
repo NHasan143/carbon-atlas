@@ -123,6 +123,19 @@
   .compare .trend svg { @apply size-full; }
   .compare .trend-good { color: var(--trend-good); }
   .compare .trend-bad { color: var(--trend-bad); }
+  /* Phones and tablets: one row per country, value at the right edge.
+     Desktop sidebar: name, value and rank stacked. */
+  .map-focus-item { @apply grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2.5; }
+  .map-focus-item .swatch { @apply self-center; }
+  .map-focus-name { @apply truncate text-[13px] font-semibold; }
+  .map-focus-value { @apply text-right text-[14px] tabular-nums; }
+  .map-focus-rank { @apply col-start-2 col-end-4 text-[11.5px] text-muted; }
+  @media (min-width: 1024px) {
+    .map-focus-item { grid-template-columns: auto minmax(0, 1fr); }
+    .map-focus-item .swatch { align-self: baseline; }
+    .map-focus-value { grid-column: 2; text-align: left; font-size: 15px; }
+    .map-focus-rank { grid-column: 2; }
+  }
   .sm-cell { @apply min-w-0 rounded-xl border border-line bg-surface p-4; }
   .chart-sm { @apply h-[230px] w-full; }
   .sm-title { @apply mb-3 text-[12.5px] font-semibold text-secondary; }

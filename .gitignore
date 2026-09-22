@@ -25,3 +25,9 @@ dist/
 .astro/
 playwright-report/
 test-results/
+
+# Local AI design tooling (Impeccable skill, agents, hooks, state)
+.claude/
+.impeccable/
+PRODUCT.md
+DESIGN.md
