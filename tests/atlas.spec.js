@@ -28,6 +28,23 @@ async function setYear(page, index) {
   await expect(page.locator('#yearReadout')).toHaveText(String(data.years[index]));
 }
 
+// The country slots are type-to-search comboboxes, not selects.
+async function pickCountry(page, slot, query, iso) {
+  const input = page.locator(`#cmp${slot}`);
+  await input.click();
+  await input.fill(query);
+  await page.locator(`#cmp${slot}List [data-iso="${iso}"]`).click();
+  await expect(page.locator(`#cmp${slot}Pop`)).toBeHidden();
+}
+
+async function clearCountry(page, slot) {
+  const clear = page.locator(`#cmp${slot}Clear`);
+  if (await clear.isVisible()) {
+    await clear.click();
+    await page.keyboard.press('Escape');
+  }
+}
+
 test('renders locally and keeps Play, Pause, slider, table, map and trends synchronized', async ({ page }) => {
   const errors = [];
   const externalRequests = [];
@@ -71,19 +88,69 @@ test('all map and scatter metrics work and country selection recovers from empty
     const expectedType = ['population', 'gdp_per_capita'].includes(metric) ? 'log' : 'linear';
     expect(await page.locator('#scatterChart').evaluate(el => el.layout.xaxis.type)).toBe(expectedType);
   }
-  await page.selectOption('#cmp0', 'BGD');
+  await pickCountry(page, 0, 'bangl', 'BGD');
+  await expect(page.locator('#cmp0')).toHaveValue('Bangladesh');
   await expect(page.locator('#compareTable tbody tr').first()).toContainText('Bangladesh');
-  await page.selectOption('#cmp1', 'BGD');
+
+  // A three-letter code ranks first, and Enter takes the top match.
+  await page.locator('#cmp1').click();
+  await page.locator('#cmp1').fill('bgd');
+  await expect(page.locator('#cmp1List [role="option"]').first()).toContainText('Bangladesh');
+  // The list warns that the pick will empty the slot already holding it.
+  await expect(page.locator('#cmp1List [data-iso="BGD"]')).toContainText('In country 1');
+  await page.locator('#cmp1').press('Enter');
+  await expect(page.locator('#cmp1')).toHaveValue('Bangladesh');
   await expect(page.locator('#cmp0')).toHaveValue('');
   await expect(page.locator('#compareTable tbody tr')).toHaveCount(2);
-  for (const slot of [0, 1, 2]) await page.selectOption(`#cmp${slot}`, '');
+
+  for (const slot of [0, 1, 2]) await clearCountry(page, slot);
   await expect(page.locator('#compareEmpty')).toBeVisible();
   await expect(page.locator('#smGrid')).toContainText('Pick at least one country');
-  await page.selectOption('#cmp0', 'USA');
+  await pickCountry(page, 0, 'usa', 'USA');
   await expect(page.locator('#compareEmpty')).toBeHidden();
   await expect(page.locator('#compareTable tbody tr')).toHaveCount(1);
   await expect(page.locator('#smGrid .js-plotly-plot')).toHaveCount(6);
   await setYear(page, 0);
+});
+
+test('country search filters by name, code and common alias, and is keyboard operable', async ({ page }) => {
+  await openAtlas(page);
+  const input = page.locator('#cmp0');
+  const list = page.locator('#cmp0List');
+
+  // Closed until asked for, and unfiltered it keeps the continent grouping.
+  await expect(page.locator('#cmp0Pop')).toBeHidden();
+  await input.click();
+  await expect(list.locator('[role="option"]')).toHaveCount(data.countries.length);
+  await expect(list.locator('[role="group"]')).toHaveCount(5);
+
+  // A name people type but the dataset does not carry still resolves.
+  await input.fill('holland');
+  await expect(list.locator('[role="option"]')).toHaveCount(1);
+  await expect(list.locator('[role="option"]').first()).toContainText('Netherlands');
+
+  // Whole-name matches outrank substring matches.
+  await input.fill('india');
+  await expect(list.locator('[role="option"] .combo-name').first()).toHaveText('India');
+
+  // Arrow keys move the active option and Enter commits it.
+  await input.fill('ind');
+  await input.press('ArrowDown');
+  const second = await list.locator('[data-active="true"] .combo-name').textContent();
+  await input.press('Enter');
+  await expect(input).toHaveValue(second.trim());
+  await expect(page.locator('#compareTable tbody tr').first()).toContainText(second.trim());
+
+  // Nothing matched says so instead of showing an empty box.
+  await input.click();
+  await input.fill('zzzz');
+  await expect(list.locator('[role="option"]')).toHaveCount(0);
+  await expect(page.locator('#cmp0Empty')).toContainText('No country matches');
+
+  // Escape abandons the typing and restores the committed country.
+  await input.press('Escape');
+  await expect(page.locator('#cmp0Pop')).toBeHidden();
+  await expect(input).toHaveValue(second.trim());
 });
 
 test('the map switches between level bands and change since 1990', async ({ page }) => {
@@ -141,7 +208,7 @@ test('themes update chart colors and mobile layout remains usable', async ({ pag
 test('dataset failures show a recovery action and keep controls disabled', async ({ page }) => {
   await page.route('**/dataset.json', route => route.fulfill({ status: 503, body: 'Unavailable' }));
   await page.goto('/');
-  await expect(page.getByRole('status')).toContainText('atlas data could not load');
+  await expect(page.locator('#loadStatus')).toContainText('atlas data could not load');
   await expect(page.getByRole('link', { name: 'Reload the atlas' })).toBeVisible();
   await expect(page.locator('#playBtn')).toBeDisabled();
   await page.unroute('**/dataset.json');
@@ -152,7 +219,7 @@ test('dataset failures show a recovery action and keep controls disabled', async
 test('a missing Plotly bundle shows a chart-library error', async ({ page }) => {
   await page.route('**/_astro/plotly*', route => route.abort());
   await page.goto('/');
-  await expect(page.getByRole('status')).toContainText('chart library could not load');
+  await expect(page.locator('#loadStatus')).toContainText('chart library could not load');
   await expect(page.locator('#playBtn')).toBeDisabled();
   await expect(page.getByRole('link', { name: 'Reload the atlas' })).toBeVisible();
 });

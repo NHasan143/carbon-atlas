@@ -245,7 +245,7 @@ function initAtlas(){
     buildMetricDropdown(element<HTMLSelectElement>("choroMetric"), choroMetric);
     buildMetricDropdown(element<HTMLSelectElement>("scatterX"), scatterXMetric);
     buildMetricDropdown(element<HTMLSelectElement>("scatterY"), scatterYMetric);
-    buildCompareDropdowns();
+    buildCountryPickers();
 
     updateCompareTable();
     return Promise.all([renderChoropleth(), renderScatter(), renderSmallMultiples()]);
@@ -273,31 +273,468 @@ function initAtlas(){
     });
   }
 
-  function buildCompareDropdowns(){
-    const byContinent: Record<string, Country[]> = {};
-    COUNTRIES_SORTED.forEach(function(c){
-      (byContinent[c.continent] = byContinent[c.continent] || []).push(c);
-    });
-    var continents = Object.keys(byContinent).sort();
+  // ---------- country search ----------
+  // A native <select> over 217 countries buries everything past the first
+  // screenful. These are ARIA comboboxes: type to filter, arrows to browse.
 
-    [0,1,2].forEach(function(slot){
-      var sel = element<HTMLSelectElement>("cmp" + slot);
-      sel.innerHTML = "";
-      var noneOpt = document.createElement("option");
-      noneOpt.value = ""; noneOpt.textContent = "— none —";
-      sel.appendChild(noneOpt);
-      continents.forEach(function(cont){
-        var group = document.createElement("optgroup");
-        group.label = cont;
-        byContinent[cont].forEach(function(c){
-          var opt = document.createElement("option");
-          opt.value = c.iso3; opt.textContent = c.name;
-          group.appendChild(opt);
-        });
-        sel.appendChild(group);
-      });
-      sel.value = highlighted[slot] || "";
+  // Short names people actually type. The dataset carries one formal name per
+  // country, so "UK", "Holland" and "Ivory Coast" would otherwise find nothing.
+  const COUNTRY_ALIASES: Record<string, string[]> = {
+    USA: ["us", "usa", "america", "united states of america"],
+    GBR: ["uk", "britain", "great britain", "england", "scotland", "wales", "northern ireland"],
+    ARE: ["uae", "emirates"],
+    NLD: ["holland"],
+    CIV: ["ivory coast"],
+    CZE: ["czech republic"],
+    COD: ["drc", "congo kinshasa", "zaire"],
+    COG: ["congo brazzaville", "republic of congo"],
+    MMR: ["burma"],
+    SWZ: ["swaziland"],
+    TLS: ["timor leste"],
+    MKD: ["macedonia"],
+    TUR: ["turkiye"],
+    CPV: ["cabo verde"],
+    KNA: ["st kitts and nevis"],
+    LCA: ["st lucia"],
+    VCT: ["st vincent and the grenadines"],
+    STP: ["sao tome"],
+    CHE: ["swiss"],
+    DEU: ["germany deutschland"],
+  };
+
+  interface CountryEntry {
+    c: Country;
+    norm: string;      // lowercased, unaccented, punctuation flattened to spaces
+    words: string[];
+    iso: string;
+    aliases: string[];
+    fold: string;      // lenient fold, mapped back to positions in c.name
+    foldMap: number[];
+  }
+  let COUNTRY_INDEX: CountryEntry[] = [];
+  const CONTINENTS: string[] = [];
+  const SLOT_LABELS = ["Country 1", "Country 2", "Country 3"];
+
+  function normalizeQuery(s: string){
+    return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, " ").trim();
+  }
+
+  // Folds accents away while remembering which source character each folded
+  // character came from, so the matched run can be marked in the real name.
+  function foldAligned(name: string){
+    var fold = "";
+    var map: number[] = [];
+    for (var i = 0; i < name.length; i++){
+      var f = name.charAt(i).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+      for (var j = 0; j < f.length; j++){ fold += f.charAt(j); map.push(i); }
+    }
+    map.push(name.length);
+    return { fold: fold, map: map };
+  }
+
+  function buildCountryIndex(){
+    COUNTRY_INDEX = COUNTRIES_SORTED.map(function(c){
+      var norm = normalizeQuery(c.name);
+      var aligned = foldAligned(c.name);
+      return {
+        c: c,
+        norm: norm,
+        words: norm.split(" ").filter(Boolean),
+        iso: c.iso3.toLowerCase(),
+        aliases: (COUNTRY_ALIASES[c.iso3] || []).map(normalizeQuery),
+        fold: aligned.fold,
+        foldMap: aligned.map
+      };
     });
+    COUNTRIES_SORTED.forEach(function(c){
+      if (CONTINENTS.indexOf(c.continent) === -1) CONTINENTS.push(c.continent);
+    });
+    CONTINENTS.sort();
+  }
+
+  // Lower rank sorts first. null means no match at all.
+  function rankEntry(entry: CountryEntry, q: string): number | null {
+    if (entry.iso === q) return 0;
+    if (entry.norm === q) return 1;
+    if (entry.norm.indexOf(q) === 0) return 2;
+    if (entry.iso.indexOf(q) === 0) return 3;
+    for (var i = 0; i < entry.words.length; i++){
+      if (entry.words[i].indexOf(q) === 0) return 4;
+    }
+    for (var a = 0; a < entry.aliases.length; a++){
+      if (entry.aliases[a].indexOf(q) === 0) return 5;
+    }
+    if (entry.norm.indexOf(q) > -1) return 6;
+    for (var b = 0; b < entry.aliases.length; b++){
+      if (entry.aliases[b].indexOf(q) > -1) return 7;
+    }
+    return null;
+  }
+
+  function searchCountries(raw: string){
+    var q = normalizeQuery(raw);
+    if (!q) return COUNTRY_INDEX.slice();
+    var hits: { entry: CountryEntry; rank: number }[] = [];
+    COUNTRY_INDEX.forEach(function(entry){
+      var rank = rankEntry(entry, q);
+      if (rank !== null) hits.push({ entry: entry, rank: rank });
+    });
+    hits.sort(function(a, b){
+      return a.rank - b.rank || a.entry.c.name.localeCompare(b.entry.c.name);
+    });
+    return hits.map(function(h){ return h.entry; });
+  }
+
+  // Marks the matched run inside the real name. Builds text nodes rather than
+  // markup, so a country name is never parsed as HTML.
+  function labelWithMatch(entry: CountryEntry, raw: string){
+    var frag = document.createDocumentFragment();
+    var name = entry.c.name;
+    var q = "";
+    for (var i = 0; i < raw.length; i++){
+      q += raw.charAt(i).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    }
+    q = q.trim();
+    var at = q ? entry.fold.indexOf(q) : -1;
+    if (at < 0){
+      frag.appendChild(document.createTextNode(name));
+      return frag;
+    }
+    var start = entry.foldMap[at];
+    var end = entry.foldMap[at + q.length];
+    frag.appendChild(document.createTextNode(name.slice(0, start)));
+    var mark = document.createElement("mark");
+    mark.textContent = name.slice(start, end);
+    frag.appendChild(mark);
+    frag.appendChild(document.createTextNode(name.slice(end)));
+    return frag;
+  }
+
+  function checkIcon(){
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "combo-check");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("aria-hidden", "true");
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "m3 8.5 3.2 3.2L13 5");
+    svg.appendChild(path);
+    return svg;
+  }
+
+  interface CountryPicker {
+    setSelected(iso: string): void;
+  }
+
+  function createCountryPicker(slot: number): CountryPicker {
+    const input = element<HTMLInputElement>("cmp" + slot);
+    const pop = element("cmp" + slot + "Pop");
+    const listbox = element("cmp" + slot + "List");
+    const emptyNote = element("cmp" + slot + "Empty");
+    const clearBtn = element<HTMLButtonElement>("cmp" + slot + "Clear");
+    const status = element("cmp" + slot + "Status");
+    const combo = input.closest(".combo") as HTMLElement;
+
+    var isOpen = false;
+    var results: CountryEntry[] = [];
+    var activeIdx = -1;
+    var statusTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function optionId(iso: string){ return "cmp" + slot + "-opt-" + iso; }
+
+    function announce(message: string, delay: number){
+      if (statusTimer) clearTimeout(statusTimer);
+      statusTimer = setTimeout(function(){ status.textContent = message; }, delay);
+    }
+
+    function renderOption(entry: CountryEntry, raw: string){
+      var option = document.createElement("div");
+      option.className = "combo-option";
+      option.id = optionId(entry.c.iso3);
+      option.setAttribute("role", "option");
+      option.dataset.iso = entry.c.iso3;
+      option.setAttribute("aria-selected", String(highlighted[slot] === entry.c.iso3));
+
+      var name = document.createElement("span");
+      name.className = "combo-name";
+      name.appendChild(labelWithMatch(entry, raw));
+      option.appendChild(name);
+
+      var otherSlot = -1;
+      for (var s = 0; s < 3; s++){
+        if (s !== slot && highlighted[s] === entry.c.iso3) otherSlot = s;
+      }
+      if (highlighted[slot] === entry.c.iso3){
+        option.appendChild(checkIcon());
+      } else if (otherSlot > -1){
+        // Choosing it here empties the other slot, so say so before the click.
+        var tag = document.createElement("span");
+        tag.className = "combo-tag";
+        var swatch = document.createElement("span");
+        swatch.className = "swatch";
+        swatch.style.background = SERIES_COLORS_LIVE()[otherSlot];
+        tag.appendChild(swatch);
+        tag.appendChild(document.createTextNode("In " + SLOT_LABELS[otherSlot].toLowerCase()));
+        option.appendChild(tag);
+      }
+      return option;
+    }
+
+    function render(raw: string){
+      results = searchCountries(raw);
+      activeIdx = -1;
+      listbox.textContent = "";
+
+      if (!results.length){
+        emptyNote.textContent = "No country matches “" + raw.trim() + "”. Try a shorter spelling or a three-letter code.";
+        emptyNote.hidden = false;
+        input.removeAttribute("aria-activedescendant");
+        announce("No countries found.", 400);
+        return;
+      }
+      emptyNote.hidden = true;
+
+      var frag = document.createDocumentFragment();
+      if (!normalizeQuery(raw)){
+        // Unfiltered, continent grouping is the only structure worth keeping.
+        CONTINENTS.forEach(function(continent){
+          var members = results.filter(function(e){ return e.c.continent === continent; });
+          if (!members.length) return;
+          var group = document.createElement("div");
+          group.setAttribute("role", "group");
+          group.setAttribute("aria-label", continent);
+          var label = document.createElement("div");
+          label.className = "combo-group-label";
+          label.setAttribute("aria-hidden", "true");
+          label.textContent = continent;
+          group.appendChild(label);
+          members.forEach(function(entry){ group.appendChild(renderOption(entry, "")); });
+          frag.appendChild(group);
+        });
+        // Grouping reorders the flat list, so mirror it back for arrow keys.
+        results = CONTINENTS.reduce(function(acc: CountryEntry[], continent){
+          return acc.concat(results.filter(function(e){ return e.c.continent === continent; }));
+        }, []);
+      } else {
+        results.forEach(function(entry){
+          var option = renderOption(entry, raw);
+          var place = document.createElement("span");
+          place.className = "combo-tag";
+          if (!option.querySelector(".combo-tag") && !option.querySelector(".combo-check")){
+            place.textContent = entry.c.continent;
+            option.appendChild(place);
+          }
+          frag.appendChild(option);
+        });
+        announce(results.length === 1
+          ? "1 country found: " + results[0].c.name + "."
+          : results.length + " countries found. " + results[0].c.name + " is first.", 400);
+      }
+      listbox.appendChild(frag);
+      if (normalizeQuery(raw)) setActive(0);
+      else {
+        // Opening on the current pick: centre it, so the names either side of
+        // it are visible instead of the list landing on its last row.
+        var selectedIdx = results.findIndex(function(e){ return e.c.iso3 === highlighted[slot]; });
+        if (selectedIdx > -1) setActive(selectedIdx, "center");
+      }
+    }
+
+    function setActive(index: number, block: ScrollLogicalPosition = "nearest"){
+      var previous = listbox.querySelector<HTMLElement>('[data-active="true"]');
+      if (previous) previous.removeAttribute("data-active");
+      activeIdx = index;
+      if (index < 0 || !results[index]){
+        input.removeAttribute("aria-activedescendant");
+        return;
+      }
+      var id = optionId(results[index].c.iso3);
+      var option = document.getElementById(id);
+      if (!option) return;
+      option.dataset.active = "true";
+      input.setAttribute("aria-activedescendant", id);
+      revealOption(option, block === "center");
+    }
+
+    // scrollIntoView would scroll the page as well as the list. This moves only
+    // the list, and keeps the sticky continent heading clear of the active row.
+    function revealOption(option: HTMLElement, center: boolean){
+      var listRect = listbox.getBoundingClientRect();
+      var optionRect = option.getBoundingClientRect();
+      if (center){
+        listbox.scrollTop += (optionRect.top - listRect.top) - (listRect.height - optionRect.height) / 2;
+        return;
+      }
+      var heading = listbox.querySelector<HTMLElement>(".combo-group-label");
+      var inset = heading ? heading.offsetHeight : 0;
+      if (optionRect.top - inset < listRect.top) listbox.scrollTop += optionRect.top - inset - listRect.top;
+      else if (optionRect.bottom > listRect.bottom) listbox.scrollTop += optionRect.bottom - listRect.bottom;
+    }
+
+    function move(delta: number){
+      if (!results.length) return;
+      var next = activeIdx + delta;
+      if (next < 0) next = results.length - 1;
+      if (next >= results.length) next = 0;
+      setActive(next);
+    }
+
+    function place(){
+      var rect = input.getBoundingClientRect();
+      var below = window.innerHeight - rect.bottom - 16;
+      var above = rect.top - 16;
+      var flip = below < 200 && above > below;
+      if (flip) pop.dataset.placement = "top";
+      else delete pop.dataset.placement;
+      var room = Math.max(160, Math.min(304, flip ? above : below));
+      listbox.style.maxHeight = room + "px";
+    }
+
+    function openList(){
+      if (isOpen || input.disabled) return;
+      isOpen = true;
+      pop.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+      place();
+      render(input.value === selectedName() ? "" : input.value);
+    }
+
+    function closeList(){
+      if (!isOpen) return;
+      isOpen = false;
+      pop.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+      input.removeAttribute("aria-activedescendant");
+      activeIdx = -1;
+      if (statusTimer) clearTimeout(statusTimer);
+    }
+
+    function selectedName(){
+      var iso = highlighted[slot];
+      return iso && COUNTRIES_BY_ISO[iso] ? COUNTRIES_BY_ISO[iso].name : "";
+    }
+
+    function syncInput(){
+      input.value = selectedName();
+      clearBtn.hidden = !input.value;
+    }
+
+    function commit(iso: string){
+      var displaced = -1;
+      for (var other = 0; other < 3; other++){
+        if (other !== slot && highlighted[other] === iso && iso !== ""){
+          displaced = other;
+          highlighted[other] = "";
+          PICKERS[other].setSelected("");
+        }
+      }
+      highlighted[slot] = iso;
+      syncInput();
+      closeList();
+
+      if (statusTimer) clearTimeout(statusTimer);
+      status.textContent = iso
+        ? COUNTRIES_BY_ISO[iso].name + " selected for " + SLOT_LABELS[slot] + "."
+          + (displaced > -1 ? " " + SLOT_LABELS[displaced] + " is now empty." : "")
+        : SLOT_LABELS[slot] + " cleared.";
+
+      renderChoropleth();
+      renderScatter();
+      renderSmallMultiples();
+      updateCompareTable();
+    }
+
+    input.addEventListener("focus", function(){
+      input.select();
+      openList();
+    });
+
+    input.addEventListener("pointerdown", function(){
+      if (document.activeElement === input) {
+        if (isOpen) closeList(); else openList();
+      }
+    });
+
+    input.addEventListener("input", function(){
+      clearBtn.hidden = !input.value;
+      if (!isOpen) openList();
+      else { render(input.value); place(); }
+    });
+
+    input.addEventListener("keydown", function(event){
+      if (event.key === "ArrowDown"){
+        event.preventDefault();
+        if (!isOpen) openList(); else move(1);
+      } else if (event.key === "ArrowUp"){
+        event.preventDefault();
+        if (!isOpen){ openList(); setActive(results.length - 1); }
+        else move(-1);
+      } else if (event.key === "Enter"){
+        if (isOpen && activeIdx > -1){
+          event.preventDefault();
+          commit(results[activeIdx].c.iso3);
+        }
+      } else if (event.key === "Escape"){
+        if (isOpen){
+          event.preventDefault();
+          event.stopPropagation();
+          closeList();
+          syncInput();
+        } else if (input.value){
+          syncInput();
+        }
+      } else if (event.key === "Tab"){
+        closeList();
+        syncInput();
+      }
+    });
+
+    // mousedown would blur the input first and close the list under the cursor.
+    listbox.addEventListener("mousedown", function(event){ event.preventDefault(); });
+    listbox.addEventListener("click", function(event){
+      var option = (event.target as HTMLElement).closest<HTMLElement>(".combo-option");
+      if (option && option.dataset.iso) commit(option.dataset.iso);
+    });
+    listbox.addEventListener("pointermove", function(event){
+      var option = (event.target as HTMLElement).closest<HTMLElement>(".combo-option");
+      if (!option || !option.dataset.iso) return;
+      var iso = option.dataset.iso;
+      var index = results.findIndex(function(e){ return e.c.iso3 === iso; });
+      if (index > -1 && index !== activeIdx) setActive(index);
+    });
+
+    clearBtn.addEventListener("click", function(){
+      commit("");
+      input.focus();
+    });
+
+    combo.addEventListener("focusout", function(event){
+      if (combo.contains(event.relatedTarget as Node)) return;
+      closeList();
+      syncInput();
+    });
+
+    window.addEventListener("resize", function(){ if (isOpen) place(); });
+
+    return {
+      setSelected: function(iso: string){
+        highlighted[slot] = iso;
+        syncInput();
+      }
+    };
+  }
+
+  const PICKERS: CountryPicker[] = [];
+
+  function buildCountryPickers(){
+    buildCountryIndex();
+    [0,1,2].forEach(function(slot){ PICKERS.push(createCountryPicker(slot)); });
+    [0,1,2].forEach(function(slot){ PICKERS[slot].setSelected(highlighted[slot] || ""); });
   }
 
   function wireEvents(){
@@ -322,23 +759,7 @@ function initAtlas(){
       scatterYMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderScatter();
     });
-    [0,1,2].forEach(function(slot){
-      element<HTMLSelectElement>("cmp" + slot).addEventListener("change", function(e){
-        var iso = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
-        // avoid duplicate picks across slots
-        [0,1,2].forEach(function(other){
-          if (other !== slot && highlighted[other] === iso && iso !== "") {
-            highlighted[other] = "";
-            element<HTMLSelectElement>("cmp" + other).value = "";
-          }
-        });
-        highlighted[slot] = iso;
-        renderChoropleth();
-        renderScatter();
-        renderSmallMultiples();
-        updateCompareTable();
-      });
-    });
+    // Country slots wire themselves up in createCountryPicker.
 
     var mq = window.matchMedia("(prefers-color-scheme: dark)");
     if (mq.addEventListener) mq.addEventListener("change", reTheme);
