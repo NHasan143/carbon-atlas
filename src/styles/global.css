@@ -32,6 +32,11 @@
     --seq-100:#cde2fb; --seq-200:#9ec5f4; --seq-300:#6da7ec; --seq-400:#3987e5;
     --seq-500:#2368b8; --seq-600:#184f95; --seq-700:#0d366b;
     --context-dot:#c3c2b7;
+    --rank-track:#f1f1ed;
+    --rank-context:#888884;
+    --rank-good:#4e9068; --rank-bad:#cc6a5f;
+    --rank-growth:#6c86bd; --rank-decline:#a38150;
+    --rank-slot-1:#3d81d4; --rank-slot-2:#dd5f2c; --rank-slot-3:#189a6b;
     --focus-ring:oklch(75% 0.25 145 / 0.8);
     --trend-good:oklch(54% 0.1 155);
     --trend-bad:oklch(55% 0.12 27);
@@ -62,6 +67,11 @@
       --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
       --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
       --context-dot:#4a4a47;
+      --rank-track:#242423;
+      --rank-good:#3e7b55; --rank-bad:#a8594f;
+      --rank-slot-1:#3576c6; --rank-slot-2:#bb5024; --rank-slot-3:#17815e;
+      --rank-growth:#5972a3; --rank-decline:#866436;
+      --rank-context:#706e6c;
       --trend-good:oklch(76% 0.1 155);
       --trend-bad:oklch(72% 0.11 27);
       --band-mid:#595240;
@@ -88,6 +98,11 @@
     --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
     --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
     --context-dot:#4a4a47;
+    --rank-track:#242423;
+    --rank-good:#3e7b55; --rank-bad:#a8594f;
+    --rank-slot-1:#3576c6; --rank-slot-2:#bb5024; --rank-slot-3:#17815e;
+    --rank-growth:#5972a3; --rank-decline:#866436;
+    --rank-context:#706e6c;
     --trend-good:oklch(76% 0.1 155);
     --trend-bad:oklch(72% 0.11 27);
     --band-mid:#595240;
@@ -224,6 +239,69 @@
   .combo-tag .swatch { @apply size-2; }
   .combo-check { @apply size-3.5 shrink-0 text-accent; }
   .combo-empty { @apply px-3 py-3.5 text-[13.5px] text-muted; }
+
+  /* Rankings: the bar is the row's own ground, so a long country name never
+     competes with a chart column for width. */
+  .rank-card { @apply min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-5; }
+  .rank-card-head { @apply mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-line pb-3; }
+  .rank-card-title { @apply text-[14px] font-semibold; }
+  .rank-card-meta { @apply text-[11.5px] text-muted tabular-nums; }
+  .rank-list { @apply grid gap-0.5; }
+  .rank-row {
+    @apply grid grid-cols-[1.6rem_minmax(0,1fr)_auto] items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13.5px];
+    transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* The bar covers the rank and name columns and stops short of the value.
+     Running it under the value put its own edge through the numeral. The track
+     is the full width the bar is measured against, so a country reporting
+     almost nothing reads as a sliver of the whole rather than as nothing. */
+  .rank-bar {
+    @apply pointer-events-none overflow-hidden rounded-[5px];
+    grid-area: 1 / 1 / 2 / 3;
+    align-self: stretch;
+    margin-block: -4px;
+    z-index: 0;
+    background: var(--rank-track);
+  }
+  .rank-fill {
+    @apply block h-full w-full origin-left;
+    background: var(--rank-fill, transparent);
+    transition: transform 460ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .rank-num { grid-area: 1 / 1 / 2 / 2; z-index: 1; }
+  .rank-name { grid-area: 1 / 2 / 2 / 3; z-index: 1; }
+  .rank-value { grid-area: 1 / 3 / 2 / 4; }
+  /* Everything here sits on the bar, so it is near-black to clear 4.5:1 there;
+     the row's hierarchy comes from size and weight instead of from colour. */
+  .rank-num { @apply text-right text-[11.5px] text-ink tabular-nums; }
+  .rank-name { @apply flex min-w-0 items-center gap-2 text-ink; }
+  .rank-label { @apply truncate; }
+  .rank-value { @apply shrink-0 font-mono text-[13px] tabular-nums; }
+  .rank-row[data-selected="true"] .rank-name { @apply font-semibold text-ink; }
+  /* On a selected row the bar already carries the country's hue, so the mark is
+     cut out of it rather than tinted with it: one solid silhouette, the same
+     shape as every other swatch on the page. */
+  .rank-row[data-selected="true"] .swatch { background: var(--surface); }
+  .rank-row[data-enter="true"] { animation: rank-enter 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+
+  .rank-yours { @apply rounded-xl bg-field px-5 py-4; }
+  .rank-your-item { @apply grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2.5 gap-y-1; }
+  .rank-your-item .swatch { @apply self-center; }
+  .rank-your-name { @apply truncate text-[13px] font-semibold; }
+  .rank-your-value { @apply text-right font-mono text-[13px] tabular-nums; }
+  .rank-your-note { @apply col-start-2 col-end-4 text-[11.5px] text-muted; }
+  @media (min-width: 640px) {
+    .rank-your-item + .rank-your-item { @apply border-l border-line pl-6; }
+  }
+
+  @keyframes rank-enter {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rank-row, .rank-fill { transition: none; }
+    .rank-row[data-enter="true"] { animation: none; }
+  }
   @media (pointer: coarse) {
     .combo-option { min-height: 44px; }
     .combo-input { min-height: 44px; }
@@ -250,8 +328,16 @@
   .controls-section { padding-inline: 23px; }
 }
 
+/* Both sections close on a caption, which needs less room beneath it than a
+   chart or a card grid does. */
 .map-section {
   border-block: 1px solid var(--border);
+  padding-bottom: clamp(20px, 2.2vw, 28px);
+}
+
+.rankings-section {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: clamp(20px, 2.2vw, 28px);
 }
 
 .trends-section {

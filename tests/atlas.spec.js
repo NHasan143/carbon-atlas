@@ -62,7 +62,7 @@ test('renders locally and keeps Play, Pause, slider, table, map and trends synch
   await page.waitForTimeout(850);
   await expect(page.locator('#yearReadout')).toHaveText(paused);
   await setYear(page, 10);
-  await expect(page.locator('[data-year-output]')).toHaveText(['2000', '2000', '2000', '2000']);
+  await expect(page.locator('[data-year-output]')).toHaveText(['2000', '2000', '2000', '2000', '2000']);
   const usaMap = await page.locator('#choroplethChart').evaluate(el => {
     const trace = el.data[0];
     const i = trace.locations.indexOf('USA');
@@ -153,6 +153,64 @@ test('country search filters by name, code and common alias, and is keyboard ope
   await expect(input).toHaveValue(second.trim());
 });
 
+test('rankings order both ends of a metric and the movers since 1990', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await openAtlas(page);
+
+  const top = page.locator('#rankTopList .rank-row');
+  const bottom = page.locator('#rankBottomList .rank-row');
+  await expect(top).toHaveCount(10);
+  await expect(bottom).toHaveCount(10);
+
+  // The leader and the trailer are the real extremes of the reporting set.
+  const co2pc = Object.entries(data.metrics.co2_per_capita)
+    .map(([iso, series]) => [iso, series[series.length - 1]])
+    .filter(([, v]) => v !== null && !Number.isNaN(v))
+    .sort((a, b) => b[1] - a[1]);
+  const nameOf = iso => data.countries.find(c => c.iso3 === iso).name;
+  await expect(top.first()).toContainText(nameOf(co2pc[0][0]));
+  await expect(bottom.first()).toContainText(nameOf(co2pc[co2pc.length - 1][0]));
+  await expect(page.locator('#rankTopMeta')).toHaveText(`${co2pc.length} of ${data.countries.length} countries report`);
+
+  // Highest and Lowest share one scale: the leader fills the row, the trailer barely registers.
+  const scaleOf = sel => page.locator(sel).evaluate(el => Number(el.style.transform.replace(/[^0-9.]/g, '')));
+  expect(await scaleOf('#rankTopList .rank-row:first-child .rank-fill')).toBeCloseTo(1, 2);
+  expect(await scaleOf('#rankBottomList .rank-row:first-child .rank-fill')).toBeLessThan(0.02);
+
+  // Every selected country is placed, whether or not it reaches a visible list.
+  await expect(page.locator('#rankYours .rank-your-item')).toHaveCount(3);
+  await expect(page.locator('#rankYours')).toContainText('highest of');
+
+  // Percent scales each mover list to itself; Amount puts both on one scale.
+  await expect(page.getByRole('radio', { name: 'Percent' })).toBeChecked();
+  expect(await scaleOf('#rankRiseList .rank-row:first-child .rank-fill')).toBeCloseTo(1, 2);
+  expect(await scaleOf('#rankFallList .rank-row:first-child .rank-fill')).toBeCloseTo(1, 2);
+  await page.getByRole('radio', { name: 'Amount' }).check();
+  await expect(page.locator('#rankRiseList .rank-row').first()).toContainText('+15.31 t');
+  const rise = await scaleOf('#rankRiseList .rank-row:first-child .rank-fill');
+  const fall = await scaleOf('#rankFallList .rank-row:first-child .rank-fill');
+  expect(Math.max(rise, fall)).toBeCloseTo(1, 2);
+  expect(Math.min(rise, fall)).toBeLessThan(0.95);
+
+  // A share metric is held to percentage points, never a percent of a percent.
+  await page.selectOption('#rankMetric', 'renewables_share_energy');
+  await expect(page.getByRole('radio', { name: 'Percent' })).toBeDisabled();
+  await expect(page.locator('#rankMoveSub')).toContainText('percentage points');
+  await expect(page.locator('#rankTopList .rank-row').first()).toContainText('Iceland');
+
+  // 1990 is the baseline, so the movers block says so instead of comparing it with itself.
+  await page.selectOption('#rankMetric', 'co2_per_capita');
+  await setYear(page, 0);
+  await expect(page.locator('#rankMoversPair')).toBeHidden();
+  await expect(page.locator('#rankMoveEmpty')).toContainText('Move the year past 1990');
+  await expect(page.locator('#rankMoveSub')).toHaveText('');
+  await setYear(page, 34);
+  await expect(page.locator('#rankMoversPair')).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
+
 test('the map switches between level bands and change since 1990', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -202,7 +260,17 @@ test('themes update chart colors and mobile layout remains usable', async ({ pag
   await page.getByRole('button', { name: 'Play animation' }).click();
   await expect(page.locator('#yearReadout')).not.toHaveText('2024');
   await page.getByRole('button', { name: 'Pause animation' }).click();
-  await page.screenshot({ path: 'test-results/atlas-mobile-dark.png', fullPage: true });
+  // The headless renderer cannot capture past ~8192px in one texture, and the
+  // mobile page is taller than that, so the reference lands in two halves.
+  const tall = await page.evaluate(() => document.documentElement.scrollHeight);
+  const half = Math.ceil(tall / 2);
+  for (const [i, y] of [0, half].entries()) {
+    await page.screenshot({
+      path: `test-results/atlas-mobile-dark-${i + 1}.png`,
+      fullPage: true,
+      clip: { x: 0, y, width: 390, height: Math.min(half, tall - y) },
+    });
+  }
 });
 
 test('dataset failures show a recovery action and keep controls disabled', async ({ page }) => {

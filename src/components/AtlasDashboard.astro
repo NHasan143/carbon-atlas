@@ -51,7 +51,80 @@ import Panel from './Panel.astro';
           <div id="choroLegend" class="map-legend"></div>
         </div>
       </div>
-      <p id="choroCaption" class="mx-auto mt-5 max-w-[90ch] text-center text-[12.5px] leading-relaxed text-balance text-muted"></p>
+      <p id="choroCaption" class="mx-auto mt-5 max-w-[90ch] text-center text-[12.5px] leading-relaxed text-balance text-muted xl:max-w-none xl:whitespace-nowrap"></p>
+    </Panel>
+
+    <Panel id="rankings" title="The Rankings" description="The two ends of the same distribution, side by side: who leads, who trails, and who has travelled furthest since 1990." class="rankings-section">
+      <div class="chart-toolbar mb-6 flex flex-wrap items-end justify-between gap-5 rounded-xl bg-field p-5">
+        <div class="flex flex-1 flex-wrap gap-4">
+          <MetricSelect id="rankMetric" label="Rank by" />
+        </div>
+        <div class="text-right">
+          <span class="block text-xs font-semibold text-muted">Selected year</span>
+          <strong class="mt-1 block font-mono text-2xl tabular-nums" data-year-output>2024</strong>
+        </div>
+      </div>
+
+      <div class="grid gap-4 lg:grid-cols-2">
+        <section class="rank-card" aria-labelledby="rankTopTitle">
+          <header class="rank-card-head">
+            <h3 id="rankTopTitle" class="rank-card-title">Highest</h3>
+            <p id="rankTopMeta" class="rank-card-meta"></p>
+          </header>
+          <ol id="rankTopList" class="rank-list"></ol>
+            <p id="rankTopEmpty" class="empty-note" hidden></p>
+        </section>
+        <section class="rank-card" aria-labelledby="rankBottomTitle">
+          <header class="rank-card-head">
+            <h3 id="rankBottomTitle" class="rank-card-title">Lowest</h3>
+            <p id="rankBottomMeta" class="rank-card-meta"></p>
+          </header>
+          <ol id="rankBottomList" class="rank-list"></ol>
+            <p id="rankBottomEmpty" class="empty-note" hidden></p>
+        </section>
+      </div>
+
+      <div class="rank-yours mt-4">
+        <span class="block text-xs font-semibold text-muted">Where your countries rank</span>
+        <ol id="rankYours" class="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-3"></ol>
+      </div>
+
+      <div class="mt-10">
+        <div class="chart-toolbar mb-4 flex flex-wrap items-end justify-between gap-5 rounded-xl bg-field p-5">
+          <div class="min-w-0 flex-1">
+            <h3 class="text-[15px] font-semibold">Biggest movers since 1990</h3>
+            <p id="rankMoveSub" class="mt-1 max-w-[56ch] text-[12.5px] leading-relaxed text-muted"></p>
+          </div>
+          <fieldset class="min-w-0 max-sm:basis-full">
+            <legend class="text-[11.5px] font-semibold tracking-[0.03em] text-muted uppercase">Measure by</legend>
+            <div class="segmented mt-1.5">
+              <label><input type="radio" name="rankBasis" value="pct" checked disabled />Percent</label>
+              <label><input type="radio" name="rankBasis" value="abs" disabled /><span id="rankBasisAmount">Amount</span></label>
+            </div>
+          </fieldset>
+        </div>
+        <div id="rankMoversPair" class="grid gap-4 lg:grid-cols-2">
+          <section class="rank-card" aria-labelledby="rankRiseTitle">
+            <header class="rank-card-head">
+              <h3 id="rankRiseTitle" class="rank-card-title">Biggest rises</h3>
+              <p id="rankRiseMeta" class="rank-card-meta"></p>
+            </header>
+            <ol id="rankRiseList" class="rank-list"></ol>
+            <p id="rankRiseEmpty" class="empty-note" hidden></p>
+          </section>
+          <section class="rank-card" aria-labelledby="rankFallTitle">
+            <header class="rank-card-head">
+              <h3 id="rankFallTitle" class="rank-card-title">Biggest falls</h3>
+              <p id="rankFallMeta" class="rank-card-meta"></p>
+            </header>
+            <ol id="rankFallList" class="rank-list"></ol>
+            <p id="rankFallEmpty" class="empty-note" hidden></p>
+          </section>
+        </div>
+        <p id="rankMoveEmpty" class="empty-note" hidden></p>
+      </div>
+
+      <p id="rankCaption" class="mx-auto mt-6 max-w-[1040px] text-center text-[12.5px] leading-relaxed text-balance text-muted"></p>
     </Panel>
 
     <Panel id="relationship" title="GDP, Emissions and Population" singleLine description="Each bubble is a country and its area represents population. Change either axis to test a different relationship." class="relationship-section">
@@ -194,7 +267,7 @@ function initAtlas(){
 
   // ---------- bootstrap ----------
   function setControlsEnabled(enabled: boolean){
-    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button, #controlsPanel input, #controlsPanel select, #choroMetric, input[name=mapView], #scatterX, #scatterY").forEach(function(control){
+    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button, #controlsPanel input, #controlsPanel select, #choroMetric, input[name=mapView], #scatterX, #scatterY, #rankMetric, input[name=rankBasis]").forEach(function(control){
       control.disabled = !enabled;
     });
   }
@@ -245,9 +318,12 @@ function initAtlas(){
     buildMetricDropdown(element<HTMLSelectElement>("choroMetric"), choroMetric);
     buildMetricDropdown(element<HTMLSelectElement>("scatterX"), scatterXMetric);
     buildMetricDropdown(element<HTMLSelectElement>("scatterY"), scatterYMetric);
+    buildMetricDropdown(element<HTMLSelectElement>("rankMetric"), rankMetric);
     buildCountryPickers();
 
     updateCompareTable();
+    syncRankBasisControl();
+    updateRankings(false);
     return Promise.all([renderChoropleth(), renderScatter(), renderSmallMultiples()]);
   }).then(function(){
     wireEvents();
@@ -647,6 +723,7 @@ function initAtlas(){
       renderScatter();
       renderSmallMultiples();
       updateCompareTable();
+      updateRankings(true);
     }
 
     input.addEventListener("focus", function(){
@@ -759,7 +836,21 @@ function initAtlas(){
       scatterYMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderScatter();
     });
+    element<HTMLSelectElement>("rankMetric").addEventListener("change", function(e){
+      rankMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
+      syncRankBasisControl();
+      updateRankings(true);
+    });
+    document.querySelectorAll<HTMLInputElement>("input[name=rankBasis]").forEach(function(input){
+      input.addEventListener("change", function(){
+        if (!input.checked) return;
+        rankBasis = input.value as MoverBasis;
+        updateRankings(true);
+      });
+    });
     // Country slots wire themselves up in createCountryPicker.
+
+    if (rankWidth.addEventListener) rankWidth.addEventListener("change", function(){ updateRankings(false); });
 
     var mq = window.matchMedia("(prefers-color-scheme: dark)");
     if (mq.addEventListener) mq.addEventListener("change", reTheme);
@@ -770,6 +861,7 @@ function initAtlas(){
     renderChoropleth();
     renderScatter();
     renderSmallMultiples();
+    updateRankings(false);
   }
 
   function setPlayState(playing: boolean){
@@ -822,6 +914,395 @@ function initAtlas(){
     updateScatterYear();
     updateSmallMultipleMarkers();
     updateCompareTable();
+    updateRankings(true);
+  }
+
+  // ---------- Rankings ----------
+  // Four ranked lists in two pairs. Each pair shares one scale, so the gap
+  // between the top of one list and the top of the other is real rather than
+  // an artefact of scaling each list to its own maximum.
+  type MoverBasis = "pct" | "abs";
+  var rankMetric = "co2_per_capita";
+  var rankBasis: MoverBasis = "pct";
+  // Ten rows a list reads well beside its pair on a wide screen. Stacked on a
+  // phone the same four lists add nearly 1,300px of scroll, so the phone gets
+  // five; the rank numbers and the reporting count keep that honest.
+  const RANK_ROWS_WIDE = 10;
+  const RANK_ROWS_NARROW = 5;
+  var rankWidth = window.matchMedia("(min-width: 640px)");
+  function rankRows(){ return rankWidth.matches ? RANK_ROWS_WIDE : RANK_ROWS_NARROW; }
+  // A country that reports a near-zero figure still gets a visible sliver, so
+  // it never reads as the grey of no data.
+  const RANK_FLOOR = 0.008;
+
+  interface RankEntry { iso: string; name: string; value: number; rank: number; }
+  interface MoverEntry { iso: string; name: string; delta: number; }
+  interface RankRow { iso: string; name: string; rank: string; value: string; ratio: number; fill: string; }
+
+  function isShareMetric(metric: string){
+    return CHANGE_BANDS[metric].mode === "pts";
+  }
+
+  // fmtValue rounds for the comparison table, where a rounded zero is fine.
+  // In a ranked list the smallest reporters are the content, so carry enough
+  // digits that they never all read as the same flat zero.
+  function fmtRankValue(v: number, metric: string){
+    var base = fmtValue(v, metric);
+    if (v <= 0 || /[1-9]/.test(base)) return base;
+    if (metric === "gdp_per_capita") return "$" + Number(v.toPrecision(2));
+    if (metric === "population") return String(Math.round(v));
+    var unit = metric === "co2" ? " Mt" : metric === "co2_per_capita" ? " t" : "%";
+    return Number(v.toPrecision(2)) + unit;
+  }
+
+  function fmtAmount(delta: number, metric: string){
+    var sign = delta > 0 ? "+" : delta < 0 ? "−" : "";
+    if (isShareMetric(metric)) return fmtChange(delta, CHANGE_BANDS[metric], metric);
+    return sign + fmtValue(Math.abs(delta), metric);
+  }
+
+  function fmtMover(delta: number, metric: string){
+    return rankBasis === "pct" && !isShareMetric(metric)
+      ? fmtChange(delta, PCT_CHANGE, metric)
+      : fmtAmount(delta, metric);
+  }
+
+  function rankedFor(metric: string, yearIdx: number): RankEntry[] {
+    var series = DATA.metrics[metric];
+    if (!series) return [];
+    var rows: { iso: string; name: string; value: number }[] = [];
+    Object.keys(series).forEach(function(iso){
+      var country = COUNTRIES_BY_ISO[iso];
+      var v = series[iso][yearIdx];
+      if (country && hasNumber(v)) rows.push({ iso: iso, name: country.name, value: v });
+    });
+    rows.sort(function(a, b){ return b.value - a.value || a.name.localeCompare(b.name); });
+    // Competition ranking: countries reporting the same figure share a rank.
+    var ranked: RankEntry[] = [];
+    rows.forEach(function(row, i){
+      var rank = i > 0 && row.value === rows[i - 1].value ? ranked[i - 1].rank : i + 1;
+      ranked.push({ iso: row.iso, name: row.name, value: row.value, rank: rank });
+    });
+    return ranked;
+  }
+
+  function moversFor(metric: string, yearIdx: number): MoverEntry[] {
+    var series = DATA.metrics[metric];
+    if (!series || yearIdx === 0) return [];
+    var relative = rankBasis === "pct" && !isShareMetric(metric);
+    var out: MoverEntry[] = [];
+    Object.keys(series).forEach(function(iso){
+      var country = COUNTRIES_BY_ISO[iso];
+      if (!country) return;
+      var from = series[iso][0];
+      var to = series[iso][yearIdx];
+      if (!hasNumber(from) || !hasNumber(to)) return;
+      // A percent change off a zero baseline is not a number, so those
+      // countries drop out of the relative list rather than reading infinite.
+      if (relative && from === 0) return;
+      out.push({ iso: iso, name: country.name, delta: relative ? (to - from) / from * 100 : to - from });
+    });
+    out.sort(function(a, b){ return b.delta - a.delta || a.name.localeCompare(b.name); });
+    return out;
+  }
+
+  function contextFill(){
+    return getVar("--rank-context");
+  }
+
+  function seriesFill(slot: number){
+    return getVar("--rank-slot-" + (slot + 1));
+  }
+
+  // Movers inherit the Change map's reading: green and red where the metric
+  // has a planetary direction, neutral growth or decline where it does not.
+  function moverFill(metric: string, delta: number){
+    var better = PLANET_BETTER_WHEN[metric];
+    var token = better
+      ? ((delta > 0 ? "up" : "down") === better ? "--rank-good" : "--rank-bad")
+      : (delta > 0 ? "--rank-growth" : "--rank-decline");
+    return getVar(token);
+  }
+
+  function createRankRow(key: string){
+    var li = document.createElement("li");
+    li.className = "rank-row";
+    li.dataset.key = key;
+    li.dataset.enter = "true";
+    var bar = document.createElement("i");
+    bar.className = "rank-bar";
+    bar.setAttribute("aria-hidden", "true");
+    var fill = document.createElement("i");
+    fill.className = "rank-fill";
+    bar.appendChild(fill);
+    var num = document.createElement("span");
+    num.className = "rank-num";
+    var name = document.createElement("span");
+    name.className = "rank-name";
+    var swatch = document.createElement("span");
+    swatch.className = "swatch";
+    var label = document.createElement("span");
+    label.className = "rank-label";
+    name.appendChild(swatch);
+    name.appendChild(label);
+    var value = document.createElement("span");
+    value.className = "rank-value";
+    li.appendChild(bar);
+    li.appendChild(num);
+    li.appendChild(name);
+    li.appendChild(value);
+    return li;
+  }
+
+  function updateRankRow(li: HTMLElement, row: RankRow){
+    var slot = highlighted.indexOf(row.iso);
+    li.style.setProperty("--rank-fill", row.fill);
+    (li.querySelector(".rank-fill") as HTMLElement).style.transform =
+      "scaleX(" + (row.ratio > 0 ? Math.max(row.ratio, RANK_FLOOR) : 0).toFixed(4) + ")";
+    li.querySelector(".rank-num")!.textContent = row.rank;
+    li.querySelector(".rank-label")!.textContent = row.name;
+    li.querySelector(".rank-value")!.textContent = row.value;
+    var swatch = li.querySelector(".swatch") as HTMLElement;
+    swatch.hidden = slot < 0;
+    if (slot > -1) li.dataset.selected = "true"; else delete li.dataset.selected;
+  }
+
+  // Rows are reused rather than rebuilt, so a bar can transition its width and
+  // a row that moves up the list can be measured before and after the move.
+  function syncRankList(listId: string, rows: RankRow[], emptyText: string){
+    var list = element(listId);
+    var note = element(listId.replace("List", "Empty"));
+    note.hidden = rows.length > 0;
+    note.textContent = emptyText;
+    const existing: Record<string, HTMLElement> = {};
+    Array.prototype.forEach.call(list.children, function(child: HTMLElement){
+      if (child.dataset.key) existing[child.dataset.key] = child;
+    });
+    const keep: Record<string, boolean> = {};
+    rows.forEach(function(row){
+      var key = listId + ":" + row.iso;
+      keep[key] = true;
+      var li = existing[key] || createRankRow(key);
+      updateRankRow(li, row);
+      list.appendChild(li);
+    });
+    Object.keys(existing).forEach(function(key){
+      if (!keep[key]) existing[key].remove();
+    });
+  }
+
+  function levelRows(entries: RankEntry[], scale: number): RankRow[] {
+    return entries.map(function(entry){
+      var slot = highlighted.indexOf(entry.iso);
+      return {
+        iso: entry.iso,
+        name: entry.name,
+        rank: String(entry.rank),
+        value: fmtRankValue(entry.value, rankMetric),
+        ratio: scale > 0 ? Math.max(entry.value, 0) / scale : 0,
+        fill: slot > -1 ? seriesFill(slot) : contextFill()
+      };
+    });
+  }
+
+  function moverRows(entries: MoverEntry[], scale: number): RankRow[] {
+    return entries.map(function(entry, i){
+      return {
+        iso: entry.iso,
+        name: entry.name,
+        rank: String(i + 1),
+        value: fmtMover(entry.delta, rankMetric),
+        ratio: scale > 0 ? Math.abs(entry.delta) / scale : 0,
+        fill: moverFill(rankMetric, entry.delta)
+      };
+    });
+  }
+
+  function rankMoves(): Record<string, number> {
+    const moves: Record<string, number> = {};
+    var series = DATA.metrics[rankMetric];
+    if (!series || currentYearIdx === 0) return moves;
+    var both: { iso: string; then: number; now: number; name: string }[] = [];
+    Object.keys(series).forEach(function(iso){
+      var country = COUNTRIES_BY_ISO[iso];
+      var then = series[iso][0];
+      var now = series[iso][currentYearIdx];
+      if (country && hasNumber(then) && hasNumber(now)){
+        both.push({ iso: iso, then: then, now: now, name: country.name });
+      }
+    });
+    const thenRank: Record<string, number> = {};
+    both.slice().sort(function(a, b){ return b.then - a.then || a.name.localeCompare(b.name); })
+      .forEach(function(row, i){ thenRank[row.iso] = i + 1; });
+    both.slice().sort(function(a, b){ return b.now - a.now || a.name.localeCompare(b.name); })
+      .forEach(function(row, i){ moves[row.iso] = thenRank[row.iso] - (i + 1); });
+    return moves;
+  }
+
+  function updateRankYours(entries: RankEntry[]){
+    var list = element("rankYours");
+    var year = YEARS[currentYearIdx];
+    var moves = rankMoves();
+    list.innerHTML = "";
+    if (!highlighted.some(Boolean)){
+      list.innerHTML = '<li class="text-[12.5px] text-muted">Pick countries above to see where they stand.</li>';
+      return;
+    }
+    var colors = SERIES_COLORS_LIVE();
+    highlighted.forEach(function(iso, slot){
+      if (!iso) return;
+      var country = COUNTRIES_BY_ISO[iso];
+      if (!country) return;
+      var entry: RankEntry | null = null;
+      for (var i = 0; i < entries.length; i++){
+        if (entries[i].iso === iso){ entry = entries[i]; break; }
+      }
+      var li = document.createElement("li");
+      li.className = "rank-your-item";
+      var swatch = document.createElement("span");
+      swatch.className = "swatch";
+      swatch.style.background = colors[slot];
+      var name = document.createElement("span");
+      name.className = "rank-your-name";
+      name.textContent = country.name;
+      var value = document.createElement("span");
+      value.className = "rank-your-value";
+      value.textContent = entry ? fmtRankValue(entry.value, rankMetric) : "—";
+      var note = document.createElement("span");
+      note.className = "rank-your-note";
+      var move = moves[iso];
+      var movePhrase = move === undefined ? ""
+        : move === 0 ? " · same place as in " + YEARS[0]
+        : " · " + (move > 0 ? "up " : "down ") + Math.abs(move)
+          + " place" + (Math.abs(move) === 1 ? "" : "s") + " since " + YEARS[0];
+      note.textContent = entry
+        ? ordinal(entry.rank) + " highest of " + entries.length + movePhrase
+        : "No data for " + year;
+      li.appendChild(swatch);
+      li.appendChild(name);
+      li.appendChild(value);
+      li.appendChild(note);
+      list.appendChild(li);
+    });
+  }
+
+  function updateRankText(entries: RankEntry[], movers: MoverEntry[],
+      topRise: MoverEntry | undefined, topFall: MoverEntry | undefined, sharedScale: boolean){
+    var meta = DATA.metricMeta[rankMetric];
+    var year = YEARS[currentYearIdx];
+    var reporting = entries.length + " of " + COUNTRIES_SORTED.length + " countries report";
+    element("rankTopMeta").textContent = reporting;
+    element("rankBottomMeta").textContent = reporting;
+
+    var share = isShareMetric(rankMetric);
+    var basisWord = currentYearIdx === 0
+      ? ""
+      : share
+      ? meta.label + " is already a percentage, so its movers are measured in percentage points, never as a percent of a percent."
+      : rankBasis === "pct"
+        ? "Percent change from " + YEARS[0] + " to " + year + ". Each list is scaled to itself, because a rise has no ceiling while a fall can never pass 100%, so the two full bars do not stand for the same size of change. Countries that started from zero are left out."
+        : "Change from " + YEARS[0] + " to " + year + ", in " + meta.unit + ". Both lists share one scale, so a fall can outrun a rise.";
+    element("rankMoveSub").textContent = basisWord;
+
+    var moverMeta = movers.length + " of " + COUNTRIES_SORTED.length + " countries report both years";
+    // On a shared scale the bar lengths already compare; on separate scales each
+    // card has to say what its own full bar is worth.
+    element("rankRiseMeta").textContent = !movers.length ? ""
+      : sharedScale || !topRise ? moverMeta
+      : "Full bar " + fmtMover(topRise.delta, rankMetric) + " · " + moverMeta;
+    element("rankFallMeta").textContent = !movers.length ? ""
+      : sharedScale || !topFall ? moverMeta
+      : "Full bar " + fmtMover(topFall.delta, rankMetric) + " · " + moverMeta;
+
+    element("rankCaption").textContent =
+      meta.label + " (" + meta.unit + ") in " + year + ". "
+      + "Highest and Lowest share one scale, so a short bar beside a long one is a real difference. "
+      + "Your three countries keep their colours; every other country is grey. "
+      + (PLANET_BETTER_WHEN[rankMetric]
+        ? "Mover bars are green where the change is better for the planet and red where it is worse."
+        : "Mover bars show growth or decline, which this metric does not judge as better or worse.");
+  }
+
+  function updateRankings(animate: boolean){
+    var entries = rankedFor(rankMetric, currentYearIdx);
+    var movers = moversFor(rankMetric, currentYearIdx);
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var flip = animate && !reduce;
+    var lists = ["rankTopList", "rankBottomList", "rankRiseList", "rankFallList"];
+
+    // Read every position before writing any, then write, then read once more:
+    // two batched passes rather than a read/write interleave per row.
+    const before = new Map<HTMLElement, number>();
+    if (flip){
+      lists.forEach(function(id){
+        element(id).querySelectorAll<HTMLElement>(".rank-row").forEach(function(row){
+          before.set(row, row.getBoundingClientRect().top);
+        });
+      });
+    }
+
+    var count = rankRows();
+    var top = entries.slice(0, count);
+    var bottom = entries.slice(-count).reverse();
+    var levelScale = entries.length ? Math.max(entries[0].value, 0) : 0;
+    var noLevel = "No country reports this metric for " + YEARS[currentYearIdx] + ".";
+    syncRankList("rankTopList", levelRows(top, levelScale), noLevel);
+    syncRankList("rankBottomList", levelRows(bottom, levelScale), noLevel);
+
+    var rises = movers.filter(function(m){ return m.delta > 0; }).slice(0, count);
+    var falls = movers.filter(function(m){ return m.delta < 0; }).slice(-count).reverse();
+    var moverScale = Math.max(
+      rises.length ? Math.abs(rises[0].delta) : 0,
+      falls.length ? Math.abs(falls[0].delta) : 0
+    );
+    var sharedMoverScale = rankBasis === "abs";
+    var riseScale = sharedMoverScale || !rises.length ? moverScale : Math.abs(rises[0].delta);
+    var fallScale = sharedMoverScale || !falls.length ? moverScale : Math.abs(falls[0].delta);
+    syncRankList("rankRiseList", moverRows(rises, riseScale), "No country rose since " + YEARS[0] + ".");
+    syncRankList("rankFallList", moverRows(falls, fallScale), "No country fell since " + YEARS[0] + ".");
+
+    var noMovers = !movers.length;
+    element("rankMoversPair").hidden = noMovers;
+    var empty = element("rankMoveEmpty");
+    empty.hidden = !noMovers;
+    empty.textContent = currentYearIdx === 0
+      ? "Move the year past " + YEARS[0] + " to see how far countries have travelled."
+      : "No country reports both " + YEARS[0] + " and " + YEARS[currentYearIdx] + " for this metric.";
+
+    updateRankYours(entries);
+    updateRankText(entries, movers, rises[0], falls[0], sharedMoverScale);
+
+    if (!flip) return;
+    const moves: { el: HTMLElement; dy: number }[] = [];
+    lists.forEach(function(id){
+      element(id).querySelectorAll<HTMLElement>(".rank-row").forEach(function(row){
+        var was = before.get(row);
+        if (was === undefined) return;
+        var dy = was - row.getBoundingClientRect().top;
+        if (Math.abs(dy) > 0.5) moves.push({ el: row, dy: dy });
+      });
+    });
+    moves.forEach(function(move){
+      move.el.style.transition = "none";
+      move.el.style.transform = "translateY(" + move.dy.toFixed(1) + "px)";
+    });
+    if (moves.length) requestAnimationFrame(function(){
+      moves.forEach(function(move){
+        move.el.style.transition = "";
+        move.el.style.transform = "";
+      });
+    });
+  }
+
+  // Percent of a percent misleads, so the share metrics are held to points.
+  function syncRankBasisControl(){
+    var share = isShareMetric(rankMetric);
+    if (share) rankBasis = "abs";
+    element("rankBasisAmount").textContent = share ? "Points" : "Amount";
+    document.querySelectorAll<HTMLInputElement>("input[name=rankBasis]").forEach(function(input){
+      input.checked = input.value === rankBasis;
+      input.disabled = share && input.value === "pct";
+    });
   }
 
   // ---------- Choropleth ----------
