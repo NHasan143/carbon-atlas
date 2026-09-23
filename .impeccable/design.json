@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-23T00:03:07Z",
+  "generatedAt": "2026-09-23T00:00:00Z",
   "title": "Design System: Carbon Atlas",
   "extensions": {
     "colorMeta": {
@@ -443,6 +443,202 @@
         ],
         "canonical": "oklch(72% 0.11 27)"
       },
+      "seq-100-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 1 (lowest)",
+        "tonalRamp": [
+          "oklch(15% 0.041 252.8)",
+          "oklch(26% 0.041 252.8)",
+          "oklch(38% 0.041 252.8)",
+          "oklch(50% 0.041 252.8)",
+          "oklch(62% 0.041 252.8)",
+          "oklch(74% 0.041 252.8)",
+          "oklch(86% 0.041 252.8)",
+          "oklch(95% 0.041 252.8)"
+        ]
+      },
+      "seq-200-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 2",
+        "tonalRamp": [
+          "oklch(15% 0.079 253.4)",
+          "oklch(26% 0.079 253.4)",
+          "oklch(38% 0.079 253.4)",
+          "oklch(50% 0.079 253.4)",
+          "oklch(62% 0.079 253.4)",
+          "oklch(74% 0.079 253.4)",
+          "oklch(86% 0.079 253.4)",
+          "oklch(95% 0.079 253.4)"
+        ]
+      },
+      "seq-300-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 3",
+        "tonalRamp": [
+          "oklch(15% 0.118 253.6)",
+          "oklch(26% 0.118 253.6)",
+          "oklch(38% 0.118 253.6)",
+          "oklch(50% 0.118 253.6)",
+          "oklch(62% 0.118 253.6)",
+          "oklch(74% 0.118 253.6)",
+          "oklch(86% 0.118 253.6)",
+          "oklch(95% 0.118 253.6)"
+        ]
+      },
+      "seq-400-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 4",
+        "tonalRamp": [
+          "oklch(15% 0.161 255.1)",
+          "oklch(26% 0.161 255.1)",
+          "oklch(38% 0.161 255.1)",
+          "oklch(50% 0.161 255.1)",
+          "oklch(62% 0.161 255.1)",
+          "oklch(74% 0.161 255.1)",
+          "oklch(86% 0.161 255.1)",
+          "oklch(95% 0.161 255.1)"
+        ]
+      },
+      "seq-500-light": {
+        "role": "tertiary",
+        "displayName": "Level Ramp Mid (unused by bands)",
+        "tonalRamp": [
+          "oklch(15% 0.143 254.9)",
+          "oklch(26% 0.143 254.9)",
+          "oklch(38% 0.143 254.9)",
+          "oklch(50% 0.143 254.9)",
+          "oklch(62% 0.143 254.9)",
+          "oklch(74% 0.143 254.9)",
+          "oklch(86% 0.143 254.9)",
+          "oklch(95% 0.143 254.9)"
+        ]
+      },
+      "seq-600-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 5",
+        "tonalRamp": [
+          "oklch(15% 0.128 256.5)",
+          "oklch(26% 0.128 256.5)",
+          "oklch(38% 0.128 256.5)",
+          "oklch(50% 0.128 256.5)",
+          "oklch(62% 0.128 256.5)",
+          "oklch(74% 0.128 256.5)",
+          "oklch(86% 0.128 256.5)",
+          "oklch(95% 0.128 256.5)"
+        ]
+      },
+      "seq-700-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 6 (highest)",
+        "tonalRamp": [
+          "oklch(15% 0.103 256.9)",
+          "oklch(26% 0.103 256.9)",
+          "oklch(38% 0.103 256.9)",
+          "oklch(50% 0.103 256.9)",
+          "oklch(62% 0.103 256.9)",
+          "oklch(74% 0.103 256.9)",
+          "oklch(86% 0.103 256.9)",
+          "oklch(95% 0.103 256.9)"
+        ]
+      },
+      "seq-100-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 1 (lowest) (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.060 249.6)",
+          "oklch(26% 0.060 249.6)",
+          "oklch(38% 0.060 249.6)",
+          "oklch(50% 0.060 249.6)",
+          "oklch(62% 0.060 249.6)",
+          "oklch(74% 0.060 249.6)",
+          "oklch(86% 0.060 249.6)",
+          "oklch(95% 0.060 249.6)"
+        ]
+      },
+      "seq-200-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 2 (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.077 250.2)",
+          "oklch(26% 0.077 250.2)",
+          "oklch(38% 0.077 250.2)",
+          "oklch(50% 0.077 250.2)",
+          "oklch(62% 0.077 250.2)",
+          "oklch(74% 0.077 250.2)",
+          "oklch(86% 0.077 250.2)",
+          "oklch(95% 0.077 250.2)"
+        ]
+      },
+      "seq-300-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 3 (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.088 246.5)",
+          "oklch(26% 0.088 246.5)",
+          "oklch(38% 0.088 246.5)",
+          "oklch(50% 0.088 246.5)",
+          "oklch(62% 0.088 246.5)",
+          "oklch(74% 0.088 246.5)",
+          "oklch(86% 0.088 246.5)",
+          "oklch(95% 0.088 246.5)"
+        ]
+      },
+      "seq-400-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 4 (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.161 255.1)",
+          "oklch(26% 0.161 255.1)",
+          "oklch(38% 0.161 255.1)",
+          "oklch(50% 0.161 255.1)",
+          "oklch(62% 0.161 255.1)",
+          "oklch(74% 0.161 255.1)",
+          "oklch(86% 0.161 255.1)",
+          "oklch(95% 0.161 255.1)"
+        ]
+      },
+      "seq-500-dark": {
+        "role": "tertiary",
+        "displayName": "Level Ramp Mid (unused by bands) (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.132 252.9)",
+          "oklch(26% 0.132 252.9)",
+          "oklch(38% 0.132 252.9)",
+          "oklch(50% 0.132 252.9)",
+          "oklch(62% 0.132 252.9)",
+          "oklch(74% 0.132 252.9)",
+          "oklch(86% 0.132 252.9)",
+          "oklch(95% 0.132 252.9)"
+        ]
+      },
+      "seq-600-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 5 (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.092 252.9)",
+          "oklch(26% 0.092 252.9)",
+          "oklch(38% 0.092 252.9)",
+          "oklch(50% 0.092 252.9)",
+          "oklch(62% 0.092 252.9)",
+          "oklch(74% 0.092 252.9)",
+          "oklch(86% 0.092 252.9)",
+          "oklch(95% 0.092 252.9)"
+        ]
+      },
+      "seq-700-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 6 (highest) (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.041 252.8)",
+          "oklch(26% 0.041 252.8)",
+          "oklch(38% 0.041 252.8)",
+          "oklch(50% 0.041 252.8)",
+          "oklch(62% 0.041 252.8)",
+          "oklch(74% 0.041 252.8)",
+          "oklch(86% 0.041 252.8)",
+          "oklch(95% 0.041 252.8)"
+        ]
+      },
       "band-mid": {
         "role": "tertiary",
         "displayName": "About the Same Sand",
@@ -653,34 +849,6 @@
           "oklch(95% 0.002 106.5)"
         ]
       },
-      "rank-context-light": {
-        "role": "neutral",
-        "displayName": "Rank Context Grey",
-        "tonalRamp": [
-          "oklch(15% 0.006 106.6)",
-          "oklch(26% 0.006 106.6)",
-          "oklch(38% 0.006 106.6)",
-          "oklch(50% 0.006 106.6)",
-          "oklch(62% 0.006 106.6)",
-          "oklch(74% 0.006 106.6)",
-          "oklch(86% 0.006 106.6)",
-          "oklch(95% 0.006 106.6)"
-        ]
-      },
-      "rank-context-dark": {
-        "role": "neutral",
-        "displayName": "Rank Context Grey (Graphite)",
-        "tonalRamp": [
-          "oklch(15% 0.004 67.7)",
-          "oklch(26% 0.004 67.7)",
-          "oklch(38% 0.004 67.7)",
-          "oklch(50% 0.004 67.7)",
-          "oklch(62% 0.004 67.7)",
-          "oklch(74% 0.004 67.7)",
-          "oklch(86% 0.004 67.7)",
-          "oklch(95% 0.004 67.7)"
-        ]
-      },
       "rank-good-light": {
         "role": "tertiary",
         "displayName": "Rank Better Green",
@@ -792,90 +960,6 @@
           "oklch(86% 0.076 73.2)",
           "oklch(95% 0.076 73.2)"
         ]
-      },
-      "rank-slot-1-light": {
-        "role": "secondary",
-        "displayName": "Rank Slot One Blue",
-        "tonalRamp": [
-          "oklch(15% 0.144 255.0)",
-          "oklch(26% 0.144 255.0)",
-          "oklch(38% 0.144 255.0)",
-          "oklch(50% 0.144 255.0)",
-          "oklch(62% 0.144 255.0)",
-          "oklch(74% 0.144 255.0)",
-          "oklch(86% 0.144 255.0)",
-          "oklch(95% 0.144 255.0)"
-        ]
-      },
-      "rank-slot-2-light": {
-        "role": "secondary",
-        "displayName": "Rank Slot Two Orange",
-        "tonalRamp": [
-          "oklch(15% 0.170 40.7)",
-          "oklch(26% 0.170 40.7)",
-          "oklch(38% 0.170 40.7)",
-          "oklch(50% 0.170 40.7)",
-          "oklch(62% 0.170 40.7)",
-          "oklch(74% 0.170 40.7)",
-          "oklch(86% 0.170 40.7)",
-          "oklch(95% 0.170 40.7)"
-        ]
-      },
-      "rank-slot-3-light": {
-        "role": "secondary",
-        "displayName": "Rank Slot Three Green",
-        "tonalRamp": [
-          "oklch(15% 0.128 162.1)",
-          "oklch(26% 0.128 162.1)",
-          "oklch(38% 0.128 162.1)",
-          "oklch(50% 0.128 162.1)",
-          "oklch(62% 0.128 162.1)",
-          "oklch(74% 0.128 162.1)",
-          "oklch(86% 0.128 162.1)",
-          "oklch(95% 0.128 162.1)"
-        ]
-      },
-      "rank-slot-1-dark": {
-        "role": "secondary",
-        "displayName": "Rank Slot One Blue (Graphite)",
-        "tonalRamp": [
-          "oklch(15% 0.141 255.2)",
-          "oklch(26% 0.141 255.2)",
-          "oklch(38% 0.141 255.2)",
-          "oklch(50% 0.141 255.2)",
-          "oklch(62% 0.141 255.2)",
-          "oklch(74% 0.141 255.2)",
-          "oklch(86% 0.141 255.2)",
-          "oklch(95% 0.141 255.2)"
-        ]
-      },
-      "rank-slot-2-dark": {
-        "role": "secondary",
-        "displayName": "Rank Slot Two Orange (Graphite)",
-        "tonalRamp": [
-          "oklch(15% 0.149 40.9)",
-          "oklch(26% 0.149 40.9)",
-          "oklch(38% 0.149 40.9)",
-          "oklch(50% 0.149 40.9)",
-          "oklch(62% 0.149 40.9)",
-          "oklch(74% 0.149 40.9)",
-          "oklch(86% 0.149 40.9)",
-          "oklch(95% 0.149 40.9)"
-        ]
-      },
-      "rank-slot-3-dark": {
-        "role": "secondary",
-        "displayName": "Rank Slot Three Green (Graphite)",
-        "tonalRamp": [
-          "oklch(15% 0.107 164.8)",
-          "oklch(26% 0.107 164.8)",
-          "oklch(38% 0.107 164.8)",
-          "oklch(50% 0.107 164.8)",
-          "oklch(62% 0.107 164.8)",
-          "oklch(74% 0.107 164.8)",
-          "oklch(86% 0.107 164.8)",
-          "oklch(95% 0.107 164.8)"
-        ]
       }
     },
     "typographyMeta": {
@@ -957,24 +1041,34 @@
         "purpose": "Scales and rises the country list open, flipping origin when it opens upward."
       },
       {
+        "name": "year-playback-step",
+        "value": "650ms",
+        "purpose": "Advances the synchronized year playback cadence; rank motion is tuned under it."
+      },
+      {
         "name": "rank-fill",
-        "value": "460ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "Grows a rank bar to its new share of the shared scale."
+        "value": "600ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Grows a rank bar to its new share of the shared scale, just under the 650ms step so fills read as continuous travel."
       },
       {
         "name": "rank-reorder",
-        "value": "520ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "Moves a reused rank row to its new position; entry animates over 420ms."
+        "value": "600ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "FLIP-transforms a reused rank row to its new position on the same 600ms clock as the fill."
+      },
+      {
+        "name": "rank-enter",
+        "value": "400ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Fades a new rank row in; opacity only, no translate, so an entering row does not appear to slide past its neighbours."
+      },
+      {
+        "name": "rank-exit",
+        "value": "320ms linear",
+        "purpose": "Fades a row that has left the visible ten while it is pinned out of flow at its last offset, then it is removed."
       },
       {
         "name": "table-row",
         "value": "200ms ease",
         "purpose": "Softens the background change on comparison-table row hover."
-      },
-      {
-        "name": "year-playback-step",
-        "value": "650ms",
-        "purpose": "Advances the synchronized year playback cadence."
       }
     ],
     "breakpoints": [
@@ -1049,9 +1143,9 @@
       "name": "Ranked List Row",
       "kind": "custom",
       "refersTo": "rank-row",
-      "description": "The signature row: the bar is the row's own ground behind the rank numeral and name, and stops short of the value.",
-      "html": "<ol class=\"ds-rank-list\"><li class=\"ds-rank-row\" style=\"--ds-fill:var(--rank-slot-1,#3d81d4);--ds-ratio:0.82\"><i class=\"ds-rank-bar\" aria-hidden=\"true\"><i class=\"ds-rank-fill\"></i></i><span class=\"ds-rank-num\">3</span><span class=\"ds-rank-name\"><span class=\"ds-swatch\"></span><span class=\"ds-rank-label\">United States</span></span><span class=\"ds-rank-value\">13.8 t</span></li><li class=\"ds-rank-row\" style=\"--ds-fill:var(--rank-context,#888884);--ds-ratio:0.54\"><i class=\"ds-rank-bar\" aria-hidden=\"true\"><i class=\"ds-rank-fill\"></i></i><span class=\"ds-rank-num\">4</span><span class=\"ds-rank-name\"><span class=\"ds-rank-label\">Australia</span></span><span class=\"ds-rank-value\">9.1 t</span></li></ol>",
-      "css": ".ds-rank-list { display:grid; gap:2px; margin:0; padding:0; list-style:none; font-family:'IBM Plex Sans',system-ui,sans-serif; } .ds-rank-row { position:relative; display:grid; grid-template-columns:1.6rem minmax(0,1fr) auto; align-items:center; gap:10px; padding:7px 10px; border-radius:8px; font-size:13.5px; color:var(--text-primary,#0b0b0b); } .ds-rank-bar { grid-area:1 / 1 / 2 / 3; align-self:stretch; margin-block:-4px; z-index:0; overflow:hidden; border-radius:5px; background:var(--rank-track,#f1f1ed); pointer-events:none; } .ds-rank-fill { display:block; width:100%; height:100%; transform-origin:left; transform:scaleX(var(--ds-ratio,1)); background:var(--ds-fill,transparent); transition:transform 460ms cubic-bezier(0.16,1,0.3,1); } .ds-rank-num { grid-area:1 / 1 / 2 / 2; z-index:1; text-align:right; font-size:11.5px; font-variant-numeric:tabular-nums; } .ds-rank-name { grid-area:1 / 2 / 2 / 3; z-index:1; display:flex; min-width:0; align-items:center; gap:8px; font-weight:600; } .ds-rank-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .ds-swatch { width:11px; height:11px; flex-shrink:0; border-radius:9999px; background:var(--surface,#fcfcfb); } .ds-rank-value { grid-area:1 / 3 / 2 / 4; flex-shrink:0; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; font-variant-numeric:tabular-nums; }"
+      "description": "The signature row: named-areas grid with the bar in its own column, framed track, map-band fill, and a selected country marked around the row.",
+      "html": "<ol class=\"ds-rank-list\"><li class=\"ds-rank-row\" data-selected=\"true\" style=\"--ds-fill:var(--seq-600,#184f95);--ds-mark:var(--accent,#2a78d6);--ds-ratio:0.82\"><i class=\"ds-rank-bar\" aria-hidden=\"true\"><i class=\"ds-rank-fill\"></i></i><span class=\"ds-rank-num\">3</span><span class=\"ds-rank-name\"><span class=\"ds-swatch\"></span><span class=\"ds-rank-label\">United States</span></span><span class=\"ds-rank-value\">13.8 t</span></li><li class=\"ds-rank-row\" style=\"--ds-fill:var(--seq-300,#6da7ec);--ds-ratio:0.54\"><i class=\"ds-rank-bar\" aria-hidden=\"true\"><i class=\"ds-rank-fill\"></i></i><span class=\"ds-rank-num\">4</span><span class=\"ds-rank-name\"><span class=\"ds-rank-label\">Australia</span></span><span class=\"ds-rank-value\">9.1 t</span></li><li class=\"ds-rank-row\" style=\"--ds-fill:var(--rank-good,#4e9068);--ds-ratio:0.31\"><i class=\"ds-rank-bar\" aria-hidden=\"true\"><i class=\"ds-rank-fill\"></i></i><span class=\"ds-rank-num\">5</span><span class=\"ds-rank-name\"><span class=\"ds-rank-label\">Denmark</span></span><span class=\"ds-rank-value\">−38%</span></li></ol>",
+      "css": ".ds-rank-list { position:relative; display:grid; gap:2px; margin:0; padding:0; list-style:none; font-family:'IBM Plex Sans',system-ui,sans-serif; } .ds-rank-row { display:grid; align-items:center; grid-template-columns:1.6rem minmax(0,1fr) auto; grid-template-areas:'num name value' 'bar bar bar'; gap:5px 10px; padding:7px 10px; border-radius:8px; font-size:13.5px; color:var(--text-primary,#0b0b0b); transition:transform 600ms cubic-bezier(0.16,1,0.3,1), opacity 320ms linear; } @media (min-width:640px) { .ds-rank-row { grid-template-columns:1.6rem minmax(0,1fr) clamp(54px,27%,168px) auto; grid-template-areas:'num name bar value'; gap:10px; } } .ds-rank-bar { grid-area:bar; height:5px; overflow:hidden; border-radius:3px; background:var(--rank-track,#f1f1ed); box-shadow:inset 0 0 0 1px var(--border,rgba(11,11,11,0.10)); pointer-events:none; } @media (min-width:640px) { .ds-rank-bar { height:13px; align-self:center; } } .ds-rank-fill { display:block; width:100%; height:100%; transform-origin:left; transform:scaleX(var(--ds-ratio,1)); background:var(--ds-fill,transparent); transition:transform 600ms cubic-bezier(0.16,1,0.3,1); } .ds-rank-num { grid-area:num; text-align:right; font-size:11.5px; color:var(--text-muted,#686660); font-variant-numeric:tabular-nums; } .ds-rank-name { grid-area:name; display:flex; min-width:0; align-items:center; gap:8px; color:var(--text-primary,#0b0b0b); } .ds-rank-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .ds-swatch { width:11px; height:11px; flex-shrink:0; border-radius:9999px; background:var(--ds-mark,currentColor); } .ds-rank-value { grid-area:value; flex-shrink:0; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; font-variant-numeric:tabular-nums; } .ds-rank-row[data-selected='true'] { background:color-mix(in oklab, var(--ds-mark) 12%, transparent); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--ds-mark) 45%, transparent); } .ds-rank-row[data-selected='true'] .ds-rank-name { font-weight:600; } .ds-rank-row[data-selected='true'] .ds-rank-num { color:var(--text-secondary,#52514e); } @media (prefers-reduced-motion: reduce) { .ds-rank-row, .ds-rank-fill { transition:none; } }"
     },
     {
       "name": "Field Toolbar",
@@ -1071,12 +1165,13 @@
   ],
   "narrative": {
     "northStar": "The Editorial Field Atlas",
-    "overview": "The system pairs the authority of a printed reference atlas with the immediacy of a living climate record. A framed, full-viewport filmic hero establishes scale and urgency; everything below it becomes quieter, flatter, and more exact so the data can carry the argument. The page is one long reading, divided into chapters by hairlines and air rather than by boxes.\n\nType does the register change. The hero speaks in a wide geometric sans set very tight and very large; chapter titles speak in a serif display face (Playfair Display) that reads as a printed atlas plate; everything operational \u2014 labels, controls, notes \u2014 is IBM Plex Sans, and every figure is IBM Plex Mono with tabular numerals so columns of numbers line up and never jitter as the year advances. Light mode is warm paper and ink; dark mode is graphite with illuminated plotting marks. Neither mode introduces a second brand palette.\n\nColour is almost entirely functional. Three country hues (blue, orange, green) hold their slot across every view; everything else is grey context. Saturated colour beyond those three exists only to encode magnitude, direction, action, or focus. The Rankings chapter extended this with its own measured colour rung \u2014 bars that are large filled shapes and carry text on top of them \u2014 but it did not extend the world's identity.",
+    "overview": "The system pairs the authority of a printed reference atlas with the immediacy of a living climate record. A framed, full-viewport filmic hero establishes scale and urgency; everything below it becomes quieter, flatter, and more exact so the data can carry the argument. The page is one long reading, divided into chapters by hairlines and air rather than by boxes.\n\nType does the register change. The hero speaks in a wide geometric sans set very tight and very large; chapter titles speak in a serif display face (Playfair Display) that reads as a printed atlas plate; everything operational — labels, controls, notes — is IBM Plex Sans, and every figure is IBM Plex Mono with tabular numerals so columns of numbers line up and never jitter as the year advances. Light mode is warm paper and ink; dark mode is graphite with illuminated plotting marks. Neither mode introduces a second brand palette.\n\nColour is almost entirely functional. Three country hues (blue, orange, green) hold their slot across every view; everything else is grey context. Saturated colour beyond those three exists only to encode magnitude, direction, action, or focus. Encodings are shared rather than duplicated: a rank bar showing a level is painted from the same six map bands, by the same band function, as the country's patch on the choropleth, so a reader who has learned the map has already learned the list.",
     "keyCharacteristics": [
       "Immersive framed motion at the opening, followed by restrained analytical chapters.",
       "Serif display chapter titles over a sans body; monospaced tabular numerals for all figures.",
       "Warm paper light surfaces and near-black graphite dark surfaces, separated by 1px hairlines.",
       "Blue, orange, green country series that stay synchronized across map, table, bubbles, trends, and ranks.",
+      "One encoding per idea, reused across views: level is always the map's band ramp, change is always the verdict ramp.",
       "Flat, bordered controls and plot stages; depth reserved for the hero, popovers, and the switch thumb.",
       "Every encoding readable without colour: rank numerals, arrow glyphs, signs, and labelled legend bands."
     ],
@@ -1088,7 +1183,7 @@
       },
       {
         "name": "The Quiet Field Rule",
-        "body": "Neutral surfaces and hairlines carry structure. Saturated colour must encode action, selection, magnitude, direction, or focus \u2014 never decoration.",
+        "body": "Neutral surfaces and hairlines carry structure. Saturated colour must encode action, selection, magnitude, direction, or focus — never decoration.",
         "section": "colors"
       },
       {
@@ -1097,8 +1192,13 @@
         "section": "colors"
       },
       {
-        "name": "The Legible Bar Rule",
-        "body": "A colour that is both a large filled region and the ground under a label belongs to the rank-* rung, not to band-* or the series accents. The map ramp and chart series are tuned for filled regions with no text on them and cannot hold 3:1 against the card and 4.5:1 under a label at the same time; the rank-* values were tuned by measurement into that narrow band (measured 3.47\u20133.56 against the card light, 3.43\u20133.55 dark; labels 5.39\u20135.53 light, 4.90\u20135.08 dark). Repainting rank bars with --band-* to \"simplify the palette\" reintroduces a contrast failure that will not be visible in a screenshot.",
+        "name": "The One Encoding Rule",
+        "body": "A quantity that already has a colour encoding elsewhere reuses that encoding, function and all. Level anywhere on the page is the seq-* map bands through bandIndex(LEVEL_BANDS[metric].edges, value); direction of change is the verdict rung. A second surface showing the same quantity in a new ramp is a bug, not a variation.",
+        "section": "colors"
+      },
+      {
+        "name": "The Framed Bar Rule",
+        "body": "A band fill is a fill, never a ground: nothing is printed over a rank bar or a map patch. Because the ramp's palest step sits close to the card (seq-100 is about 1.3:1 against paper-surface — the same relationship the choropleth has always shipped for its lowest band), the bar's extent is carried by structure instead of by the fill: .rank-bar takes a 1px --border inset frame that outlines the full track whatever shade lands in it. Fix a pale bar by keeping the frame, not by darkening the ramp — darkening it breaks the match with the map, which is the whole point of the colour.",
         "section": "colors"
       },
       {
@@ -1118,12 +1218,17 @@
       },
       {
         "name": "The Open Chapter Rule",
-        "body": "Section spacing and hairlines define the story. Cards wrap controls, tables, and plots \u2014 never a whole chapter.",
+        "body": "Section spacing and hairlines define the story. Cards wrap controls, tables, and plots — never a whole chapter.",
         "section": "layout"
       },
       {
         "name": "The Pinned Context Rule",
         "body": "When a data region must scroll horizontally, keep the identifying label visible and give small screens a plain-language scroll hint.",
+        "section": "layout"
+      },
+      {
+        "name": "The Measured Caption Rule",
+        "body": "A caption gets an explicit measure and is allowed to change shape at a breakpoint (90ch → nowrap at xl; 1040px for two settled lines from 1024px). A caption that reflows into a ragged third line at one width is not finished.",
         "section": "layout"
       },
       {
@@ -1140,20 +1245,26 @@
     "dos": [
       "Do keep blue, orange, and green in slot order across controls, table, map, bubbles, trends, and ranks.",
       "Do define every new colour token in all three theme blocks in the same change, and state its measured contrast against the surface it will sit on.",
-      "Do use rank-* for any bar, chip, or block that will have text sitting on top of it.",
+      "Do paint a level anywhere on the page from the seq-* map bands via bandIndex, so the list and the map agree by construction rather than by eye.",
+      "Do use the rank-* verdict rung for direction-of-change bars, which have no position on the level scale to borrow.",
+      "Do give any band-filled bar a 1px inset frame so its extent survives the palest step of the ramp.",
       "Do pair monospaced tabular numerals with plain-language labels and units.",
       "Do carry direction with shape (arrow, sign, rank numeral) as well as colour, so a figure survives without hue.",
+      "Do match animated list motion to the playback cadence that drives it (600ms transitions under a 650ms step), and pin a leaving row out of flow rather than deleting it mid-step.",
       "Do keep every interactive target at 44px or larger under @media (pointer: coarse) while leaving its visual box alone.",
       "Do disable transitions, entry animations, and the hero video under prefers-reduced-motion.",
       "Do keep chapters open: hairlines and spacing, not nested boxes."
     ],
     "donts": [
-      "Don't repaint rank bars with --band-* or the --accent* series; see the Legible Bar Rule.",
+      "Don't print text over a band-filled bar or a map patch. The ramps are tuned for fills; give the label its own grid column, which is what the rank row now does.",
+      "Don't invent a new ramp for a quantity that already has one; see the One Encoding Rule.",
+      "Don't darken seq-100 to \"fix\" a pale bar. The frame is the mechanism, and the ramp must keep matching the map.",
+      "Don't mark a selection by cutting a hole in, or recolouring, the data fill — mark it around the row (wash plus inset ring) so the encoding stays intact.",
+      "Don't rebuild a live list from innerHTML on a playback step; reuse the rows and the strip cells.",
       "Don't add ambient shadow to analytical cards, tables, toolbars, or plot stages. Shadow is for the hero, floating overlays, and the switch thumb.",
       "Don't use decorative colour that could be mistaken for a series, a magnitude band, a selection, or a focus state.",
-      "Don't mute text that sits on a coloured bar to create hierarchy; change size or weight instead.",
       "Don't set Playfair on anything smaller than a chapter title, and don't substitute a system serif or system display face for it.",
-      "Don't hand Plotly an oklch() value \u2014 it cannot parse it and silently swaps in its own scale.",
+      "Don't hand Plotly an oklch() value — it cannot parse it and silently swaps in its own scale.",
       "Don't build a segmented control, disclosure, or listbox out of divs when a native radio, details, or option would carry the keyboard and screen-reader behaviour.",
       "Don't let any region force horizontal scroll at 390px; the comparison table's own scroll frame is the single sanctioned exception."
     ]
