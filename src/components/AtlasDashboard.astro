@@ -4,10 +4,12 @@ import BackToTop from './BackToTop.astro';
 import Hero from './Hero.astro';
 import MetricSelect from './MetricSelect.astro';
 import Panel from './Panel.astro';
+import SoundToggle from './SoundToggle.astro';
 ---
 
   <Hero />
   <BackToTop />
+  <SoundToggle />
 
   <div class="atlas-shell mx-auto max-w-[1280px] px-4 pt-20 pb-6 sm:px-6 lg:pt-28">
     <AtlasControls />
@@ -869,6 +871,9 @@ function initAtlas(){
     element("playIcon").style.display = playing ? "none" : "block";
     element("pauseIcon").style.display = playing ? "block" : "none";
     element("playBtn").setAttribute("aria-pressed", String(playing));
+    // Pressing Play is the gesture a browser requires before it will let any
+    // audio start, so the sound control listens for this rather than guessing.
+    document.dispatchEvent(new CustomEvent("atlas:playback", { detail: { playing: playing } }));
   }
 
   function updateYearOutputs(){
@@ -938,6 +943,7 @@ function initAtlas(){
   interface RankEntry { iso: string; name: string; value: number; rank: number; }
   interface MoverEntry { iso: string; name: string; delta: number; }
   interface RankRow { iso: string; name: string; rank: string; value: string; ratio: number; fill: string; }
+  var EXIT_MS = 320;
 
   function isShareMetric(metric: string){
     return CHANGE_BANDS[metric].mode === "pts";
@@ -1006,12 +1012,13 @@ function initAtlas(){
     return out;
   }
 
-  function contextFill(){
-    return getVar("--rank-context");
+  function levelBandColors(){
+    var t = theme();
+    return [t.seq[0], t.seq[1], t.seq[2], t.seq[3], t.seq[5], t.seq[6]];
   }
 
-  function seriesFill(slot: number){
-    return getVar("--rank-slot-" + (slot + 1));
+  function levelFill(value: number, colors: string[]){
+    return colors[bandIndex(LEVEL_BANDS[rankMetric].edges, value)];
   }
 
   // Movers inherit the Change map's reading: green and red where the metric
@@ -1064,7 +1071,15 @@ function initAtlas(){
     li.querySelector(".rank-value")!.textContent = row.value;
     var swatch = li.querySelector(".swatch") as HTMLElement;
     swatch.hidden = slot < 0;
-    if (slot > -1) li.dataset.selected = "true"; else delete li.dataset.selected;
+    if (slot > -1){
+      li.dataset.selected = "true";
+      var mark = SERIES_COLORS_LIVE()[slot];
+      li.style.setProperty("--rank-mark", mark);
+      swatch.style.background = mark;
+    } else {
+      delete li.dataset.selected;
+      li.style.removeProperty("--rank-mark");
+    }
   }
 
   // Rows are reused rather than rebuilt, so a bar can transition its width and
@@ -1087,20 +1102,28 @@ function initAtlas(){
       list.appendChild(li);
     });
     Object.keys(existing).forEach(function(key){
-      if (!keep[key]) existing[key].remove();
+      if (keep[key]) return;
+      var leaving = existing[key];
+      if (leaving.dataset.exit) return;
+      // Pin it where it already sits, then let it fade without dragging the
+      // rows that remain, which is what made a playing list look like flicker.
+      leaving.style.top = leaving.offsetTop + "px";
+      leaving.dataset.exit = "true";
+      delete leaving.dataset.key;
+      setTimeout(function(){ leaving.remove(); }, EXIT_MS);
     });
   }
 
   function levelRows(entries: RankEntry[], scale: number): RankRow[] {
+    var colors = levelBandColors();
     return entries.map(function(entry){
-      var slot = highlighted.indexOf(entry.iso);
       return {
         iso: entry.iso,
         name: entry.name,
         rank: String(entry.rank),
         value: fmtRankValue(entry.value, rankMetric),
         ratio: scale > 0 ? Math.max(entry.value, 0) / scale : 0,
-        fill: slot > -1 ? seriesFill(slot) : contextFill()
+        fill: levelFill(entry.value, colors)
       };
     });
   }
@@ -1139,50 +1162,66 @@ function initAtlas(){
     return moves;
   }
 
+  // Rebuilt from scratch this strip flashed three times a second under Play.
+  // The cells are kept and only their text is rewritten.
   function updateRankYours(entries: RankEntry[]){
     var list = element("rankYours");
     var year = YEARS[currentYearIdx];
     var moves = rankMoves();
-    list.innerHTML = "";
+    var colors = SERIES_COLORS_LIVE();
+
     if (!highlighted.some(Boolean)){
-      list.innerHTML = '<li class="text-[12.5px] text-muted">Pick countries above to see where they stand.</li>';
+      if (!list.querySelector(".rank-your-empty")){
+        list.innerHTML = '<li class="rank-your-empty text-[12.5px] text-muted">Pick countries above to see where they stand.</li>';
+      }
       return;
     }
-    var colors = SERIES_COLORS_LIVE();
+    var emptyNote = list.querySelector(".rank-your-empty");
+    if (emptyNote) emptyNote.remove();
+
+    const existing: Record<string, HTMLElement> = {};
+    Array.prototype.forEach.call(list.children, function(child: HTMLElement){
+      if (child.dataset.slot) existing[child.dataset.slot] = child;
+    });
+    const keep: Record<string, boolean> = {};
+
     highlighted.forEach(function(iso, slot){
       if (!iso) return;
       var country = COUNTRIES_BY_ISO[iso];
       if (!country) return;
+      keep[String(slot)] = true;
+      var li = existing[String(slot)];
+      if (!li){
+        li = document.createElement("li");
+        li.className = "rank-your-item";
+        li.dataset.slot = String(slot);
+        ["swatch", "rank-your-name", "rank-your-value", "rank-your-note"].forEach(function(cls){
+          var span = document.createElement("span");
+          span.className = cls;
+          li.appendChild(span);
+        });
+      }
       var entry: RankEntry | null = null;
       for (var i = 0; i < entries.length; i++){
         if (entries[i].iso === iso){ entry = entries[i]; break; }
       }
-      var li = document.createElement("li");
-      li.className = "rank-your-item";
-      var swatch = document.createElement("span");
-      swatch.className = "swatch";
-      swatch.style.background = colors[slot];
-      var name = document.createElement("span");
-      name.className = "rank-your-name";
-      name.textContent = country.name;
-      var value = document.createElement("span");
-      value.className = "rank-your-value";
-      value.textContent = entry ? fmtRankValue(entry.value, rankMetric) : "—";
-      var note = document.createElement("span");
-      note.className = "rank-your-note";
       var move = moves[iso];
       var movePhrase = move === undefined ? ""
-        : move === 0 ? " · same place as in " + YEARS[0]
-        : " · " + (move > 0 ? "up " : "down ") + Math.abs(move)
+        : move === 0 ? " \u00b7 same place as in " + YEARS[0]
+        : " \u00b7 " + (move > 0 ? "up " : "down ") + Math.abs(move)
           + " place" + (Math.abs(move) === 1 ? "" : "s") + " since " + YEARS[0];
-      note.textContent = entry
+
+      (li.querySelector(".swatch") as HTMLElement).style.background = colors[slot];
+      li.querySelector(".rank-your-name")!.textContent = country.name;
+      li.querySelector(".rank-your-value")!.textContent = entry ? fmtRankValue(entry.value, rankMetric) : "\u2014";
+      li.querySelector(".rank-your-note")!.textContent = entry
         ? ordinal(entry.rank) + " highest of " + entries.length + movePhrase
         : "No data for " + year;
-      li.appendChild(swatch);
-      li.appendChild(name);
-      li.appendChild(value);
-      li.appendChild(note);
       list.appendChild(li);
+    });
+
+    Object.keys(existing).forEach(function(slot){
+      if (!keep[slot]) existing[slot].remove();
     });
   }
 
@@ -1216,8 +1255,8 @@ function initAtlas(){
 
     element("rankCaption").textContent =
       meta.label + " (" + meta.unit + ") in " + year + ". "
-      + "Highest and Lowest share one scale, so a short bar beside a long one is a real difference. "
-      + "Your three countries keep their colours; every other country is grey. "
+      + "Highest and Lowest share one scale, and every bar carries the same six bands as the World View map. "
+      + "Your three countries are marked in their own colours. "
       + (PLANET_BETTER_WHEN[rankMetric]
         ? "Mover bars are green where the change is better for the planet and red where it is worse."
         : "Mover bars show growth or decline, which this metric does not judge as better or worse.");
@@ -1235,7 +1274,7 @@ function initAtlas(){
     const before = new Map<HTMLElement, number>();
     if (flip){
       lists.forEach(function(id){
-        element(id).querySelectorAll<HTMLElement>(".rank-row").forEach(function(row){
+        element(id).querySelectorAll<HTMLElement>(".rank-row:not([data-exit])").forEach(function(row){
           before.set(row, row.getBoundingClientRect().top);
         });
       });
@@ -1275,7 +1314,7 @@ function initAtlas(){
     if (!flip) return;
     const moves: { el: HTMLElement; dy: number }[] = [];
     lists.forEach(function(id){
-      element(id).querySelectorAll<HTMLElement>(".rank-row").forEach(function(row){
+      element(id).querySelectorAll<HTMLElement>(".rank-row:not([data-exit])").forEach(function(row){
         var was = before.get(row);
         if (was === undefined) return;
         var dy = was - row.getBoundingClientRect().top;

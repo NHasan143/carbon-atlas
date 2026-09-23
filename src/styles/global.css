@@ -33,10 +33,8 @@
     --seq-500:#2368b8; --seq-600:#184f95; --seq-700:#0d366b;
     --context-dot:#c3c2b7;
     --rank-track:#f1f1ed;
-    --rank-context:#888884;
     --rank-good:#4e9068; --rank-bad:#cc6a5f;
     --rank-growth:#6c86bd; --rank-decline:#a38150;
-    --rank-slot-1:#3d81d4; --rank-slot-2:#dd5f2c; --rank-slot-3:#189a6b;
     --focus-ring:oklch(75% 0.25 145 / 0.8);
     --trend-good:oklch(54% 0.1 155);
     --trend-bad:oklch(55% 0.12 27);
@@ -69,9 +67,7 @@
       --context-dot:#4a4a47;
       --rank-track:#242423;
       --rank-good:#3e7b55; --rank-bad:#a8594f;
-      --rank-slot-1:#3576c6; --rank-slot-2:#bb5024; --rank-slot-3:#17815e;
       --rank-growth:#5972a3; --rank-decline:#866436;
-      --rank-context:#706e6c;
       --trend-good:oklch(76% 0.1 155);
       --trend-bad:oklch(72% 0.11 27);
       --band-mid:#595240;
@@ -100,9 +96,7 @@
     --context-dot:#4a4a47;
     --rank-track:#242423;
     --rank-good:#3e7b55; --rank-bad:#a8594f;
-    --rank-slot-1:#3576c6; --rank-slot-2:#bb5024; --rank-slot-3:#17815e;
     --rank-growth:#5972a3; --rank-decline:#866436;
-    --rank-context:#706e6c;
     --trend-good:oklch(76% 0.1 155);
     --trend-bad:oklch(72% 0.11 27);
     --band-mid:#595240;
@@ -240,49 +234,63 @@
   .combo-check { @apply size-3.5 shrink-0 text-accent; }
   .combo-empty { @apply px-3 py-3.5 text-[13.5px] text-muted; }
 
-  /* Rankings: the bar is the row's own ground, so a long country name never
-     competes with a chart column for width. */
+  /* Rankings: the bar holds a column of its own. Nothing is printed over it,
+     so it is free to carry the World View's six fixed band colours and a
+     country's bar matches the shade it wears on the map. */
   .rank-card { @apply min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-5; }
   .rank-card-head { @apply mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-line pb-3; }
   .rank-card-title { @apply text-[14px] font-semibold; }
   .rank-card-meta { @apply text-[11.5px] text-muted tabular-nums; }
-  .rank-list { @apply grid gap-0.5; }
+  .rank-list { @apply relative grid gap-0.5; }
   .rank-row {
-    @apply grid grid-cols-[1.6rem_minmax(0,1fr)_auto] items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13.5px];
-    transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+    @apply grid items-center rounded-lg px-2.5 py-[7px] text-[13.5px];
+    grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+    grid-template-areas: "num name value" "bar bar bar";
+    gap: 5px 10px;
+    transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 320ms linear;
   }
-  /* The bar covers the rank and name columns and stops short of the value.
-     Running it under the value put its own edge through the numeral. The track
-     is the full width the bar is measured against, so a country reporting
-     almost nothing reads as a sliver of the whole rather than as nothing. */
+  /* Narrow cards stack the bar under the row so long country names keep their
+     width; from `sm` up it takes its own column between name and value. */
+  @media (min-width: 640px) {
+    .rank-row {
+      grid-template-columns: 1.6rem minmax(0, 1fr) clamp(54px, 27%, 168px) auto;
+      grid-template-areas: "num name bar value";
+      gap: 10px;
+    }
+  }
   .rank-bar {
-    @apply pointer-events-none overflow-hidden rounded-[5px];
-    grid-area: 1 / 1 / 2 / 3;
-    align-self: stretch;
-    margin-block: -4px;
-    z-index: 0;
+    @apply pointer-events-none overflow-hidden rounded-[3px];
+    grid-area: bar;
+    height: 5px;
     background: var(--rank-track);
+    /* The palest band is barely lighter than the card, exactly as it is on the
+       map. The frame keeps the bar's full extent readable whatever it holds. */
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+  @media (min-width: 640px) {
+    .rank-bar { height: 13px; align-self: center; }
   }
   .rank-fill {
     @apply block h-full w-full origin-left;
     background: var(--rank-fill, transparent);
-    transition: transform 460ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .rank-num { grid-area: 1 / 1 / 2 / 2; z-index: 1; }
-  .rank-name { grid-area: 1 / 2 / 2 / 3; z-index: 1; }
-  .rank-value { grid-area: 1 / 3 / 2 / 4; }
-  /* Everything here sits on the bar, so it is near-black to clear 4.5:1 there;
-     the row's hierarchy comes from size and weight instead of from colour. */
-  .rank-num { @apply text-right text-[11.5px] text-ink tabular-nums; }
-  .rank-name { @apply flex min-w-0 items-center gap-2 text-ink; }
+  .rank-num { grid-area: num; @apply text-right text-[11.5px] text-muted tabular-nums; }
+  .rank-name { grid-area: name; @apply flex min-w-0 items-center gap-2 text-ink; }
+  .rank-value { grid-area: value; @apply shrink-0 font-mono text-[13px] tabular-nums; }
   .rank-label { @apply truncate; }
-  .rank-value { @apply shrink-0 font-mono text-[13px] tabular-nums; }
-  .rank-row[data-selected="true"] .rank-name { @apply font-semibold text-ink; }
-  /* On a selected row the bar already carries the country's hue, so the mark is
-     cut out of it rather than tinted with it: one solid silhouette, the same
-     shape as every other swatch on the page. */
-  .rank-row[data-selected="true"] .swatch { background: var(--surface); }
-  .rank-row[data-enter="true"] { animation: rank-enter 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+  /* The bar now carries the metric's band, so a selected country is marked the
+     way the map marks it: its own colour around the row, not inside the bar. */
+  .rank-row[data-selected="true"] {
+    background: color-mix(in oklab, var(--rank-mark) 12%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--rank-mark) 45%, transparent);
+  }
+  .rank-row[data-selected="true"] .rank-name { @apply font-semibold; }
+  .rank-row[data-selected="true"] .rank-num { @apply text-secondary; }
+  /* A leaving row is lifted out of flow at its last position so the rows that
+     remain do not jump while it fades. */
+  .rank-row[data-exit="true"] { @apply pointer-events-none absolute inset-x-0 opacity-0; }
+  .rank-row[data-enter="true"] { animation: rank-enter 400ms cubic-bezier(0.16, 1, 0.3, 1); }
 
   .rank-yours { @apply rounded-xl bg-field px-5 py-4; }
   .rank-your-item { @apply grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2.5 gap-y-1; }
@@ -295,8 +303,8 @@
   }
 
   @keyframes rank-enter {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: none; }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   @media (prefers-reduced-motion: reduce) {
     .rank-row, .rank-fill { transition: none; }
