@@ -1,190 +1,1272 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-19T17:40:29Z",
-  "title": "Design System: Climate & Energy Atlas",
+  "generatedAt": "2026-09-23T00:00:00Z",
+  "title": "Design System: Carbon Atlas",
   "extensions": {
     "colorMeta": {
-      "paper-page": { "role": "neutral", "displayName": "Paper Page", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(50% 0.006 95)", "oklch(62% 0.006 95)", "oklch(74% 0.006 95)", "oklch(86% 0.006 95)", "oklch(95% 0.006 95)"] },
-      "paper-surface": { "role": "neutral", "displayName": "Paper Surface", "tonalRamp": ["oklch(15% 0.004 95)", "oklch(26% 0.004 95)", "oklch(38% 0.004 95)", "oklch(50% 0.004 95)", "oklch(62% 0.004 95)", "oklch(74% 0.004 95)", "oklch(86% 0.004 95)", "oklch(95% 0.004 95)"] },
-      "paper-field": { "role": "neutral", "displayName": "Paper Field", "tonalRamp": ["oklch(15% 0.012 95)", "oklch(26% 0.012 95)", "oklch(38% 0.012 95)", "oklch(50% 0.012 95)", "oklch(62% 0.012 95)", "oklch(74% 0.012 95)", "oklch(86% 0.012 95)", "oklch(95% 0.012 95)"] },
-      "ink": { "role": "neutral", "displayName": "Atlas Ink", "tonalRamp": ["oklch(15% 0 0)", "oklch(26% 0 0)", "oklch(38% 0 0)", "oklch(50% 0 0)", "oklch(62% 0 0)", "oklch(74% 0 0)", "oklch(86% 0 0)", "oklch(95% 0 0)"] },
-      "ink-secondary": { "role": "neutral", "displayName": "Secondary Ink", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(50% 0.006 95)", "oklch(62% 0.006 95)", "oklch(74% 0.006 95)", "oklch(86% 0.006 95)", "oklch(95% 0.006 95)"] },
-      "ink-muted": { "role": "neutral", "displayName": "Muted Ink", "tonalRamp": ["oklch(15% 0.012 95)", "oklch(26% 0.012 95)", "oklch(38% 0.012 95)", "oklch(50% 0.012 95)", "oklch(62% 0.012 95)", "oklch(74% 0.012 95)", "oklch(86% 0.012 95)", "oklch(95% 0.012 95)"] },
-      "hairline-light": { "role": "neutral", "displayName": "Light Hairline", "tonalRamp": ["oklch(15% 0 0 / 0.10)", "oklch(26% 0 0 / 0.10)", "oklch(38% 0 0 / 0.10)", "oklch(50% 0 0 / 0.10)", "oklch(62% 0 0 / 0.10)", "oklch(74% 0 0 / 0.10)", "oklch(86% 0 0 / 0.10)", "oklch(95% 0 0 / 0.10)"] },
-      "grid-light": { "role": "neutral", "displayName": "Light Grid", "tonalRamp": ["oklch(15% 0.010 95)", "oklch(26% 0.010 95)", "oklch(38% 0.010 95)", "oklch(50% 0.010 95)", "oklch(62% 0.010 95)", "oklch(74% 0.010 95)", "oklch(86% 0.010 95)", "oklch(95% 0.010 95)"] },
-      "axis-light": { "role": "neutral", "displayName": "Light Axis", "tonalRamp": ["oklch(15% 0.012 95)", "oklch(26% 0.012 95)", "oklch(38% 0.012 95)", "oklch(50% 0.012 95)", "oklch(62% 0.012 95)", "oklch(74% 0.012 95)", "oklch(86% 0.012 95)", "oklch(95% 0.012 95)"] },
-      "graphite-page": { "role": "neutral", "displayName": "Graphite Page", "tonalRamp": ["oklch(15% 0.003 95)", "oklch(26% 0.003 95)", "oklch(38% 0.003 95)", "oklch(50% 0.003 95)", "oklch(62% 0.003 95)", "oklch(74% 0.003 95)", "oklch(86% 0.003 95)", "oklch(95% 0.003 95)"] },
-      "graphite-surface": { "role": "neutral", "displayName": "Graphite Surface", "tonalRamp": ["oklch(15% 0.004 95)", "oklch(26% 0.004 95)", "oklch(38% 0.004 95)", "oklch(50% 0.004 95)", "oklch(62% 0.004 95)", "oklch(74% 0.004 95)", "oklch(86% 0.004 95)", "oklch(95% 0.004 95)"] },
-      "graphite-field": { "role": "neutral", "displayName": "Graphite Field", "tonalRamp": ["oklch(15% 0.005 95)", "oklch(26% 0.005 95)", "oklch(38% 0.005 95)", "oklch(50% 0.005 95)", "oklch(62% 0.005 95)", "oklch(74% 0.005 95)", "oklch(86% 0.005 95)", "oklch(95% 0.005 95)"] },
-      "paper-white": { "role": "neutral", "displayName": "Paper White", "tonalRamp": ["oklch(15% 0 0)", "oklch(26% 0 0)", "oklch(38% 0 0)", "oklch(50% 0 0)", "oklch(62% 0 0)", "oklch(74% 0 0)", "oklch(86% 0 0)", "oklch(95% 0 0)"] },
-      "graphite-secondary": { "role": "neutral", "displayName": "Graphite Secondary", "tonalRamp": ["oklch(15% 0.012 95)", "oklch(26% 0.012 95)", "oklch(38% 0.012 95)", "oklch(50% 0.012 95)", "oklch(62% 0.012 95)", "oklch(74% 0.012 95)", "oklch(86% 0.012 95)", "oklch(95% 0.012 95)"] },
-      "graphite-muted": { "role": "neutral", "displayName": "Graphite Muted", "tonalRamp": ["oklch(15% 0.014 95)", "oklch(26% 0.014 95)", "oklch(38% 0.014 95)", "oklch(50% 0.014 95)", "oklch(62% 0.014 95)", "oklch(74% 0.014 95)", "oklch(86% 0.014 95)", "oklch(95% 0.014 95)"] },
-      "hairline-dark": { "role": "neutral", "displayName": "Dark Hairline", "tonalRamp": ["oklch(15% 0 0 / 0.10)", "oklch(26% 0 0 / 0.10)", "oklch(38% 0 0 / 0.10)", "oklch(50% 0 0 / 0.10)", "oklch(62% 0 0 / 0.10)", "oklch(74% 0 0 / 0.10)", "oklch(86% 0 0 / 0.10)", "oklch(95% 0 0 / 0.10)"] },
-      "grid-dark": { "role": "neutral", "displayName": "Dark Grid", "tonalRamp": ["oklch(15% 0.005 95)", "oklch(26% 0.005 95)", "oklch(38% 0.005 95)", "oklch(50% 0.005 95)", "oklch(62% 0.005 95)", "oklch(74% 0.005 95)", "oklch(86% 0.005 95)", "oklch(95% 0.005 95)"] },
-      "axis-dark": { "role": "neutral", "displayName": "Dark Axis", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(50% 0.006 95)", "oklch(62% 0.006 95)", "oklch(74% 0.006 95)", "oklch(86% 0.006 95)", "oklch(95% 0.006 95)"] },
-      "context-dark": { "role": "neutral", "displayName": "Dark Context Dot", "tonalRamp": ["oklch(15% 0.006 95)", "oklch(26% 0.006 95)", "oklch(38% 0.006 95)", "oklch(50% 0.006 95)", "oklch(62% 0.006 95)", "oklch(74% 0.006 95)", "oklch(86% 0.006 95)", "oklch(95% 0.006 95)"] },
-      "series-blue-light": { "role": "primary", "displayName": "Atlas Blue Light", "tonalRamp": ["oklch(15% 0.16 252)", "oklch(26% 0.16 252)", "oklch(38% 0.16 252)", "oklch(50% 0.16 252)", "oklch(62% 0.16 252)", "oklch(74% 0.16 252)", "oklch(86% 0.16 252)", "oklch(95% 0.16 252)"] },
-      "series-blue-dark": { "role": "primary", "displayName": "Atlas Blue Dark", "tonalRamp": ["oklch(15% 0.16 252)", "oklch(26% 0.16 252)", "oklch(38% 0.16 252)", "oklch(50% 0.16 252)", "oklch(62% 0.16 252)", "oklch(74% 0.16 252)", "oklch(86% 0.16 252)", "oklch(95% 0.16 252)"] },
-      "action-green": { "role": "primary", "displayName": "Living Green", "canonical": "oklch(75% 0.25 145 / 0.8)", "tonalRamp": ["oklch(15% 0.08 145)", "oklch(26% 0.12 145)", "oklch(38% 0.16 145)", "oklch(50% 0.20 145)", "oklch(62% 0.23 145)", "oklch(75% 0.25 145)", "oklch(86% 0.18 145)", "oklch(95% 0.08 145)"] },
-      "series-orange-light": { "role": "secondary", "displayName": "Signal Orange Light", "tonalRamp": ["oklch(15% 0.16 42)", "oklch(26% 0.16 42)", "oklch(38% 0.16 42)", "oklch(50% 0.16 42)", "oklch(62% 0.16 42)", "oklch(74% 0.16 42)", "oklch(86% 0.16 42)", "oklch(95% 0.16 42)"] },
-      "series-orange-dark": { "role": "secondary", "displayName": "Signal Orange Dark", "tonalRamp": ["oklch(15% 0.16 42)", "oklch(26% 0.16 42)", "oklch(38% 0.16 42)", "oklch(50% 0.16 42)", "oklch(62% 0.16 42)", "oklch(74% 0.16 42)", "oklch(86% 0.16 42)", "oklch(95% 0.16 42)"] },
-      "series-green-light": { "role": "tertiary", "displayName": "Field Green Light", "tonalRamp": ["oklch(15% 0.15 160)", "oklch(26% 0.15 160)", "oklch(38% 0.15 160)", "oklch(50% 0.15 160)", "oklch(62% 0.15 160)", "oklch(74% 0.15 160)", "oklch(86% 0.15 160)", "oklch(95% 0.15 160)"] },
-      "series-green-dark": { "role": "tertiary", "displayName": "Field Green Dark", "tonalRamp": ["oklch(15% 0.15 160)", "oklch(26% 0.15 160)", "oklch(38% 0.15 160)", "oklch(50% 0.15 160)", "oklch(62% 0.15 160)", "oklch(74% 0.15 160)", "oklch(86% 0.15 160)", "oklch(95% 0.15 160)"] },
-      "map-blue-light-1": { "role": "primary", "displayName": "Map Blue Light 1", "tonalRamp": ["oklch(15% 0.08 252)", "oklch(26% 0.08 252)", "oklch(38% 0.08 252)", "oklch(50% 0.08 252)", "oklch(62% 0.08 252)", "oklch(74% 0.08 252)", "oklch(86% 0.08 252)", "oklch(95% 0.08 252)"] },
-      "map-blue-light-2": { "role": "primary", "displayName": "Map Blue Light 2", "tonalRamp": ["oklch(15% 0.10 252)", "oklch(26% 0.10 252)", "oklch(38% 0.10 252)", "oklch(50% 0.10 252)", "oklch(62% 0.10 252)", "oklch(74% 0.10 252)", "oklch(86% 0.10 252)", "oklch(95% 0.10 252)"] },
-      "map-blue-light-3": { "role": "primary", "displayName": "Map Blue Light 3", "tonalRamp": ["oklch(15% 0.13 252)", "oklch(26% 0.13 252)", "oklch(38% 0.13 252)", "oklch(50% 0.13 252)", "oklch(62% 0.13 252)", "oklch(74% 0.13 252)", "oklch(86% 0.13 252)", "oklch(95% 0.13 252)"] },
-      "map-blue-light-4": { "role": "primary", "displayName": "Map Blue Light 4", "tonalRamp": ["oklch(15% 0.16 252)", "oklch(26% 0.16 252)", "oklch(38% 0.16 252)", "oklch(50% 0.16 252)", "oklch(62% 0.16 252)", "oklch(74% 0.16 252)", "oklch(86% 0.16 252)", "oklch(95% 0.16 252)"] },
-      "map-blue-light-5": { "role": "primary", "displayName": "Map Blue Light 5", "tonalRamp": ["oklch(15% 0.14 252)", "oklch(26% 0.14 252)", "oklch(38% 0.14 252)", "oklch(50% 0.14 252)", "oklch(62% 0.14 252)", "oklch(74% 0.14 252)", "oklch(86% 0.14 252)", "oklch(95% 0.14 252)"] },
-      "map-blue-light-6": { "role": "primary", "displayName": "Map Blue Light 6", "tonalRamp": ["oklch(15% 0.12 252)", "oklch(26% 0.12 252)", "oklch(38% 0.12 252)", "oklch(50% 0.12 252)", "oklch(62% 0.12 252)", "oklch(74% 0.12 252)", "oklch(86% 0.12 252)", "oklch(95% 0.12 252)"] },
-      "map-blue-light-7": { "role": "primary", "displayName": "Map Blue Light 7", "tonalRamp": ["oklch(15% 0.10 252)", "oklch(26% 0.10 252)", "oklch(38% 0.10 252)", "oklch(50% 0.10 252)", "oklch(62% 0.10 252)", "oklch(74% 0.10 252)", "oklch(86% 0.10 252)", "oklch(95% 0.10 252)"] },
-      "map-blue-dark-1": { "role": "primary", "displayName": "Map Blue Dark 1", "tonalRamp": ["oklch(15% 0.08 252)", "oklch(26% 0.08 252)", "oklch(38% 0.08 252)", "oklch(50% 0.08 252)", "oklch(62% 0.08 252)", "oklch(74% 0.08 252)", "oklch(86% 0.08 252)", "oklch(95% 0.08 252)"] },
-      "map-blue-dark-2": { "role": "primary", "displayName": "Map Blue Dark 2", "tonalRamp": ["oklch(15% 0.09 252)", "oklch(26% 0.09 252)", "oklch(38% 0.09 252)", "oklch(50% 0.09 252)", "oklch(62% 0.09 252)", "oklch(74% 0.09 252)", "oklch(86% 0.09 252)", "oklch(95% 0.09 252)"] },
-      "map-blue-dark-3": { "role": "primary", "displayName": "Map Blue Dark 3", "tonalRamp": ["oklch(15% 0.10 252)", "oklch(26% 0.10 252)", "oklch(38% 0.10 252)", "oklch(50% 0.10 252)", "oklch(62% 0.10 252)", "oklch(74% 0.10 252)", "oklch(86% 0.10 252)", "oklch(95% 0.10 252)"] },
-      "map-blue-dark-4": { "role": "primary", "displayName": "Map Blue Dark 4", "tonalRamp": ["oklch(15% 0.16 252)", "oklch(26% 0.16 252)", "oklch(38% 0.16 252)", "oklch(50% 0.16 252)", "oklch(62% 0.16 252)", "oklch(74% 0.16 252)", "oklch(86% 0.16 252)", "oklch(95% 0.16 252)"] },
-      "map-blue-dark-5": { "role": "primary", "displayName": "Map Blue Dark 5", "tonalRamp": ["oklch(15% 0.13 252)", "oklch(26% 0.13 252)", "oklch(38% 0.13 252)", "oklch(50% 0.13 252)", "oklch(62% 0.13 252)", "oklch(74% 0.13 252)", "oklch(86% 0.13 252)", "oklch(95% 0.13 252)"] },
-      "map-blue-dark-6": { "role": "primary", "displayName": "Map Blue Dark 6", "tonalRamp": ["oklch(15% 0.10 252)", "oklch(26% 0.10 252)", "oklch(38% 0.10 252)", "oklch(50% 0.10 252)", "oklch(62% 0.10 252)", "oklch(74% 0.10 252)", "oklch(86% 0.10 252)", "oklch(95% 0.10 252)"] },
-      "map-blue-dark-7": { "role": "primary", "displayName": "Map Blue Dark 7", "tonalRamp": ["oklch(15% 0.08 252)", "oklch(26% 0.08 252)", "oklch(38% 0.08 252)", "oklch(50% 0.08 252)", "oklch(62% 0.08 252)", "oklch(74% 0.08 252)", "oklch(86% 0.08 252)", "oklch(95% 0.08 252)"] },
-      "hero-midnight": { "role": "neutral", "displayName": "Hero Midnight", "tonalRamp": ["oklch(15% 0.025 240)", "oklch(26% 0.025 240)", "oklch(38% 0.025 240)", "oklch(50% 0.025 240)", "oklch(62% 0.025 240)", "oklch(74% 0.025 240)", "oklch(86% 0.025 240)", "oklch(95% 0.025 240)"] },
-      "hero-support": { "role": "neutral", "displayName": "Hero Support", "tonalRamp": ["oklch(15% 0.02 240)", "oklch(26% 0.02 240)", "oklch(38% 0.02 240)", "oklch(50% 0.02 240)", "oklch(62% 0.02 240)", "oklch(74% 0.02 240)", "oklch(86% 0.02 240)", "oklch(95% 0.02 240)"] },
-      "hero-meta": { "role": "primary", "displayName": "Hero Meta Blue", "tonalRamp": ["oklch(15% 0.10 252)", "oklch(26% 0.10 252)", "oklch(38% 0.10 252)", "oklch(50% 0.10 252)", "oklch(62% 0.10 252)", "oklch(74% 0.10 252)", "oklch(86% 0.10 252)", "oklch(95% 0.10 252)"] },
-      "hero-hover-overlay": { "role": "neutral", "displayName": "Hero Hover Overlay", "tonalRamp": ["rgba(0,0,0,0.85)", "rgba(0,0,0,0.72)", "rgba(0,0,0,0.60)", "rgba(0,0,0,0.48)", "rgba(0,0,0,0.36)", "rgba(0,0,0,0.24)", "rgba(0,0,0,0.12)", "rgba(0,0,0,0.04)"] }
+      "paper-page": {
+        "role": "neutral",
+        "displayName": "Paper Page",
+        "tonalRamp": [
+          "oklch(15% 0.003 106.4)",
+          "oklch(26% 0.003 106.4)",
+          "oklch(38% 0.003 106.4)",
+          "oklch(50% 0.003 106.4)",
+          "oklch(62% 0.003 106.4)",
+          "oklch(74% 0.003 106.4)",
+          "oklch(86% 0.003 106.4)",
+          "oklch(95% 0.003 106.4)"
+        ]
+      },
+      "paper-surface": {
+        "role": "neutral",
+        "displayName": "Paper Surface",
+        "tonalRamp": [
+          "oklch(15% 0.001 106.4)",
+          "oklch(26% 0.001 106.4)",
+          "oklch(38% 0.001 106.4)",
+          "oklch(50% 0.001 106.4)",
+          "oklch(62% 0.001 106.4)",
+          "oklch(74% 0.001 106.4)",
+          "oklch(86% 0.001 106.4)",
+          "oklch(95% 0.001 106.4)"
+        ]
+      },
+      "paper-field": {
+        "role": "neutral",
+        "displayName": "Paper Field",
+        "tonalRamp": [
+          "oklch(15% 0.007 97.4)",
+          "oklch(26% 0.007 97.4)",
+          "oklch(38% 0.007 97.4)",
+          "oklch(50% 0.007 97.4)",
+          "oklch(62% 0.007 97.4)",
+          "oklch(74% 0.007 97.4)",
+          "oklch(86% 0.007 97.4)",
+          "oklch(95% 0.007 97.4)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Atlas Ink",
+        "tonalRamp": [
+          "oklch(15% 0.000 89.9)",
+          "oklch(26% 0.000 89.9)",
+          "oklch(38% 0.000 89.9)",
+          "oklch(50% 0.000 89.9)",
+          "oklch(62% 0.000 89.9)",
+          "oklch(74% 0.000 89.9)",
+          "oklch(86% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
+        ]
+      },
+      "ink-secondary": {
+        "role": "neutral",
+        "displayName": "Secondary Ink",
+        "tonalRamp": [
+          "oklch(15% 0.005 91.5)",
+          "oklch(26% 0.005 91.5)",
+          "oklch(38% 0.005 91.5)",
+          "oklch(50% 0.005 91.5)",
+          "oklch(62% 0.005 91.5)",
+          "oklch(74% 0.005 91.5)",
+          "oklch(86% 0.005 91.5)",
+          "oklch(95% 0.005 91.5)"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "tonalRamp": [
+          "oklch(15% 0.010 91.6)",
+          "oklch(26% 0.010 91.6)",
+          "oklch(38% 0.010 91.6)",
+          "oklch(50% 0.010 91.6)",
+          "oklch(62% 0.010 91.6)",
+          "oklch(74% 0.010 91.6)",
+          "oklch(86% 0.010 91.6)",
+          "oklch(95% 0.010 91.6)"
+        ]
+      },
+      "hairline-light": {
+        "role": "neutral",
+        "displayName": "Light Hairline",
+        "tonalRamp": [
+          "oklch(15% 0.000 89.9 / 0.10)",
+          "oklch(26% 0.000 89.9 / 0.10)",
+          "oklch(38% 0.000 89.9 / 0.10)",
+          "oklch(50% 0.000 89.9 / 0.10)",
+          "oklch(62% 0.000 89.9 / 0.10)",
+          "oklch(74% 0.000 89.9 / 0.10)",
+          "oklch(86% 0.000 89.9 / 0.10)",
+          "oklch(95% 0.000 89.9 / 0.10)"
+        ]
+      },
+      "grid-light": {
+        "role": "neutral",
+        "displayName": "Light Grid",
+        "tonalRamp": [
+          "oklch(15% 0.009 100.0)",
+          "oklch(26% 0.009 100.0)",
+          "oklch(38% 0.009 100.0)",
+          "oklch(50% 0.009 100.0)",
+          "oklch(62% 0.009 100.0)",
+          "oklch(74% 0.009 100.0)",
+          "oklch(86% 0.009 100.0)",
+          "oklch(95% 0.009 100.0)"
+        ]
+      },
+      "axis-light": {
+        "role": "neutral",
+        "displayName": "Light Axis",
+        "tonalRamp": [
+          "oklch(15% 0.015 102.5)",
+          "oklch(26% 0.015 102.5)",
+          "oklch(38% 0.015 102.5)",
+          "oklch(50% 0.015 102.5)",
+          "oklch(62% 0.015 102.5)",
+          "oklch(74% 0.015 102.5)",
+          "oklch(86% 0.015 102.5)",
+          "oklch(95% 0.015 102.5)"
+        ]
+      },
+      "graphite-page": {
+        "role": "neutral",
+        "displayName": "Graphite Page",
+        "tonalRamp": [
+          "oklch(15% 0.000 89.9)",
+          "oklch(26% 0.000 89.9)",
+          "oklch(38% 0.000 89.9)",
+          "oklch(50% 0.000 89.9)",
+          "oklch(62% 0.000 89.9)",
+          "oklch(74% 0.000 89.9)",
+          "oklch(86% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
+        ]
+      },
+      "graphite-surface": {
+        "role": "neutral",
+        "displayName": "Graphite Surface",
+        "tonalRamp": [
+          "oklch(15% 0.002 106.6)",
+          "oklch(26% 0.002 106.6)",
+          "oklch(38% 0.002 106.6)",
+          "oklch(50% 0.002 106.6)",
+          "oklch(62% 0.002 106.6)",
+          "oklch(74% 0.002 106.6)",
+          "oklch(86% 0.002 106.6)",
+          "oklch(95% 0.002 106.6)"
+        ]
+      },
+      "graphite-field": {
+        "role": "neutral",
+        "displayName": "Graphite Field",
+        "tonalRamp": [
+          "oklch(15% 0.002 106.5)",
+          "oklch(26% 0.002 106.5)",
+          "oklch(38% 0.002 106.5)",
+          "oklch(50% 0.002 106.5)",
+          "oklch(62% 0.002 106.5)",
+          "oklch(74% 0.002 106.5)",
+          "oklch(86% 0.002 106.5)",
+          "oklch(95% 0.002 106.5)"
+        ]
+      },
+      "paper-white": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "tonalRamp": [
+          "oklch(15% 0.000 89.9)",
+          "oklch(26% 0.000 89.9)",
+          "oklch(38% 0.000 89.9)",
+          "oklch(50% 0.000 89.9)",
+          "oklch(62% 0.000 89.9)",
+          "oklch(74% 0.000 89.9)",
+          "oklch(86% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
+        ]
+      },
+      "graphite-secondary": {
+        "role": "neutral",
+        "displayName": "Graphite Secondary Ink",
+        "tonalRamp": [
+          "oklch(15% 0.015 102.5)",
+          "oklch(26% 0.015 102.5)",
+          "oklch(38% 0.015 102.5)",
+          "oklch(50% 0.015 102.5)",
+          "oklch(62% 0.015 102.5)",
+          "oklch(74% 0.015 102.5)",
+          "oklch(86% 0.015 102.5)",
+          "oklch(95% 0.015 102.5)"
+        ]
+      },
+      "graphite-muted": {
+        "role": "neutral",
+        "displayName": "Graphite Muted Ink",
+        "tonalRamp": [
+          "oklch(15% 0.013 96.5)",
+          "oklch(26% 0.013 96.5)",
+          "oklch(38% 0.013 96.5)",
+          "oklch(50% 0.013 96.5)",
+          "oklch(62% 0.013 96.5)",
+          "oklch(74% 0.013 96.5)",
+          "oklch(86% 0.013 96.5)",
+          "oklch(95% 0.013 96.5)"
+        ]
+      },
+      "hairline-dark": {
+        "role": "neutral",
+        "displayName": "Dark Hairline",
+        "tonalRamp": [
+          "oklch(15% 0.000 89.9 / 0.10)",
+          "oklch(26% 0.000 89.9 / 0.10)",
+          "oklch(38% 0.000 89.9 / 0.10)",
+          "oklch(50% 0.000 89.9 / 0.10)",
+          "oklch(62% 0.000 89.9 / 0.10)",
+          "oklch(74% 0.000 89.9 / 0.10)",
+          "oklch(86% 0.000 89.9 / 0.10)",
+          "oklch(95% 0.000 89.9 / 0.10)"
+        ]
+      },
+      "grid-dark": {
+        "role": "neutral",
+        "displayName": "Dark Grid",
+        "tonalRamp": [
+          "oklch(15% 0.004 106.6)",
+          "oklch(26% 0.004 106.6)",
+          "oklch(38% 0.004 106.6)",
+          "oklch(50% 0.004 106.6)",
+          "oklch(62% 0.004 106.6)",
+          "oklch(74% 0.004 106.6)",
+          "oklch(86% 0.004 106.6)",
+          "oklch(95% 0.004 106.6)"
+        ]
+      },
+      "axis-dark": {
+        "role": "neutral",
+        "displayName": "Dark Axis",
+        "tonalRamp": [
+          "oklch(15% 0.005 106.7)",
+          "oklch(26% 0.005 106.7)",
+          "oklch(38% 0.005 106.7)",
+          "oklch(50% 0.005 106.7)",
+          "oklch(62% 0.005 106.7)",
+          "oklch(74% 0.005 106.7)",
+          "oklch(86% 0.005 106.7)",
+          "oklch(95% 0.005 106.7)"
+        ]
+      },
+      "action-green": {
+        "role": "primary",
+        "displayName": "Living Green",
+        "tonalRamp": [
+          "oklch(15% 0.250 145.0 / 0.80)",
+          "oklch(26% 0.250 145.0 / 0.80)",
+          "oklch(38% 0.250 145.0 / 0.80)",
+          "oklch(50% 0.250 145.0 / 0.80)",
+          "oklch(62% 0.250 145.0 / 0.80)",
+          "oklch(74% 0.250 145.0 / 0.80)",
+          "oklch(86% 0.250 145.0 / 0.80)",
+          "oklch(95% 0.250 145.0 / 0.80)"
+        ],
+        "canonical": "oklch(75% 0.25 145 / 0.8)"
+      },
+      "series-blue-light": {
+        "role": "secondary",
+        "displayName": "Atlas Blue",
+        "tonalRamp": [
+          "oklch(15% 0.163 255.5)",
+          "oklch(26% 0.163 255.5)",
+          "oklch(38% 0.163 255.5)",
+          "oklch(50% 0.163 255.5)",
+          "oklch(62% 0.163 255.5)",
+          "oklch(74% 0.163 255.5)",
+          "oklch(86% 0.163 255.5)",
+          "oklch(95% 0.163 255.5)"
+        ]
+      },
+      "series-orange-light": {
+        "role": "secondary",
+        "displayName": "Atlas Orange",
+        "tonalRamp": [
+          "oklch(15% 0.175 40.6)",
+          "oklch(26% 0.175 40.6)",
+          "oklch(38% 0.175 40.6)",
+          "oklch(50% 0.175 40.6)",
+          "oklch(62% 0.175 40.6)",
+          "oklch(74% 0.175 40.6)",
+          "oklch(86% 0.175 40.6)",
+          "oklch(95% 0.175 40.6)"
+        ]
+      },
+      "series-green-light": {
+        "role": "secondary",
+        "displayName": "Atlas Green",
+        "tonalRamp": [
+          "oklch(15% 0.141 162.1)",
+          "oklch(26% 0.141 162.1)",
+          "oklch(38% 0.141 162.1)",
+          "oklch(50% 0.141 162.1)",
+          "oklch(62% 0.141 162.1)",
+          "oklch(74% 0.141 162.1)",
+          "oklch(86% 0.141 162.1)",
+          "oklch(95% 0.141 162.1)"
+        ]
+      },
+      "series-blue-dark": {
+        "role": "secondary",
+        "displayName": "Atlas Blue (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.161 255.1)",
+          "oklch(26% 0.161 255.1)",
+          "oklch(38% 0.161 255.1)",
+          "oklch(50% 0.161 255.1)",
+          "oklch(62% 0.161 255.1)",
+          "oklch(74% 0.161 255.1)",
+          "oklch(86% 0.161 255.1)",
+          "oklch(95% 0.161 255.1)"
+        ]
+      },
+      "series-orange-dark": {
+        "role": "secondary",
+        "displayName": "Atlas Orange (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.173 40.1)",
+          "oklch(26% 0.173 40.1)",
+          "oklch(38% 0.173 40.1)",
+          "oklch(50% 0.173 40.1)",
+          "oklch(62% 0.173 40.1)",
+          "oklch(74% 0.173 40.1)",
+          "oklch(86% 0.173 40.1)",
+          "oklch(95% 0.173 40.1)"
+        ]
+      },
+      "series-green-dark": {
+        "role": "secondary",
+        "displayName": "Atlas Green (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.128 163.1)",
+          "oklch(26% 0.128 163.1)",
+          "oklch(38% 0.128 163.1)",
+          "oklch(50% 0.128 163.1)",
+          "oklch(62% 0.128 163.1)",
+          "oklch(74% 0.128 163.1)",
+          "oklch(86% 0.128 163.1)",
+          "oklch(95% 0.128 163.1)"
+        ]
+      },
+      "context-dot-light": {
+        "role": "neutral",
+        "displayName": "Context Grey",
+        "tonalRamp": [
+          "oklch(15% 0.015 102.5)",
+          "oklch(26% 0.015 102.5)",
+          "oklch(38% 0.015 102.5)",
+          "oklch(50% 0.015 102.5)",
+          "oklch(62% 0.015 102.5)",
+          "oklch(74% 0.015 102.5)",
+          "oklch(86% 0.015 102.5)",
+          "oklch(95% 0.015 102.5)"
+        ]
+      },
+      "context-dot-dark": {
+        "role": "neutral",
+        "displayName": "Context Grey (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.005 106.6)",
+          "oklch(26% 0.005 106.6)",
+          "oklch(38% 0.005 106.6)",
+          "oklch(50% 0.005 106.6)",
+          "oklch(62% 0.005 106.6)",
+          "oklch(74% 0.005 106.6)",
+          "oklch(86% 0.005 106.6)",
+          "oklch(95% 0.005 106.6)"
+        ]
+      },
+      "trend-good-light": {
+        "role": "tertiary",
+        "displayName": "Better Arrow",
+        "tonalRamp": [
+          "oklch(15% 0.100 155.0)",
+          "oklch(26% 0.100 155.0)",
+          "oklch(38% 0.100 155.0)",
+          "oklch(50% 0.100 155.0)",
+          "oklch(62% 0.100 155.0)",
+          "oklch(74% 0.100 155.0)",
+          "oklch(86% 0.100 155.0)",
+          "oklch(95% 0.100 155.0)"
+        ],
+        "canonical": "oklch(54% 0.1 155)"
+      },
+      "trend-bad-light": {
+        "role": "tertiary",
+        "displayName": "Worse Arrow",
+        "tonalRamp": [
+          "oklch(15% 0.120 27.0)",
+          "oklch(26% 0.120 27.0)",
+          "oklch(38% 0.120 27.0)",
+          "oklch(50% 0.120 27.0)",
+          "oklch(62% 0.120 27.0)",
+          "oklch(74% 0.120 27.0)",
+          "oklch(86% 0.120 27.0)",
+          "oklch(95% 0.120 27.0)"
+        ],
+        "canonical": "oklch(55% 0.12 27)"
+      },
+      "trend-good-dark": {
+        "role": "tertiary",
+        "displayName": "Better Arrow (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.100 155.0)",
+          "oklch(26% 0.100 155.0)",
+          "oklch(38% 0.100 155.0)",
+          "oklch(50% 0.100 155.0)",
+          "oklch(62% 0.100 155.0)",
+          "oklch(74% 0.100 155.0)",
+          "oklch(86% 0.100 155.0)",
+          "oklch(95% 0.100 155.0)"
+        ],
+        "canonical": "oklch(76% 0.1 155)"
+      },
+      "trend-bad-dark": {
+        "role": "tertiary",
+        "displayName": "Worse Arrow (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.110 27.0)",
+          "oklch(26% 0.110 27.0)",
+          "oklch(38% 0.110 27.0)",
+          "oklch(50% 0.110 27.0)",
+          "oklch(62% 0.110 27.0)",
+          "oklch(74% 0.110 27.0)",
+          "oklch(86% 0.110 27.0)",
+          "oklch(95% 0.110 27.0)"
+        ],
+        "canonical": "oklch(72% 0.11 27)"
+      },
+      "seq-100-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 1 (lowest)",
+        "tonalRamp": [
+          "oklch(15% 0.041 252.8)",
+          "oklch(26% 0.041 252.8)",
+          "oklch(38% 0.041 252.8)",
+          "oklch(50% 0.041 252.8)",
+          "oklch(62% 0.041 252.8)",
+          "oklch(74% 0.041 252.8)",
+          "oklch(86% 0.041 252.8)",
+          "oklch(95% 0.041 252.8)"
+        ]
+      },
+      "seq-200-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 2",
+        "tonalRamp": [
+          "oklch(15% 0.079 253.4)",
+          "oklch(26% 0.079 253.4)",
+          "oklch(38% 0.079 253.4)",
+          "oklch(50% 0.079 253.4)",
+          "oklch(62% 0.079 253.4)",
+          "oklch(74% 0.079 253.4)",
+          "oklch(86% 0.079 253.4)",
+          "oklch(95% 0.079 253.4)"
+        ]
+      },
+      "seq-300-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 3",
+        "tonalRamp": [
+          "oklch(15% 0.118 253.6)",
+          "oklch(26% 0.118 253.6)",
+          "oklch(38% 0.118 253.6)",
+          "oklch(50% 0.118 253.6)",
+          "oklch(62% 0.118 253.6)",
+          "oklch(74% 0.118 253.6)",
+          "oklch(86% 0.118 253.6)",
+          "oklch(95% 0.118 253.6)"
+        ]
+      },
+      "seq-400-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 4",
+        "tonalRamp": [
+          "oklch(15% 0.161 255.1)",
+          "oklch(26% 0.161 255.1)",
+          "oklch(38% 0.161 255.1)",
+          "oklch(50% 0.161 255.1)",
+          "oklch(62% 0.161 255.1)",
+          "oklch(74% 0.161 255.1)",
+          "oklch(86% 0.161 255.1)",
+          "oklch(95% 0.161 255.1)"
+        ]
+      },
+      "seq-500-light": {
+        "role": "tertiary",
+        "displayName": "Level Ramp Mid (unused by bands)",
+        "tonalRamp": [
+          "oklch(15% 0.143 254.9)",
+          "oklch(26% 0.143 254.9)",
+          "oklch(38% 0.143 254.9)",
+          "oklch(50% 0.143 254.9)",
+          "oklch(62% 0.143 254.9)",
+          "oklch(74% 0.143 254.9)",
+          "oklch(86% 0.143 254.9)",
+          "oklch(95% 0.143 254.9)"
+        ]
+      },
+      "seq-600-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 5",
+        "tonalRamp": [
+          "oklch(15% 0.128 256.5)",
+          "oklch(26% 0.128 256.5)",
+          "oklch(38% 0.128 256.5)",
+          "oklch(50% 0.128 256.5)",
+          "oklch(62% 0.128 256.5)",
+          "oklch(74% 0.128 256.5)",
+          "oklch(86% 0.128 256.5)",
+          "oklch(95% 0.128 256.5)"
+        ]
+      },
+      "seq-700-light": {
+        "role": "tertiary",
+        "displayName": "Level Band 6 (highest)",
+        "tonalRamp": [
+          "oklch(15% 0.103 256.9)",
+          "oklch(26% 0.103 256.9)",
+          "oklch(38% 0.103 256.9)",
+          "oklch(50% 0.103 256.9)",
+          "oklch(62% 0.103 256.9)",
+          "oklch(74% 0.103 256.9)",
+          "oklch(86% 0.103 256.9)",
+          "oklch(95% 0.103 256.9)"
+        ]
+      },
+      "seq-100-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 1 (lowest) (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.060 249.6)",
+          "oklch(26% 0.060 249.6)",
+          "oklch(38% 0.060 249.6)",
+          "oklch(50% 0.060 249.6)",
+          "oklch(62% 0.060 249.6)",
+          "oklch(74% 0.060 249.6)",
+          "oklch(86% 0.060 249.6)",
+          "oklch(95% 0.060 249.6)"
+        ]
+      },
+      "seq-200-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 2 (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.077 250.2)",
+          "oklch(26% 0.077 250.2)",
+          "oklch(38% 0.077 250.2)",
+          "oklch(50% 0.077 250.2)",
+          "oklch(62% 0.077 250.2)",
+          "oklch(74% 0.077 250.2)",
+          "oklch(86% 0.077 250.2)",
+          "oklch(95% 0.077 250.2)"
+        ]
+      },
+      "seq-300-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 3 (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.088 246.5)",
+          "oklch(26% 0.088 246.5)",
+          "oklch(38% 0.088 246.5)",
+          "oklch(50% 0.088 246.5)",
+          "oklch(62% 0.088 246.5)",
+          "oklch(74% 0.088 246.5)",
+          "oklch(86% 0.088 246.5)",
+          "oklch(95% 0.088 246.5)"
+        ]
+      },
+      "seq-400-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 4 (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.161 255.1)",
+          "oklch(26% 0.161 255.1)",
+          "oklch(38% 0.161 255.1)",
+          "oklch(50% 0.161 255.1)",
+          "oklch(62% 0.161 255.1)",
+          "oklch(74% 0.161 255.1)",
+          "oklch(86% 0.161 255.1)",
+          "oklch(95% 0.161 255.1)"
+        ]
+      },
+      "seq-500-dark": {
+        "role": "tertiary",
+        "displayName": "Level Ramp Mid (unused by bands) (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.132 252.9)",
+          "oklch(26% 0.132 252.9)",
+          "oklch(38% 0.132 252.9)",
+          "oklch(50% 0.132 252.9)",
+          "oklch(62% 0.132 252.9)",
+          "oklch(74% 0.132 252.9)",
+          "oklch(86% 0.132 252.9)",
+          "oklch(95% 0.132 252.9)"
+        ]
+      },
+      "seq-600-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 5 (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.092 252.9)",
+          "oklch(26% 0.092 252.9)",
+          "oklch(38% 0.092 252.9)",
+          "oklch(50% 0.092 252.9)",
+          "oklch(62% 0.092 252.9)",
+          "oklch(74% 0.092 252.9)",
+          "oklch(86% 0.092 252.9)",
+          "oklch(95% 0.092 252.9)"
+        ]
+      },
+      "seq-700-dark": {
+        "role": "tertiary",
+        "displayName": "Level Band 6 (highest) (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.041 252.8)",
+          "oklch(26% 0.041 252.8)",
+          "oklch(38% 0.041 252.8)",
+          "oklch(50% 0.041 252.8)",
+          "oklch(62% 0.041 252.8)",
+          "oklch(74% 0.041 252.8)",
+          "oklch(86% 0.041 252.8)",
+          "oklch(95% 0.041 252.8)"
+        ]
+      },
+      "band-mid": {
+        "role": "tertiary",
+        "displayName": "About the Same Sand",
+        "tonalRamp": [
+          "oklch(15% 0.035 88.8)",
+          "oklch(26% 0.035 88.8)",
+          "oklch(38% 0.035 88.8)",
+          "oklch(50% 0.035 88.8)",
+          "oklch(62% 0.035 88.8)",
+          "oklch(74% 0.035 88.8)",
+          "oklch(86% 0.035 88.8)",
+          "oklch(95% 0.035 88.8)"
+        ]
+      },
+      "band-good-1": {
+        "role": "tertiary",
+        "displayName": "Better, Slight",
+        "tonalRamp": [
+          "oklch(15% 0.060 155.4)",
+          "oklch(26% 0.060 155.4)",
+          "oklch(38% 0.060 155.4)",
+          "oklch(50% 0.060 155.4)",
+          "oklch(62% 0.060 155.4)",
+          "oklch(74% 0.060 155.4)",
+          "oklch(86% 0.060 155.4)",
+          "oklch(95% 0.060 155.4)"
+        ]
+      },
+      "band-good-2": {
+        "role": "tertiary",
+        "displayName": "Better, Clear",
+        "tonalRamp": [
+          "oklch(15% 0.100 155.1)",
+          "oklch(26% 0.100 155.1)",
+          "oklch(38% 0.100 155.1)",
+          "oklch(50% 0.100 155.1)",
+          "oklch(62% 0.100 155.1)",
+          "oklch(74% 0.100 155.1)",
+          "oklch(86% 0.100 155.1)",
+          "oklch(95% 0.100 155.1)"
+        ]
+      },
+      "band-good-3": {
+        "role": "tertiary",
+        "displayName": "Better, Strongest",
+        "tonalRamp": [
+          "oklch(15% 0.100 155.0)",
+          "oklch(26% 0.100 155.0)",
+          "oklch(38% 0.100 155.0)",
+          "oklch(50% 0.100 155.0)",
+          "oklch(62% 0.100 155.0)",
+          "oklch(74% 0.100 155.0)",
+          "oklch(86% 0.100 155.0)",
+          "oklch(95% 0.100 155.0)"
+        ]
+      },
+      "band-bad-1": {
+        "role": "tertiary",
+        "displayName": "Worse, Slight",
+        "tonalRamp": [
+          "oklch(15% 0.060 27.4)",
+          "oklch(26% 0.060 27.4)",
+          "oklch(38% 0.060 27.4)",
+          "oklch(50% 0.060 27.4)",
+          "oklch(62% 0.060 27.4)",
+          "oklch(74% 0.060 27.4)",
+          "oklch(86% 0.060 27.4)",
+          "oklch(95% 0.060 27.4)"
+        ]
+      },
+      "band-bad-2": {
+        "role": "tertiary",
+        "displayName": "Worse, Clear",
+        "tonalRamp": [
+          "oklch(15% 0.121 26.9)",
+          "oklch(26% 0.121 26.9)",
+          "oklch(38% 0.121 26.9)",
+          "oklch(50% 0.121 26.9)",
+          "oklch(62% 0.121 26.9)",
+          "oklch(74% 0.121 26.9)",
+          "oklch(86% 0.121 26.9)",
+          "oklch(95% 0.121 26.9)"
+        ]
+      },
+      "band-bad-3": {
+        "role": "tertiary",
+        "displayName": "Worse, Strongest",
+        "tonalRamp": [
+          "oklch(15% 0.141 26.9)",
+          "oklch(26% 0.141 26.9)",
+          "oklch(38% 0.141 26.9)",
+          "oklch(50% 0.141 26.9)",
+          "oklch(62% 0.141 26.9)",
+          "oklch(74% 0.141 26.9)",
+          "oklch(86% 0.141 26.9)",
+          "oklch(95% 0.141 26.9)"
+        ]
+      },
+      "band-growth-1": {
+        "role": "tertiary",
+        "displayName": "Growth, Slight",
+        "tonalRamp": [
+          "oklch(15% 0.040 265.0)",
+          "oklch(26% 0.040 265.0)",
+          "oklch(38% 0.040 265.0)",
+          "oklch(50% 0.040 265.0)",
+          "oklch(62% 0.040 265.0)",
+          "oklch(74% 0.040 265.0)",
+          "oklch(86% 0.040 265.0)",
+          "oklch(95% 0.040 265.0)"
+        ]
+      },
+      "band-growth-2": {
+        "role": "tertiary",
+        "displayName": "Growth, Clear",
+        "tonalRamp": [
+          "oklch(15% 0.080 264.5)",
+          "oklch(26% 0.080 264.5)",
+          "oklch(38% 0.080 264.5)",
+          "oklch(50% 0.080 264.5)",
+          "oklch(62% 0.080 264.5)",
+          "oklch(74% 0.080 264.5)",
+          "oklch(86% 0.080 264.5)",
+          "oklch(95% 0.080 264.5)"
+        ]
+      },
+      "band-growth-3": {
+        "role": "tertiary",
+        "displayName": "Growth, Strongest",
+        "tonalRamp": [
+          "oklch(15% 0.100 265.0)",
+          "oklch(26% 0.100 265.0)",
+          "oklch(38% 0.100 265.0)",
+          "oklch(50% 0.100 265.0)",
+          "oklch(62% 0.100 265.0)",
+          "oklch(74% 0.100 265.0)",
+          "oklch(86% 0.100 265.0)",
+          "oklch(95% 0.100 265.0)"
+        ]
+      },
+      "band-decline-1": {
+        "role": "tertiary",
+        "displayName": "Decline, Slight",
+        "tonalRamp": [
+          "oklch(15% 0.041 69.7)",
+          "oklch(26% 0.041 69.7)",
+          "oklch(38% 0.041 69.7)",
+          "oklch(50% 0.041 69.7)",
+          "oklch(62% 0.041 69.7)",
+          "oklch(74% 0.041 69.7)",
+          "oklch(86% 0.041 69.7)",
+          "oklch(95% 0.041 69.7)"
+        ]
+      },
+      "band-decline-2": {
+        "role": "tertiary",
+        "displayName": "Decline, Clear",
+        "tonalRamp": [
+          "oklch(15% 0.070 70.6)",
+          "oklch(26% 0.070 70.6)",
+          "oklch(38% 0.070 70.6)",
+          "oklch(50% 0.070 70.6)",
+          "oklch(62% 0.070 70.6)",
+          "oklch(74% 0.070 70.6)",
+          "oklch(86% 0.070 70.6)",
+          "oklch(95% 0.070 70.6)"
+        ]
+      },
+      "band-decline-3": {
+        "role": "tertiary",
+        "displayName": "Decline, Strongest",
+        "tonalRamp": [
+          "oklch(15% 0.070 69.7)",
+          "oklch(26% 0.070 69.7)",
+          "oklch(38% 0.070 69.7)",
+          "oklch(50% 0.070 69.7)",
+          "oklch(62% 0.070 69.7)",
+          "oklch(74% 0.070 69.7)",
+          "oklch(86% 0.070 69.7)",
+          "oklch(95% 0.070 69.7)"
+        ]
+      },
+      "rank-track-light": {
+        "role": "neutral",
+        "displayName": "Rank Track",
+        "tonalRamp": [
+          "oklch(15% 0.005 106.5)",
+          "oklch(26% 0.005 106.5)",
+          "oklch(38% 0.005 106.5)",
+          "oklch(50% 0.005 106.5)",
+          "oklch(62% 0.005 106.5)",
+          "oklch(74% 0.005 106.5)",
+          "oklch(86% 0.005 106.5)",
+          "oklch(95% 0.005 106.5)"
+        ]
+      },
+      "rank-track-dark": {
+        "role": "neutral",
+        "displayName": "Rank Track (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.002 106.5)",
+          "oklch(26% 0.002 106.5)",
+          "oklch(38% 0.002 106.5)",
+          "oklch(50% 0.002 106.5)",
+          "oklch(62% 0.002 106.5)",
+          "oklch(74% 0.002 106.5)",
+          "oklch(86% 0.002 106.5)",
+          "oklch(95% 0.002 106.5)"
+        ]
+      },
+      "rank-good-light": {
+        "role": "tertiary",
+        "displayName": "Rank Better Green",
+        "tonalRamp": [
+          "oklch(15% 0.092 155.7)",
+          "oklch(26% 0.092 155.7)",
+          "oklch(38% 0.092 155.7)",
+          "oklch(50% 0.092 155.7)",
+          "oklch(62% 0.092 155.7)",
+          "oklch(74% 0.092 155.7)",
+          "oklch(86% 0.092 155.7)",
+          "oklch(95% 0.092 155.7)"
+        ]
+      },
+      "rank-good-dark": {
+        "role": "tertiary",
+        "displayName": "Rank Better Green (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.088 154.7)",
+          "oklch(26% 0.088 154.7)",
+          "oklch(38% 0.088 154.7)",
+          "oklch(50% 0.088 154.7)",
+          "oklch(62% 0.088 154.7)",
+          "oklch(74% 0.088 154.7)",
+          "oklch(86% 0.088 154.7)",
+          "oklch(95% 0.088 154.7)"
+        ]
+      },
+      "rank-bad-light": {
+        "role": "tertiary",
+        "displayName": "Rank Worse Red",
+        "tonalRamp": [
+          "oklch(15% 0.126 27.8)",
+          "oklch(26% 0.126 27.8)",
+          "oklch(38% 0.126 27.8)",
+          "oklch(50% 0.126 27.8)",
+          "oklch(62% 0.126 27.8)",
+          "oklch(74% 0.126 27.8)",
+          "oklch(86% 0.126 27.8)",
+          "oklch(95% 0.126 27.8)"
+        ]
+      },
+      "rank-bad-dark": {
+        "role": "tertiary",
+        "displayName": "Rank Worse Red (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.105 28.4)",
+          "oklch(26% 0.105 28.4)",
+          "oklch(38% 0.105 28.4)",
+          "oklch(50% 0.105 28.4)",
+          "oklch(62% 0.105 28.4)",
+          "oklch(74% 0.105 28.4)",
+          "oklch(86% 0.105 28.4)",
+          "oklch(95% 0.105 28.4)"
+        ]
+      },
+      "rank-growth-light": {
+        "role": "tertiary",
+        "displayName": "Rank Growth Blue",
+        "tonalRamp": [
+          "oklch(15% 0.089 264.5)",
+          "oklch(26% 0.089 264.5)",
+          "oklch(38% 0.089 264.5)",
+          "oklch(50% 0.089 264.5)",
+          "oklch(62% 0.089 264.5)",
+          "oklch(74% 0.089 264.5)",
+          "oklch(86% 0.089 264.5)",
+          "oklch(95% 0.089 264.5)"
+        ]
+      },
+      "rank-growth-dark": {
+        "role": "tertiary",
+        "displayName": "Rank Growth Blue (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.082 263.2)",
+          "oklch(26% 0.082 263.2)",
+          "oklch(38% 0.082 263.2)",
+          "oklch(50% 0.082 263.2)",
+          "oklch(62% 0.082 263.2)",
+          "oklch(74% 0.082 263.2)",
+          "oklch(86% 0.082 263.2)",
+          "oklch(95% 0.082 263.2)"
+        ]
+      },
+      "rank-decline-light": {
+        "role": "tertiary",
+        "displayName": "Rank Decline Sand",
+        "tonalRamp": [
+          "oklch(15% 0.078 75.6)",
+          "oklch(26% 0.078 75.6)",
+          "oklch(38% 0.078 75.6)",
+          "oklch(50% 0.078 75.6)",
+          "oklch(62% 0.078 75.6)",
+          "oklch(74% 0.078 75.6)",
+          "oklch(86% 0.078 75.6)",
+          "oklch(95% 0.078 75.6)"
+        ]
+      },
+      "rank-decline-dark": {
+        "role": "tertiary",
+        "displayName": "Rank Decline Sand (Graphite)",
+        "tonalRamp": [
+          "oklch(15% 0.076 73.2)",
+          "oklch(26% 0.076 73.2)",
+          "oklch(38% 0.076 73.2)",
+          "oklch(50% 0.076 73.2)",
+          "oklch(62% 0.076 73.2)",
+          "oklch(74% 0.076 73.2)",
+          "oklch(86% 0.076 73.2)",
+          "oklch(95% 0.076 73.2)"
+        ]
+      }
     },
     "typographyMeta": {
-      "display": { "displayName": "Editorial Display", "purpose": "The bottom-anchored hero statement only." },
-      "headline": { "displayName": "Chapter Headline", "purpose": "Analytical section titles and major narrative turns." },
-      "body": { "displayName": "Reading Body", "purpose": "Explanations, captions, and supporting prose." },
-      "label": { "displayName": "Technical Label", "purpose": "Controls, table headers, field names, and compact metadata." },
-      "meta": { "displayName": "Hero Meta", "purpose": "Compact uppercase date range and metric count in the hero." },
-      "data": { "displayName": "Atlas Data", "purpose": "Years, measures, and prominent tabular values." }
+      "display": {
+        "displayName": "Hero Statement",
+        "purpose": "The bottom-anchored rotating hero line only, in Google Sans Variable."
+      },
+      "headline": {
+        "displayName": "Atlas Plate Title",
+        "purpose": "Chapter titles, in Playfair Display. Nothing smaller takes the serif."
+      },
+      "title": {
+        "displayName": "Card Title",
+        "purpose": "Card and sub-chapter headings such as a rank card's Highest."
+      },
+      "body": {
+        "displayName": "Reading Body",
+        "purpose": "Chapter descriptions, captions, and supporting prose."
+      },
+      "label": {
+        "displayName": "Technical Label",
+        "purpose": "Control labels, table column heads, legend and strip headings."
+      },
+      "meta": {
+        "displayName": "Hero Meta",
+        "purpose": "The uppercase mono date-range line set below the hero paragraph."
+      },
+      "data": {
+        "displayName": "Atlas Data",
+        "purpose": "Every figure on the page, monospaced with tabular numerals."
+      }
     },
     "shadows": [
-      { "name": "hero-frame", "value": "0 28px 70px -36px rgb(3 15 25 / 0.8)", "purpose": "Grounds the full-viewport film frame against the page." },
-      { "name": "hero-vignette", "value": "inset 0 0 150px rgb(0 0 0 / 0.32)", "purpose": "Protects edge contrast over the hero video." },
-      { "name": "hero-action-rest", "value": "0 12px 30px -16px rgb(0 0 0 / 0.7)", "purpose": "Keeps hero actions legible over moving imagery." },
-      { "name": "hero-action-hover", "value": "0 0 0 1px oklch(75% 0.25 145 / 0.36), 0 0 28px oklch(75% 0.25 145 / 0.48), 0 18px 44px -14px oklch(75% 0.25 145 / 0.62)", "purpose": "Creates the Living Green light bloom around hero actions during hover." }
+      {
+        "name": "hero-frame",
+        "value": "0 28px 70px -36px rgb(3 15 25 / 0.8)",
+        "purpose": "Grounds the full-viewport film frame against the page."
+      },
+      {
+        "name": "hero-action-rest",
+        "value": "0 12px 30px -16px rgb(0 0 0 / 0.7)",
+        "purpose": "Keeps hero actions and the floating back-to-top ring legible over moving imagery."
+      },
+      {
+        "name": "hero-action-hover",
+        "value": "0 0 0 1px oklch(75% 0.25 145 / 0.36), 0 0 28px oklch(75% 0.25 145 / 0.48), 0 18px 44px -14px oklch(75% 0.25 145 / 0.62)",
+        "purpose": "The Living Green bloom around hero actions on hover."
+      },
+      {
+        "name": "popover",
+        "value": "0 2px 4px rgb(0 0 0 / 0.05), 0 12px 28px -8px rgb(0 0 0 / 0.22)",
+        "purpose": "Floats the country combobox list above the sections that follow it."
+      },
+      {
+        "name": "switch-thumb",
+        "value": "0 1px 2px rgb(0 0 0 / 0.06), 0 3px 8px -3px rgb(0 0 0 / 0.14)",
+        "purpose": "Raises the selected option of a segmented control."
+      }
     ],
     "motion": [
-      { "name": "hero-rise", "value": "900ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Resolves hero copy and actions upward from a soft blur; the two title beats follow at 180ms and 320ms." },
-      { "name": "hero-action", "value": "300ms ease", "purpose": "Scales hero actions to 105%, recolors them, and deepens their shadow on hover." },
-      { "name": "control-focus", "value": "240ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Lifts and accents a focused country control." },
-      { "name": "table-row", "value": "200ms ease", "purpose": "Softens the background change on table-row hover." },
-      { "name": "year-playback-step", "value": "650ms", "purpose": "Advances the synchronized year playback cadence." }
+      {
+        "name": "ease-atlas",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The single easing curve for every state change on the page."
+      },
+      {
+        "name": "hero-rise",
+        "value": "900ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Resolves hero copy and actions upward; the two title beats follow at 180ms and 320ms."
+      },
+      {
+        "name": "control-focus",
+        "value": "240ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Lifts and accents a focused country control by 2px."
+      },
+      {
+        "name": "combo-open",
+        "value": "180ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Scales and rises the country list open, flipping origin when it opens upward."
+      },
+      {
+        "name": "year-playback-step",
+        "value": "650ms",
+        "purpose": "Advances the synchronized year playback cadence; rank motion is tuned under it."
+      },
+      {
+        "name": "rank-fill",
+        "value": "600ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Grows a rank bar to its new share of the shared scale, just under the 650ms step so fills read as continuous travel."
+      },
+      {
+        "name": "rank-reorder",
+        "value": "600ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "FLIP-transforms a reused rank row to its new position on the same 600ms clock as the fill."
+      },
+      {
+        "name": "rank-enter",
+        "value": "400ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Fades a new rank row in; opacity only, no translate, so an entering row does not appear to slide past its neighbours."
+      },
+      {
+        "name": "rank-exit",
+        "value": "320ms linear",
+        "purpose": "Fades a row that has left the visible ten while it is pinned out of flow at its last offset, then it is removed."
+      },
+      {
+        "name": "table-row",
+        "value": "200ms ease",
+        "purpose": "Softens the background change on comparison-table row hover."
+      }
     ],
     "breakpoints": [
-      { "name": "sm", "value": "640px" },
-      { "name": "md", "value": "768px" },
-      { "name": "lg", "value": "1024px" }
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "shell-max",
+        "value": "1280px"
+      }
     ]
   },
   "components": [
     {
-      "name": "Explore Atlas Button",
+      "name": "Play Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The primary hero action that leads into the shared atlas controls.",
-      "html": "<a class=\"ds-btn-primary\" href=\"#controlsPanel\">Explore the atlas <svg aria-hidden=\"true\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"m5 8 5 5 5-5\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" /></svg></a>",
-      "css": ".ds-btn-primary{display:inline-flex;min-height:48px;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border:0;border-radius:8px;background:oklch(75% .25 145 / .8);color:#071018;font:600 14px/1.25 'IBM Plex Sans',system-ui,sans-serif;text-decoration:none;box-shadow:0 12px 30px -16px rgb(0 0 0 / .7);transition:transform 300ms ease,box-shadow 300ms ease}.ds-btn-primary svg{width:16px;height:16px;transition:transform 300ms}.ds-btn-primary:hover{transform:scale(1.05);box-shadow:0 0 0 1px oklch(75% .25 145 / .36),0 0 28px oklch(75% .25 145 / .48),0 18px 44px -14px oklch(75% .25 145 / .62)}.ds-btn-primary:hover svg{transform:translateY(2px)}.ds-btn-primary:focus-visible{outline:2px solid oklch(75% .25 145 / .8);outline-offset:2px;box-shadow:0 0 28px oklch(75% .25 145 / .48)}@media(prefers-reduced-motion:reduce){.ds-btn-primary,.ds-btn-primary svg{transition:none}}"
+      "description": "The primary action on the page: steps the shared year forward every 650ms.",
+      "html": "<button class=\"ds-btn-play\" type=\"button\" aria-pressed=\"false\"><svg aria-hidden=\"true\" viewBox=\"0 0 12 12\" fill=\"currentColor\"><path d=\"M2 1 11 6 2 11Z\"/></svg><span>Play</span></button>",
+      "css": ".ds-btn-play { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:76px; padding:9px 16px; border:none; border-radius:8px; background:var(--action-accent, oklch(75% 0.25 145 / 0.8)); color:#071018; font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:13px; font-weight:600; cursor:pointer; } .ds-btn-play svg { width:12px; height:12px; } .ds-btn-play:hover { filter:brightness(1.1); } .ds-btn-play:focus-visible { outline:2px solid var(--focus-ring, oklch(75% 0.25 145 / 0.8)); outline-offset:2px; } .ds-btn-play:disabled { opacity:0.55; cursor:wait; }"
     },
     {
-      "name": "Donate Button",
+      "name": "Hero Action",
       "kind": "button",
-      "refersTo": "button-secondary",
-      "description": "The secondary hero action for an external donation destination.",
-      "html": "<a class=\"ds-btn-secondary\" href=\"#\">Donate <svg aria-hidden=\"true\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M6 14 14 6M8 6h6v6\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" /></svg></a>",
-      "css": ".ds-btn-secondary{display:inline-flex;min-height:48px;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border:1px solid rgb(255 255 255 / .45);border-radius:8px;background:rgb(0 0 0 / .2);color:#fff;font:600 14px/1.25 'IBM Plex Sans',system-ui,sans-serif;text-decoration:none;box-shadow:0 12px 30px -16px rgb(0 0 0 / .7);transition:transform 300ms ease,background-color 300ms ease,border-color 300ms ease,box-shadow 300ms ease}.ds-btn-secondary svg{width:16px;height:16px;transition:transform 300ms}.ds-btn-secondary:hover{transform:scale(1.05);border-color:oklch(75% .25 145 / .8);background:rgb(0 0 0 / .36);box-shadow:0 0 0 1px oklch(75% .25 145 / .36),0 0 28px oklch(75% .25 145 / .48),0 18px 44px -14px oklch(75% .25 145 / .62)}.ds-btn-secondary:hover svg{transform:translate(2px,-2px)}.ds-btn-secondary:focus-visible{outline:2px solid oklch(75% .25 145 / .8);outline-offset:2px;box-shadow:0 0 28px oklch(75% .25 145 / .48)}@media(prefers-reduced-motion:reduce){.ds-btn-secondary,.ds-btn-secondary svg{transition:none}}"
-    },
-    {
-      "name": "Playback Button",
-      "kind": "button",
-      "refersTo": "button-compact",
-      "description": "The compact action that starts or pauses synchronized year playback.",
-      "html": "<button class=\"ds-btn-play\" type=\"button\"><svg aria-hidden=\"true\" viewBox=\"0 0 12 12\"><path d=\"M2 1 11 6 2 11Z\" /></svg>Play</button>",
-      "css": ".ds-btn-play{display:inline-flex;min-width:76px;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border:0;border-radius:8px;background:oklch(75% .25 145 / .8);color:#071018;font:600 13px/1.25 'IBM Plex Sans',system-ui,sans-serif;cursor:pointer}.ds-btn-play svg{width:12px;height:12px;fill:currentColor}.ds-btn-play:hover{filter:brightness(1.1)}.ds-btn-play:focus-visible{outline:2px solid oklch(75% .25 145 / .8);outline-offset:2px}.ds-btn-play:disabled{cursor:wait;opacity:.55}"
+      "refersTo": "button-hero",
+      "description": "Pill anchor over the hero video; Explore the atlas always precedes Donate.",
+      "html": "<a class=\"ds-btn-hero\" href=\"#controlsPanel\">Explore the atlas<svg aria-hidden=\"true\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"m5 8 5 5 5-5\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></a>",
+      "css": ".ds-btn-hero { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:12px 28px; border:1px solid rgb(255 255 255 / 0.45); border-radius:9999px; background:#000; color:#fff; font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:14px; font-weight:600; text-decoration:none; box-shadow:0 12px 30px -16px rgb(0 0 0 / 0.7); transition:transform 300ms ease, box-shadow 300ms ease; } .ds-btn-hero svg { width:16px; height:16px; transition:transform 300ms ease; } .ds-btn-hero:hover { transform:scale(1.05); box-shadow:0 0 0 1px oklch(75% 0.25 145 / 0.36), 0 0 28px oklch(75% 0.25 145 / 0.48), 0 18px 44px -14px oklch(75% 0.25 145 / 0.62); } .ds-btn-hero:hover svg { transform:translateY(2px); } .ds-btn-hero:focus-visible { outline:2px solid oklch(75% 0.25 145 / 0.8); outline-offset:2px; }"
     },
     {
       "name": "Metric Select",
       "kind": "input",
       "refersTo": "select-field",
-      "description": "A bounded field for selecting a country or analytical metric.",
-      "html": "<label class=\"ds-field\"><span>Map metric</span><select><option>CO2 per capita</option><option>Total CO2 emissions</option></select></label>",
-      "css": ".ds-field{display:flex;min-width:0;flex-direction:column;gap:6px;color:var(--text-muted,#686660);font:600 11.5px/1.25 'IBM Plex Sans',system-ui,sans-serif;letter-spacing:.03em;text-transform:uppercase}.ds-field select{max-width:220px;padding:7px 10px;border:1px solid var(--border,rgba(11,11,11,.1));border-radius:8px;background:var(--surface-2,#f2f1ec);color:var(--text-primary,#0b0b0b);font:400 13.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;text-transform:none}.ds-field select:focus-visible{outline:2px solid oklch(75% .25 145 / .8);outline-offset:2px}.ds-field select:disabled{cursor:wait;opacity:.55}"
+      "description": "Labelled native select used for every metric picker; its label is an uppercase technical label.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-metric\">Rank by</label><select class=\"ds-select\" id=\"ds-metric\"><option>CO&#8322; per person</option><option>Total CO&#8322;</option></select></div>",
+      "css": ".ds-field { display:flex; flex-direction:column; gap:6px; min-width:0; } .ds-field-label { font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:11.5px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase; color:var(--text-muted,#686660); } .ds-select { max-width:220px; padding:7px 10px; border:1px solid var(--border, rgba(11,11,11,0.10)); border-radius:10px; background:var(--surface-2,#f2f1ec); color:var(--text-primary,#0b0b0b); font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:13.5px; } .ds-select:focus-visible { outline:2px solid var(--focus-ring, oklch(75% 0.25 145 / 0.8)); outline-offset:2px; }"
     },
     {
-      "name": "Country Control",
+      "name": "Country Search",
+      "kind": "input",
+      "refersTo": "combo-input",
+      "description": "Editable combobox over 217 countries; replaced a 217-option native select.",
+      "html": "<div class=\"ds-combo\"><svg class=\"ds-combo-icon\" aria-hidden=\"true\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"><circle cx=\"7\" cy=\"7\" r=\"4.25\"/><path d=\"m10.2 10.2 3.05 3.05\"/></svg><input class=\"ds-combo-input\" type=\"text\" role=\"combobox\" aria-expanded=\"false\" placeholder=\"Type a country name\" value=\"United States\"></div>",
+      "css": ".ds-combo { position:relative; min-width:0; } .ds-combo-icon { position:absolute; top:50%; left:12px; width:16px; height:16px; transform:translateY(-50%); color:var(--text-muted,#686660); pointer-events:none; } .ds-combo-input { width:100%; min-height:40px; padding:9px 36px; border:1px solid var(--border, rgba(11,11,11,0.10)); border-radius:10px; background:var(--surface,#fcfcfb); color:var(--text-primary,#0b0b0b); font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:14px; transition:border-color 160ms cubic-bezier(0.16,1,0.3,1); } .ds-combo-input::placeholder { color:var(--text-muted,#686660); } .ds-combo-input:hover { border-color:var(--axis,#c3c2b7); } .ds-combo-input:focus-visible { outline:2px solid var(--focus-ring, oklch(75% 0.25 145 / 0.8)); outline-offset:2px; }"
+    },
+    {
+      "name": "Segmented Switch",
+      "kind": "chip",
+      "refersTo": "segmented-option",
+      "description": "Two-option switch built from native radios; used for Level/Change and Percent/Amount.",
+      "html": "<div class=\"ds-segmented\"><label><input type=\"radio\" name=\"ds-seg\" checked>Percent</label><label><input type=\"radio\" name=\"ds-seg\">Amount</label></div>",
+      "css": ".ds-segmented { display:grid; grid-template-columns:1fr 1fr; gap:3px; padding:3px; border:1px solid var(--border, rgba(11,11,11,0.10)); border-radius:10px; background:var(--bg,#f9f9f7); } .ds-segmented label { position:relative; display:flex; align-items:center; justify-content:center; min-height:36px; padding:0 12px; border-radius:7px; color:var(--text-secondary,#52514e); font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:background-color 200ms cubic-bezier(0.16,1,0.3,1), color 200ms cubic-bezier(0.16,1,0.3,1), box-shadow 200ms cubic-bezier(0.16,1,0.3,1); } .ds-segmented input { position:absolute; inset:0; margin:0; opacity:0; cursor:pointer; } .ds-segmented label:has(:checked) { background:var(--surface,#fcfcfb); color:var(--text-primary,#0b0b0b); box-shadow:0 1px 2px rgb(0 0 0 / 0.06), 0 3px 8px -3px rgb(0 0 0 / 0.14); } .ds-segmented label:has(:focus-visible) { outline:2px solid var(--focus-ring, oklch(75% 0.25 145 / 0.8)); outline-offset:2px; }"
+    },
+    {
+      "name": "Analytical Card",
       "kind": "card",
-      "refersTo": "control-card",
-      "description": "A country selector paired with its persistent series identity.",
-      "html": "<div class=\"ds-country-control\"><div class=\"ds-country-label\"><label for=\"ds-country\">Country 1</label><span aria-hidden=\"true\"></span></div><select id=\"ds-country\"><option>United States</option></select></div>",
-      "css": ".ds-country-control{display:flex;min-width:0;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--border,rgba(11,11,11,.1));border-radius:12px;background:var(--surface-2,#f2f1ec);transition:border-color 240ms cubic-bezier(.16,1,.3,1),transform 240ms cubic-bezier(.16,1,.3,1)}.ds-country-control:focus-within{border-color:oklch(75% .25 145 / .8);transform:translateY(-2px)}.ds-country-label{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--text-secondary,#52514e);font:600 12px/1.25 'IBM Plex Sans',system-ui,sans-serif}.ds-country-label span{width:11px;height:11px;flex:none;border-radius:999px;background:var(--accent,#2a78d6)}.ds-country-control select{width:100%;padding:7px 10px;border:1px solid var(--border,rgba(11,11,11,.1));border-radius:8px;background:var(--surface-2,#f2f1ec);color:var(--text-primary,#0b0b0b);font:400 13.5px/1.5 'IBM Plex Sans',system-ui,sans-serif}.ds-country-control select:focus-visible{outline:2px solid oklch(75% .25 145 / .8);outline-offset:2px}"
+      "refersTo": "card-analytical",
+      "description": "The flat, hairlined surface card that holds a plot stage or a ranked list.",
+      "html": "<section class=\"ds-card\"><header class=\"ds-card-head\"><h3 class=\"ds-card-title\">Highest</h3><p class=\"ds-card-meta\">213 countries reporting &middot; 2024</p></header><p class=\"ds-card-body\">Content sits on a flat surface; depth comes from tone and a single hairline.</p></section>",
+      "css": ".ds-card { min-width:0; padding:20px; border:1px solid var(--border, rgba(11,11,11,0.10)); border-radius:12px; background:var(--surface,#fcfcfb); font-family:'IBM Plex Sans',system-ui,sans-serif; color:var(--text-primary,#0b0b0b); } .ds-card-head { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 12px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--border, rgba(11,11,11,0.10)); } .ds-card-title { margin:0; font-size:14px; font-weight:600; } .ds-card-meta { margin:0; font-size:11.5px; color:var(--text-muted,#686660); font-variant-numeric:tabular-nums; } .ds-card-body { margin:0; font-size:15px; line-height:1.6; color:var(--text-secondary,#52514e); }"
     },
     {
-      "name": "Section Heading",
+      "name": "Ranked List Row",
       "kind": "custom",
-      "description": "The editorial opening for each analytical chapter.",
-      "html": "<header class=\"ds-section-heading\"><h2>World map</h2><p>Move from a single value to the global pattern. Every country is held to one consistent scale across time.</p></header>",
-      "css": ".ds-section-heading{display:grid;gap:12px;padding-bottom:28px;border-bottom:1px solid var(--border,rgba(11,11,11,.1));color:var(--text-primary,#0b0b0b);font-family:'IBM Plex Sans',system-ui,sans-serif}.ds-section-heading h2{max-width:18ch;margin:0;font-size:clamp(28px,4vw,46px);font-weight:700;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}.ds-section-heading p{max-width:62ch;margin:0;color:var(--text-secondary,#52514e);font-size:15px;line-height:1.625}@media(min-width:1024px){.ds-section-heading{grid-template-columns:minmax(0,1fr) minmax(260px,.65fr);align-items:end;gap:48px}.ds-section-heading p{justify-self:end}}"
+      "refersTo": "rank-row",
+      "description": "The signature row: named-areas grid with the bar in its own column, framed track, map-band fill, and a selected country marked around the row.",
+      "html": "<ol class=\"ds-rank-list\"><li class=\"ds-rank-row\" data-selected=\"true\" style=\"--ds-fill:var(--seq-600,#184f95);--ds-mark:var(--accent,#2a78d6);--ds-ratio:0.82\"><i class=\"ds-rank-bar\" aria-hidden=\"true\"><i class=\"ds-rank-fill\"></i></i><span class=\"ds-rank-num\">3</span><span class=\"ds-rank-name\"><span class=\"ds-swatch\"></span><span class=\"ds-rank-label\">United States</span></span><span class=\"ds-rank-value\">13.8 t</span></li><li class=\"ds-rank-row\" style=\"--ds-fill:var(--seq-300,#6da7ec);--ds-ratio:0.54\"><i class=\"ds-rank-bar\" aria-hidden=\"true\"><i class=\"ds-rank-fill\"></i></i><span class=\"ds-rank-num\">4</span><span class=\"ds-rank-name\"><span class=\"ds-rank-label\">Australia</span></span><span class=\"ds-rank-value\">9.1 t</span></li><li class=\"ds-rank-row\" style=\"--ds-fill:var(--rank-good,#4e9068);--ds-ratio:0.31\"><i class=\"ds-rank-bar\" aria-hidden=\"true\"><i class=\"ds-rank-fill\"></i></i><span class=\"ds-rank-num\">5</span><span class=\"ds-rank-name\"><span class=\"ds-rank-label\">Denmark</span></span><span class=\"ds-rank-value\">−38%</span></li></ol>",
+      "css": ".ds-rank-list { position:relative; display:grid; gap:2px; margin:0; padding:0; list-style:none; font-family:'IBM Plex Sans',system-ui,sans-serif; } .ds-rank-row { display:grid; align-items:center; grid-template-columns:1.6rem minmax(0,1fr) auto; grid-template-areas:'num name value' 'bar bar bar'; gap:5px 10px; padding:7px 10px; border-radius:8px; font-size:13.5px; color:var(--text-primary,#0b0b0b); transition:transform 600ms cubic-bezier(0.16,1,0.3,1), opacity 320ms linear; } @media (min-width:640px) { .ds-rank-row { grid-template-columns:1.6rem minmax(0,1fr) clamp(54px,27%,168px) auto; grid-template-areas:'num name bar value'; gap:10px; } } .ds-rank-bar { grid-area:bar; height:5px; overflow:hidden; border-radius:3px; background:var(--rank-track,#f1f1ed); box-shadow:inset 0 0 0 1px var(--border,rgba(11,11,11,0.10)); pointer-events:none; } @media (min-width:640px) { .ds-rank-bar { height:13px; align-self:center; } } .ds-rank-fill { display:block; width:100%; height:100%; transform-origin:left; transform:scaleX(var(--ds-ratio,1)); background:var(--ds-fill,transparent); transition:transform 600ms cubic-bezier(0.16,1,0.3,1); } .ds-rank-num { grid-area:num; text-align:right; font-size:11.5px; color:var(--text-muted,#686660); font-variant-numeric:tabular-nums; } .ds-rank-name { grid-area:name; display:flex; min-width:0; align-items:center; gap:8px; color:var(--text-primary,#0b0b0b); } .ds-rank-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .ds-swatch { width:11px; height:11px; flex-shrink:0; border-radius:9999px; background:var(--ds-mark,currentColor); } .ds-rank-value { grid-area:value; flex-shrink:0; font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:13px; font-variant-numeric:tabular-nums; } .ds-rank-row[data-selected='true'] { background:color-mix(in oklab, var(--ds-mark) 12%, transparent); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--ds-mark) 45%, transparent); } .ds-rank-row[data-selected='true'] .ds-rank-name { font-weight:600; } .ds-rank-row[data-selected='true'] .ds-rank-num { color:var(--text-secondary,#52514e); } @media (prefers-reduced-motion: reduce) { .ds-rank-row, .ds-rank-fill { transition:none; } }"
     },
     {
-      "name": "Year Toolbar",
+      "name": "Field Toolbar",
       "kind": "card",
-      "description": "A compact status strip that pairs context with a prominent selected year.",
-      "html": "<div class=\"ds-year-toolbar\"><span>Selected year</span><strong>2023</strong></div>",
-      "css": ".ds-year-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-radius:12px;background:var(--surface-2,#f2f1ec);color:var(--text-primary,#0b0b0b)}.ds-year-toolbar span{color:var(--text-muted,#686660);font:600 12px/1.25 'IBM Plex Sans',system-ui,sans-serif}.ds-year-toolbar strong{font:600 20px/1.25 'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}"
+      "refersTo": "field-toolbar",
+      "description": "The recessed well that carries a chapter's pickers and the shared year readout.",
+      "html": "<div class=\"ds-toolbar\"><span class=\"ds-toolbar-label\">Selected year</span><strong class=\"ds-toolbar-value\">2024</strong></div>",
+      "css": ".ds-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 20px; border-radius:12px; background:var(--surface-2,#f2f1ec); font-family:'IBM Plex Sans',system-ui,sans-serif; } .ds-toolbar-label { font-size:12px; font-weight:600; color:var(--text-muted,#686660); } .ds-toolbar-value { font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--text-primary,#0b0b0b); }"
     },
     {
-      "name": "Chart Stage",
-      "kind": "card",
-      "refersTo": "chart-stage",
-      "description": "The bounded neutral surface that contains maps and analytical plots.",
-      "html": "<div class=\"ds-chart-stage\" role=\"img\" aria-label=\"Chart preview\"><div class=\"ds-chart-grid\"><span></span><span></span><span></span></div><svg viewBox=\"0 0 300 120\" aria-hidden=\"true\"><path d=\"M8 95 C55 80 75 88 112 58 S180 42 212 60 S262 31 292 24\" fill=\"none\" stroke=\"var(--accent,#2a78d6)\" stroke-width=\"3\" /></svg></div>",
-      "css": ".ds-chart-stage{position:relative;min-width:0;height:220px;overflow:hidden;padding:16px;border:1px solid var(--border,rgba(11,11,11,.1));border-radius:12px;background:var(--surface,#fcfcfb);color:var(--text-primary,#0b0b0b)}.ds-chart-stage svg{position:absolute;inset:20px;width:calc(100% - 40px);height:calc(100% - 40px)}.ds-chart-grid{position:absolute;inset:20px;display:grid;grid-template-rows:repeat(3,1fr)}.ds-chart-grid span{border-bottom:1px solid var(--grid,#e1e0d9)}"
-    },
-    {
-      "name": "Pinned Comparison Table",
+      "name": "Chapter Heading",
       "kind": "custom",
-      "description": "A horizontally scrollable metric table that keeps country identity visible.",
-      "html": "<div class=\"ds-table-frame\"><div class=\"ds-table-scroll\"><table><thead><tr><th>Country</th><th>CO2 per capita</th><th>Total CO2</th><th>Population</th></tr></thead><tbody><tr><td><span></span>United States</td><td>14.32 t</td><td>4,912 Mt</td><td>343,477,330</td></tr><tr><td><span></span>China</td><td>8.56 t</td><td>12,172 Mt</td><td>1,422,584,930</td></tr></tbody></table></div></div>",
-      "css": ".ds-table-frame{padding:12px;border:1px solid var(--border,rgba(11,11,11,.1));border-radius:12px;background:var(--surface-2,#f2f1ec);color:var(--text-primary,#0b0b0b);font-family:'IBM Plex Sans',system-ui,sans-serif}.ds-table-scroll{overflow-x:auto;scrollbar-color:var(--axis,#c3c2b7) transparent;scrollbar-width:thin}.ds-table-frame table{width:100%;min-width:560px;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}.ds-table-frame th,.ds-table-frame td{padding:16px;border-bottom:1px solid var(--border,rgba(11,11,11,.1));text-align:right;white-space:nowrap}.ds-table-frame th{color:var(--text-muted,#686660);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}.ds-table-frame th:first-child,.ds-table-frame td:first-child{position:sticky;left:0;z-index:2;background:var(--surface-2,#f2f1ec);text-align:left}.ds-table-frame td:first-child{display:flex;align-items:center;gap:10px;font-weight:600}.ds-table-frame td:first-child span{width:9px;height:9px;border-radius:999px;background:var(--accent,#2a78d6)}.ds-table-frame tbody tr{transition:background-color 200ms}.ds-table-frame tbody tr:hover{background:var(--surface,#fcfcfb)}.ds-table-frame tbody tr:last-child td{border-bottom:0}"
+      "description": "The serif plate title with its supporting column and closing hairline that opens every chapter.",
+      "html": "<header class=\"ds-chapter\"><h2 class=\"ds-chapter-title\">The Rankings</h2><p class=\"ds-chapter-desc\">The two ends of the same distribution, side by side: who leads, who trails, and who has travelled furthest since 1990.</p></header>",
+      "css": ".ds-chapter { display:grid; gap:12px; padding-bottom:28px; border-bottom:1px solid var(--border, rgba(11,11,11,0.10)); } @media (min-width:1024px) { .ds-chapter { grid-template-columns:minmax(0,1fr) minmax(260px,0.65fr); align-items:end; gap:48px; } } .ds-chapter-title { margin:0; max-width:18ch; font-family:'Playfair Display Variable','Playfair Display',Georgia,serif; font-size:clamp(30px,4.2vw,50px); font-weight:600; line-height:1.06; letter-spacing:-0.015em; text-wrap:balance; color:var(--text-primary,#0b0b0b); } .ds-chapter-desc { margin:0; max-width:62ch; font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:15px; line-height:1.6; color:var(--text-secondary,#52514e); }"
     }
   ],
   "narrative": {
     "northStar": "The Editorial Field Atlas",
-    "overview": "The system pairs the authority of a printed reference atlas with the immediacy of a living climate record. A framed, full-viewport filmic hero establishes scale and urgency; everything below it becomes quieter, flatter, and more exact so the data can carry the argument.\n\nIBM Plex gives the experience a direct editorial voice without losing technical credibility. Strong headlines, compact labels, mono numerals, generous chapter spacing, and bounded analytical stages create a clear reading rhythm. Light mode feels like warm paper and ink; dark mode feels like graphite and illuminated plotting marks.",
+    "overview": "The system pairs the authority of a printed reference atlas with the immediacy of a living climate record. A framed, full-viewport filmic hero establishes scale and urgency; everything below it becomes quieter, flatter, and more exact so the data can carry the argument. The page is one long reading, divided into chapters by hairlines and air rather than by boxes.\n\nType does the register change. The hero speaks in a wide geometric sans set very tight and very large; chapter titles speak in a serif display face (Playfair Display) that reads as a printed atlas plate; everything operational — labels, controls, notes — is IBM Plex Sans, and every figure is IBM Plex Mono with tabular numerals so columns of numbers line up and never jitter as the year advances. Light mode is warm paper and ink; dark mode is graphite with illuminated plotting marks. Neither mode introduces a second brand palette.\n\nColour is almost entirely functional. Three country hues (blue, orange, green) hold their slot across every view; everything else is grey context. Saturated colour beyond those three exists only to encode magnitude, direction, action, or focus. Encodings are shared rather than duplicated: a rank bar showing a level is painted from the same six map bands, by the same band function, as the country's patch on the choropleth, so a reader who has learned the map has already learned the list.",
     "keyCharacteristics": [
       "Immersive framed motion at the opening, followed by restrained analytical chapters.",
-      "Bottom-anchored editorial composition with a split headline and supporting column.",
-      "Warm paper light surfaces and near-black graphite dark surfaces.",
-      "Blue, orange, and green country series that stay synchronized across every view.",
-      "Flat, bordered controls and plot stages with generous whitespace between chapters.",
-      "Compact labels and monospaced, tabular numerals for fast data scanning."
+      "Serif display chapter titles over a sans body; monospaced tabular numerals for all figures.",
+      "Warm paper light surfaces and near-black graphite dark surfaces, separated by 1px hairlines.",
+      "Blue, orange, green country series that stay synchronized across map, table, bubbles, trends, and ranks.",
+      "One encoding per idea, reused across views: level is always the map's band ramp, change is always the verdict ramp.",
+      "Flat, bordered controls and plot stages; depth reserved for the hero, popovers, and the switch thumb.",
+      "Every encoding readable without colour: rank numerals, arrow glyphs, signs, and labelled legend bands."
     ],
     "rules": [
-      { "name": "The Three-Country Rule", "body": "Blue is always country one, orange country two, and green country three. Never reorder or repurpose these hues within a view.", "section": "colors" },
-      { "name": "The Quiet Field Rule", "body": "Use neutral surfaces and hairlines for structure. Saturated color must encode action, selection, magnitude, or focus.", "section": "colors" },
-      { "name": "The Theme Pair Rule", "body": "Light and dark modes preserve semantic roles and relative contrast; they do not introduce a separate brand palette.", "section": "colors" },
-      { "name": "The Data Has a Different Voice Rule", "body": "Use IBM Plex Mono only for years, measures, and compact technical metadata; prose and navigation stay in IBM Plex Sans.", "section": "typography" },
-      { "name": "The Tight Headline Rule", "body": "Large editorial headings use heavy weight, compact line height, and negative tracking. Do not imitate their density in body copy.", "section": "typography" },
-      { "name": "The Open Chapter Rule", "body": "Section spacing and hairlines define the story. Use cards for controls, tables, and plots, not as a wrapper around every chapter.", "section": "layout" },
-      { "name": "The Pinned Context Rule", "body": "When a data region must scroll horizontally, keep the identifying label visible and provide a plain-language scroll hint on small screens.", "section": "layout" },
-      { "name": "The Cinematic Exception Rule", "body": "Ambient shadow belongs to the hero and its over-video actions. Analytical surfaces use tone and borders instead.", "section": "elevation" },
-      { "name": "The Nested Radius Rule", "body": "Larger outer surfaces receive the larger radius. Inner controls step down in radius so layers remain visually ordered.", "section": "shapes" }
+      {
+        "name": "The Three-Country Rule",
+        "body": "Blue is always country one, orange country two, green country three. Never reorder or repurpose these hues within a view.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Field Rule",
+        "body": "Neutral surfaces and hairlines carry structure. Saturated colour must encode action, selection, magnitude, direction, or focus — never decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Theme Pair Rule",
+        "body": "Light and dark preserve semantic roles and relative contrast; they do not introduce a separate brand palette. Any new token lands in all three theme blocks (:root, the prefers-color-scheme: dark media block, and :root[data-theme=\"dark\"]) in the same commit.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Encoding Rule",
+        "body": "A quantity that already has a colour encoding elsewhere reuses that encoding, function and all. Level anywhere on the page is the seq-* map bands through bandIndex(LEVEL_BANDS[metric].edges, value); direction of change is the verdict rung. A second surface showing the same quantity in a new ramp is a bug, not a variation.",
+        "section": "colors"
+      },
+      {
+        "name": "The Framed Bar Rule",
+        "body": "A band fill is a fill, never a ground: nothing is printed over a rank bar or a map patch. Because the ramp's palest step sits close to the card (seq-100 is about 1.3:1 against paper-surface — the same relationship the choropleth has always shipped for its lowest band), the bar's extent is carried by structure instead of by the fill: .rank-bar takes a 1px --border inset frame that outlines the full track whatever shade lands in it. Fix a pale bar by keeping the frame, not by darkening the ramp — darkening it breaks the match with the map, which is the whole point of the colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Data Has a Different Voice Rule",
+        "body": "IBM Plex Mono with tabular-nums for years, measures, and compact technical metadata; prose, labels, and navigation stay in IBM Plex Sans. A number that animates must be tabular or it will jitter.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tight Headline Rule",
+        "body": "Large editorial headings use heavy weight, compact line height, and negative tracking. Do not imitate that density in body copy.",
+        "section": "typography"
+      },
+      {
+        "name": "The Plate Title Rule",
+        "body": "The serif belongs to chapter titles only. Card titles, labels, and values never take Playfair; a sub-heading that wants more presence gets weight, not a face change.",
+        "section": "typography"
+      },
+      {
+        "name": "The Open Chapter Rule",
+        "body": "Section spacing and hairlines define the story. Cards wrap controls, tables, and plots — never a whole chapter.",
+        "section": "layout"
+      },
+      {
+        "name": "The Pinned Context Rule",
+        "body": "When a data region must scroll horizontally, keep the identifying label visible and give small screens a plain-language scroll hint.",
+        "section": "layout"
+      },
+      {
+        "name": "The Measured Caption Rule",
+        "body": "A caption gets an explicit measure and is allowed to change shape at a breakpoint (90ch → nowrap at xl; 1040px for two settled lines from 1024px). A caption that reflows into a ragged third line at one width is not finished.",
+        "section": "layout"
+      },
+      {
+        "name": "The Cinematic Exception Rule",
+        "body": "Ambient shadow belongs to the hero, its over-video actions, floating overlays, and the switch thumb. Analytical surfaces use tone and hairlines instead.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Nested Radius Rule",
+        "body": "The larger outer surface takes the larger radius; inner controls step down so the layering stays visually ordered.",
+        "section": "shapes"
+      }
     ],
     "dos": [
-      "Do keep Explore the atlas as the primary action before Donate.",
-      "Do preserve blue, orange, and green slot order in controls, tables, bubbles, and trend lines.",
-      "Do use warm paper and graphite surface stacks with one-pixel hairlines for analytical structure.",
-      "Do pair monospaced tabular numerals with plain-language labels and notes.",
-      "Do maintain open chapter spacing, bounded controls, and bounded plot stages at every viewport.",
-      "Do keep mobile maps legible and comparison tables horizontally scrollable with the country column pinned.",
-      "Do disable motion and the hero video when reduced motion is requested."
+      "Do keep blue, orange, and green in slot order across controls, table, map, bubbles, trends, and ranks.",
+      "Do define every new colour token in all three theme blocks in the same change, and state its measured contrast against the surface it will sit on.",
+      "Do paint a level anywhere on the page from the seq-* map bands via bandIndex, so the list and the map agree by construction rather than by eye.",
+      "Do use the rank-* verdict rung for direction-of-change bars, which have no position on the level scale to borrow.",
+      "Do give any band-filled bar a 1px inset frame so its extent survives the palest step of the ramp.",
+      "Do pair monospaced tabular numerals with plain-language labels and units.",
+      "Do carry direction with shape (arrow, sign, rank numeral) as well as colour, so a figure survives without hue.",
+      "Do match animated list motion to the playback cadence that drives it (600ms transitions under a 650ms step), and pin a leaving row out of flow rather than deleting it mid-step.",
+      "Do keep every interactive target at 44px or larger under @media (pointer: coarse) while leaving its visual box alone.",
+      "Do disable transitions, entry animations, and the hero video under prefers-reduced-motion.",
+      "Do keep chapters open: hairlines and spacing, not nested boxes."
     ],
     "donts": [
-      "Don't use decorative color where it could be mistaken for a series, selection, magnitude, or focus state.",
-      "Don't add ambient shadows to analytical cards, tables, toolbars, or chart stages.",
-      "Don't wrap every chapter in a card or compress the whitespace that separates the analytical story.",
-      "Don't change a country's assigned hue between views or rely on color without a nearby country name.",
-      "Don't let large chart canvases force the mobile page wider than the viewport.",
-      "Don't use the hero's cinematic motion language inside the analytical chapters."
+      "Don't print text over a band-filled bar or a map patch. The ramps are tuned for fills; give the label its own grid column, which is what the rank row now does.",
+      "Don't invent a new ramp for a quantity that already has one; see the One Encoding Rule.",
+      "Don't darken seq-100 to \"fix\" a pale bar. The frame is the mechanism, and the ramp must keep matching the map.",
+      "Don't mark a selection by cutting a hole in, or recolouring, the data fill — mark it around the row (wash plus inset ring) so the encoding stays intact.",
+      "Don't rebuild a live list from innerHTML on a playback step; reuse the rows and the strip cells.",
+      "Don't add ambient shadow to analytical cards, tables, toolbars, or plot stages. Shadow is for the hero, floating overlays, and the switch thumb.",
+      "Don't use decorative colour that could be mistaken for a series, a magnitude band, a selection, or a focus state.",
+      "Don't set Playfair on anything smaller than a chapter title, and don't substitute a system serif or system display face for it.",
+      "Don't hand Plotly an oklch() value — it cannot parse it and silently swaps in its own scale.",
+      "Don't build a segmented control, disclosure, or listbox out of divs when a native radio, details, or option would carry the keyboard and screen-reader behaviour.",
+      "Don't let any region force horizontal scroll at 390px; the comparison table's own scroll frame is the single sanctioned exception."
     ]
   }
 }

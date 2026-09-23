@@ -32,6 +32,9 @@
     --seq-100:#cde2fb; --seq-200:#9ec5f4; --seq-300:#6da7ec; --seq-400:#3987e5;
     --seq-500:#2368b8; --seq-600:#184f95; --seq-700:#0d366b;
     --context-dot:#c3c2b7;
+    --rank-track:#f1f1ed;
+    --rank-good:#4e9068; --rank-bad:#cc6a5f;
+    --rank-growth:#6c86bd; --rank-decline:#a38150;
     --focus-ring:oklch(75% 0.25 145 / 0.8);
     --trend-good:oklch(54% 0.1 155);
     --trend-bad:oklch(55% 0.12 27);
@@ -62,6 +65,9 @@
       --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
       --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
       --context-dot:#4a4a47;
+      --rank-track:#242423;
+      --rank-good:#3e7b55; --rank-bad:#a8594f;
+      --rank-growth:#5972a3; --rank-decline:#866436;
       --trend-good:oklch(76% 0.1 155);
       --trend-bad:oklch(72% 0.11 27);
       --band-mid:#595240;
@@ -88,6 +94,9 @@
     --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
     --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
     --context-dot:#4a4a47;
+    --rank-track:#242423;
+    --rank-good:#3e7b55; --rank-bad:#a8594f;
+    --rank-growth:#5972a3; --rank-decline:#866436;
     --trend-good:oklch(76% 0.1 155);
     --trend-bad:oklch(72% 0.11 27);
     --band-mid:#595240;
@@ -175,6 +184,139 @@
   .sm-cell { @apply min-w-0 rounded-xl border border-line bg-surface p-4; }
   .chart-sm { @apply h-[230px] w-full; }
   .sm-title { @apply mb-3 text-[12.5px] font-semibold text-secondary; }
+
+  /* Country search: an editable combobox over 217 countries. A native select
+     with 217 options makes the visitor hunt; typing two letters does not. */
+  .combo { @apply relative min-w-0; }
+  .combo-icon { @apply pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted; }
+  .combo-input {
+    @apply min-h-10 w-full min-w-0 rounded-lg border border-line bg-surface py-[9px] pr-9 pl-9 text-base text-ink sm:text-[14px];
+    transition: border-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .combo-input::placeholder { color: var(--text-muted); }
+  /* Focusing selects the country name so typing replaces it. At full strength
+     the page's selection green reads as a highlighter over the whole field. */
+  .combo-input::selection { background: color-mix(in oklab, var(--action-accent) 32%, transparent); color: var(--text-primary); }
+  .combo-input:hover:not(:disabled) { border-color: var(--axis); }
+  .combo:has(.combo-input:disabled) .combo-icon { @apply opacity-55; }
+  .combo-clear {
+    @apply absolute top-1/2 right-1.5 flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-muted;
+    transition: color 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .combo-clear svg { @apply size-4; }
+  .combo-clear:hover { @apply bg-field text-ink; }
+
+  .combo-pop {
+    @apply absolute inset-x-0 top-[calc(100%+6px)] z-30 overflow-hidden rounded-xl border border-line bg-surface;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.05), 0 12px 28px -8px rgb(0 0 0 / 0.22);
+  }
+  .combo-pop[data-placement="top"] { @apply top-auto bottom-[calc(100%+6px)]; }
+  .combo-list {
+    @apply max-h-[min(19rem,50vh)] overflow-y-auto overscroll-contain py-1;
+    scrollbar-color: var(--axis) transparent;
+    scrollbar-width: thin;
+  }
+  .combo-group-label {
+    @apply sticky top-0 z-[2] bg-surface px-3 pt-2.5 pb-1.5 text-[10.5px] font-semibold tracking-[0.06em] text-muted uppercase;
+  }
+  .combo-option {
+    @apply flex min-h-9 cursor-pointer items-center gap-2.5 px-3 py-[7px] text-[14px] text-secondary;
+  }
+  .combo-option mark { @apply bg-transparent font-bold text-ink; }
+  .combo-option[data-active="true"] {
+    background: color-mix(in oklab, var(--action-accent) 16%, var(--surface));
+    @apply text-ink;
+  }
+  .combo-option[aria-selected="true"] { @apply font-semibold text-ink; }
+  .combo-name { @apply min-w-0 flex-1 truncate; }
+  .combo-tag { @apply flex shrink-0 items-center gap-1.5 text-[11.5px] font-normal text-muted; }
+  .combo-tag .swatch { @apply size-2; }
+  .combo-check { @apply size-3.5 shrink-0 text-accent; }
+  .combo-empty { @apply px-3 py-3.5 text-[13.5px] text-muted; }
+
+  /* Rankings: the bar holds a column of its own. Nothing is printed over it,
+     so it is free to carry the World View's six fixed band colours and a
+     country's bar matches the shade it wears on the map. */
+  .rank-card { @apply min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-5; }
+  .rank-card-head { @apply mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-line pb-3; }
+  .rank-card-title { @apply text-[14px] font-semibold; }
+  .rank-card-meta { @apply text-[11.5px] text-muted tabular-nums; }
+  .rank-list { @apply relative grid gap-0.5; }
+  .rank-row {
+    @apply grid items-center rounded-lg px-2.5 py-[7px] text-[13.5px];
+    grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+    grid-template-areas: "num name value" "bar bar bar";
+    gap: 5px 10px;
+    transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 320ms linear;
+  }
+  /* Narrow cards stack the bar under the row so long country names keep their
+     width; from `sm` up it takes its own column between name and value. */
+  @media (min-width: 640px) {
+    .rank-row {
+      grid-template-columns: 1.6rem minmax(0, 1fr) clamp(54px, 27%, 168px) auto;
+      grid-template-areas: "num name bar value";
+      gap: 10px;
+    }
+  }
+  .rank-bar {
+    @apply pointer-events-none overflow-hidden rounded-[3px];
+    grid-area: bar;
+    height: 5px;
+    background: var(--rank-track);
+    /* The palest band is barely lighter than the card, exactly as it is on the
+       map. The frame keeps the bar's full extent readable whatever it holds. */
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+  @media (min-width: 640px) {
+    .rank-bar { height: 13px; align-self: center; }
+  }
+  .rank-fill {
+    @apply block h-full w-full origin-left;
+    background: var(--rank-fill, transparent);
+    transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .rank-num { grid-area: num; @apply text-right text-[11.5px] text-muted tabular-nums; }
+  .rank-name { grid-area: name; @apply flex min-w-0 items-center gap-2 text-ink; }
+  .rank-value { grid-area: value; @apply shrink-0 font-mono text-[13px] tabular-nums; }
+  .rank-label { @apply truncate; }
+  /* The bar now carries the metric's band, so a selected country is marked the
+     way the map marks it: its own colour around the row, not inside the bar. */
+  .rank-row[data-selected="true"] {
+    background: color-mix(in oklab, var(--rank-mark) 12%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--rank-mark) 45%, transparent);
+  }
+  .rank-row[data-selected="true"] .rank-name { @apply font-semibold; }
+  .rank-row[data-selected="true"] .rank-num { @apply text-secondary; }
+  /* A leaving row is lifted out of flow at its last position so the rows that
+     remain do not jump while it fades. */
+  .rank-row[data-exit="true"] { @apply pointer-events-none absolute inset-x-0 opacity-0; }
+  .rank-row[data-enter="true"] { animation: rank-enter 400ms cubic-bezier(0.16, 1, 0.3, 1); }
+
+  .rank-yours { @apply rounded-xl bg-field px-5 py-4; }
+  .rank-your-item { @apply grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2.5 gap-y-1; }
+  .rank-your-item .swatch { @apply self-center; }
+  .rank-your-name { @apply truncate text-[13px] font-semibold; }
+  .rank-your-value { @apply text-right font-mono text-[13px] tabular-nums; }
+  .rank-your-note { @apply col-start-2 col-end-4 text-[11.5px] text-muted; }
+  @media (min-width: 640px) {
+    .rank-your-item + .rank-your-item { @apply border-l border-line pl-6; }
+  }
+
+  @keyframes rank-enter {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rank-row, .rank-fill { transition: none; }
+    .rank-row[data-enter="true"] { animation: none; }
+  }
+  @media (pointer: coarse) {
+    .combo-option { min-height: 44px; }
+    .combo-input { min-height: 44px; }
+    .combo-clear { @apply size-9; }
+    /* Keeps the visual box at 36px while the tap target reaches 44px. */
+    .combo-clear::after { content: ""; position: absolute; inset: -4px; }
+  }
 }
 
 .atlas-section { scroll-margin-top: 24px; }
@@ -194,8 +336,16 @@
   .controls-section { padding-inline: 23px; }
 }
 
+/* Both sections close on a caption, which needs less room beneath it than a
+   chart or a card grid does. */
 .map-section {
   border-block: 1px solid var(--border);
+  padding-bottom: clamp(20px, 2.2vw, 28px);
+}
+
+.rankings-section {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: clamp(20px, 2.2vw, 28px);
 }
 
 .trends-section {
@@ -212,12 +362,43 @@
 }
 
 .country-control {
+  position: relative;
   transition: border-color 240ms cubic-bezier(0.16, 1, 0.3, 1), transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .country-control:focus-within {
   border-color: var(--action-accent);
   transform: translateY(-2px);
+  /* Lifts the open list above the cards that follow it in the DOM. */
+  z-index: 10;
+}
+
+/* Lift the whole card above the sections that follow it in the DOM, so a
+   country list opening from the third slot is not painted under them. */
+.controls-section { z-index: 20; }
+
+.combo-pop {
+  animation: combo-open 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top center;
+}
+.combo-pop[data-placement="top"] {
+  transform-origin: bottom center;
+  animation-name: combo-open-up;
+}
+
+@keyframes combo-open {
+  from { opacity: 0; transform: translateY(-5px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes combo-open-up {
+  from { opacity: 0; transform: translateY(5px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .combo-pop { animation: none; }
+  .country-control { transition: border-color 240ms ease; }
+  .country-control:focus-within { transform: none; }
 }
 
 @media (max-width: 639px) {

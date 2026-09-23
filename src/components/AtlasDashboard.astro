@@ -4,10 +4,12 @@ import BackToTop from './BackToTop.astro';
 import Hero from './Hero.astro';
 import MetricSelect from './MetricSelect.astro';
 import Panel from './Panel.astro';
+import SoundToggle from './SoundToggle.astro';
 ---
 
   <Hero />
   <BackToTop />
+  <SoundToggle />
 
   <div class="atlas-shell mx-auto max-w-[1280px] px-4 pt-20 pb-6 sm:px-6 lg:pt-28">
     <AtlasControls />
@@ -51,7 +53,80 @@ import Panel from './Panel.astro';
           <div id="choroLegend" class="map-legend"></div>
         </div>
       </div>
-      <p id="choroCaption" class="mx-auto mt-5 max-w-[90ch] text-center text-[12.5px] leading-relaxed text-balance text-muted"></p>
+      <p id="choroCaption" class="mx-auto mt-5 max-w-[90ch] text-center text-[12.5px] leading-relaxed text-balance text-muted xl:max-w-none xl:whitespace-nowrap"></p>
+    </Panel>
+
+    <Panel id="rankings" title="The Rankings" description="The two ends of the same distribution, side by side: who leads, who trails, and who has travelled furthest since 1990." class="rankings-section">
+      <div class="chart-toolbar mb-6 flex flex-wrap items-end justify-between gap-5 rounded-xl bg-field p-5">
+        <div class="flex flex-1 flex-wrap gap-4">
+          <MetricSelect id="rankMetric" label="Rank by" />
+        </div>
+        <div class="text-right">
+          <span class="block text-xs font-semibold text-muted">Selected year</span>
+          <strong class="mt-1 block font-mono text-2xl tabular-nums" data-year-output>2024</strong>
+        </div>
+      </div>
+
+      <div class="grid gap-4 lg:grid-cols-2">
+        <section class="rank-card" aria-labelledby="rankTopTitle">
+          <header class="rank-card-head">
+            <h3 id="rankTopTitle" class="rank-card-title">Highest</h3>
+            <p id="rankTopMeta" class="rank-card-meta"></p>
+          </header>
+          <ol id="rankTopList" class="rank-list"></ol>
+            <p id="rankTopEmpty" class="empty-note" hidden></p>
+        </section>
+        <section class="rank-card" aria-labelledby="rankBottomTitle">
+          <header class="rank-card-head">
+            <h3 id="rankBottomTitle" class="rank-card-title">Lowest</h3>
+            <p id="rankBottomMeta" class="rank-card-meta"></p>
+          </header>
+          <ol id="rankBottomList" class="rank-list"></ol>
+            <p id="rankBottomEmpty" class="empty-note" hidden></p>
+        </section>
+      </div>
+
+      <div class="rank-yours mt-4">
+        <span class="block text-xs font-semibold text-muted">Where your countries rank</span>
+        <ol id="rankYours" class="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-3"></ol>
+      </div>
+
+      <div class="mt-10">
+        <div class="chart-toolbar mb-4 flex flex-wrap items-end justify-between gap-5 rounded-xl bg-field p-5">
+          <div class="min-w-0 flex-1">
+            <h3 class="text-[15px] font-semibold">Biggest movers since 1990</h3>
+            <p id="rankMoveSub" class="mt-1 max-w-[56ch] text-[12.5px] leading-relaxed text-muted"></p>
+          </div>
+          <fieldset class="min-w-0 max-sm:basis-full">
+            <legend class="text-[11.5px] font-semibold tracking-[0.03em] text-muted uppercase">Measure by</legend>
+            <div class="segmented mt-1.5">
+              <label><input type="radio" name="rankBasis" value="pct" checked disabled />Percent</label>
+              <label><input type="radio" name="rankBasis" value="abs" disabled /><span id="rankBasisAmount">Amount</span></label>
+            </div>
+          </fieldset>
+        </div>
+        <div id="rankMoversPair" class="grid gap-4 lg:grid-cols-2">
+          <section class="rank-card" aria-labelledby="rankRiseTitle">
+            <header class="rank-card-head">
+              <h3 id="rankRiseTitle" class="rank-card-title">Biggest rises</h3>
+              <p id="rankRiseMeta" class="rank-card-meta"></p>
+            </header>
+            <ol id="rankRiseList" class="rank-list"></ol>
+            <p id="rankRiseEmpty" class="empty-note" hidden></p>
+          </section>
+          <section class="rank-card" aria-labelledby="rankFallTitle">
+            <header class="rank-card-head">
+              <h3 id="rankFallTitle" class="rank-card-title">Biggest falls</h3>
+              <p id="rankFallMeta" class="rank-card-meta"></p>
+            </header>
+            <ol id="rankFallList" class="rank-list"></ol>
+            <p id="rankFallEmpty" class="empty-note" hidden></p>
+          </section>
+        </div>
+        <p id="rankMoveEmpty" class="empty-note" hidden></p>
+      </div>
+
+      <p id="rankCaption" class="mx-auto mt-6 max-w-[1040px] text-center text-[12.5px] leading-relaxed text-balance text-muted"></p>
     </Panel>
 
     <Panel id="relationship" title="GDP, Emissions and Population" singleLine description="Each bubble is a country and its area represents population. Change either axis to test a different relationship." class="relationship-section">
@@ -194,7 +269,7 @@ function initAtlas(){
 
   // ---------- bootstrap ----------
   function setControlsEnabled(enabled: boolean){
-    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button, #controlsPanel input, #controlsPanel select, #choroMetric, input[name=mapView], #scatterX, #scatterY").forEach(function(control){
+    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button, #controlsPanel input, #controlsPanel select, #choroMetric, input[name=mapView], #scatterX, #scatterY, #rankMetric, input[name=rankBasis]").forEach(function(control){
       control.disabled = !enabled;
     });
   }
@@ -245,9 +320,12 @@ function initAtlas(){
     buildMetricDropdown(element<HTMLSelectElement>("choroMetric"), choroMetric);
     buildMetricDropdown(element<HTMLSelectElement>("scatterX"), scatterXMetric);
     buildMetricDropdown(element<HTMLSelectElement>("scatterY"), scatterYMetric);
-    buildCompareDropdowns();
+    buildMetricDropdown(element<HTMLSelectElement>("rankMetric"), rankMetric);
+    buildCountryPickers();
 
     updateCompareTable();
+    syncRankBasisControl();
+    updateRankings(false);
     return Promise.all([renderChoropleth(), renderScatter(), renderSmallMultiples()]);
   }).then(function(){
     wireEvents();
@@ -273,31 +351,469 @@ function initAtlas(){
     });
   }
 
-  function buildCompareDropdowns(){
-    const byContinent: Record<string, Country[]> = {};
-    COUNTRIES_SORTED.forEach(function(c){
-      (byContinent[c.continent] = byContinent[c.continent] || []).push(c);
-    });
-    var continents = Object.keys(byContinent).sort();
+  // ---------- country search ----------
+  // A native <select> over 217 countries buries everything past the first
+  // screenful. These are ARIA comboboxes: type to filter, arrows to browse.
 
-    [0,1,2].forEach(function(slot){
-      var sel = element<HTMLSelectElement>("cmp" + slot);
-      sel.innerHTML = "";
-      var noneOpt = document.createElement("option");
-      noneOpt.value = ""; noneOpt.textContent = "— none —";
-      sel.appendChild(noneOpt);
-      continents.forEach(function(cont){
-        var group = document.createElement("optgroup");
-        group.label = cont;
-        byContinent[cont].forEach(function(c){
-          var opt = document.createElement("option");
-          opt.value = c.iso3; opt.textContent = c.name;
-          group.appendChild(opt);
-        });
-        sel.appendChild(group);
-      });
-      sel.value = highlighted[slot] || "";
+  // Short names people actually type. The dataset carries one formal name per
+  // country, so "UK", "Holland" and "Ivory Coast" would otherwise find nothing.
+  const COUNTRY_ALIASES: Record<string, string[]> = {
+    USA: ["us", "usa", "america", "united states of america"],
+    GBR: ["uk", "britain", "great britain", "england", "scotland", "wales", "northern ireland"],
+    ARE: ["uae", "emirates"],
+    NLD: ["holland"],
+    CIV: ["ivory coast"],
+    CZE: ["czech republic"],
+    COD: ["drc", "congo kinshasa", "zaire"],
+    COG: ["congo brazzaville", "republic of congo"],
+    MMR: ["burma"],
+    SWZ: ["swaziland"],
+    TLS: ["timor leste"],
+    MKD: ["macedonia"],
+    TUR: ["turkiye"],
+    CPV: ["cabo verde"],
+    KNA: ["st kitts and nevis"],
+    LCA: ["st lucia"],
+    VCT: ["st vincent and the grenadines"],
+    STP: ["sao tome"],
+    CHE: ["swiss"],
+    DEU: ["germany deutschland"],
+  };
+
+  interface CountryEntry {
+    c: Country;
+    norm: string;      // lowercased, unaccented, punctuation flattened to spaces
+    words: string[];
+    iso: string;
+    aliases: string[];
+    fold: string;      // lenient fold, mapped back to positions in c.name
+    foldMap: number[];
+  }
+  let COUNTRY_INDEX: CountryEntry[] = [];
+  const CONTINENTS: string[] = [];
+  const SLOT_LABELS = ["Country 1", "Country 2", "Country 3"];
+
+  function normalizeQuery(s: string){
+    return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, " ").trim();
+  }
+
+  // Folds accents away while remembering which source character each folded
+  // character came from, so the matched run can be marked in the real name.
+  function foldAligned(name: string){
+    var fold = "";
+    var map: number[] = [];
+    for (var i = 0; i < name.length; i++){
+      var f = name.charAt(i).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+      for (var j = 0; j < f.length; j++){ fold += f.charAt(j); map.push(i); }
+    }
+    map.push(name.length);
+    return { fold: fold, map: map };
+  }
+
+  function buildCountryIndex(){
+    COUNTRY_INDEX = COUNTRIES_SORTED.map(function(c){
+      var norm = normalizeQuery(c.name);
+      var aligned = foldAligned(c.name);
+      return {
+        c: c,
+        norm: norm,
+        words: norm.split(" ").filter(Boolean),
+        iso: c.iso3.toLowerCase(),
+        aliases: (COUNTRY_ALIASES[c.iso3] || []).map(normalizeQuery),
+        fold: aligned.fold,
+        foldMap: aligned.map
+      };
     });
+    COUNTRIES_SORTED.forEach(function(c){
+      if (CONTINENTS.indexOf(c.continent) === -1) CONTINENTS.push(c.continent);
+    });
+    CONTINENTS.sort();
+  }
+
+  // Lower rank sorts first. null means no match at all.
+  function rankEntry(entry: CountryEntry, q: string): number | null {
+    if (entry.iso === q) return 0;
+    if (entry.norm === q) return 1;
+    if (entry.norm.indexOf(q) === 0) return 2;
+    if (entry.iso.indexOf(q) === 0) return 3;
+    for (var i = 0; i < entry.words.length; i++){
+      if (entry.words[i].indexOf(q) === 0) return 4;
+    }
+    for (var a = 0; a < entry.aliases.length; a++){
+      if (entry.aliases[a].indexOf(q) === 0) return 5;
+    }
+    if (entry.norm.indexOf(q) > -1) return 6;
+    for (var b = 0; b < entry.aliases.length; b++){
+      if (entry.aliases[b].indexOf(q) > -1) return 7;
+    }
+    return null;
+  }
+
+  function searchCountries(raw: string){
+    var q = normalizeQuery(raw);
+    if (!q) return COUNTRY_INDEX.slice();
+    var hits: { entry: CountryEntry; rank: number }[] = [];
+    COUNTRY_INDEX.forEach(function(entry){
+      var rank = rankEntry(entry, q);
+      if (rank !== null) hits.push({ entry: entry, rank: rank });
+    });
+    hits.sort(function(a, b){
+      return a.rank - b.rank || a.entry.c.name.localeCompare(b.entry.c.name);
+    });
+    return hits.map(function(h){ return h.entry; });
+  }
+
+  // Marks the matched run inside the real name. Builds text nodes rather than
+  // markup, so a country name is never parsed as HTML.
+  function labelWithMatch(entry: CountryEntry, raw: string){
+    var frag = document.createDocumentFragment();
+    var name = entry.c.name;
+    var q = "";
+    for (var i = 0; i < raw.length; i++){
+      q += raw.charAt(i).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    }
+    q = q.trim();
+    var at = q ? entry.fold.indexOf(q) : -1;
+    if (at < 0){
+      frag.appendChild(document.createTextNode(name));
+      return frag;
+    }
+    var start = entry.foldMap[at];
+    var end = entry.foldMap[at + q.length];
+    frag.appendChild(document.createTextNode(name.slice(0, start)));
+    var mark = document.createElement("mark");
+    mark.textContent = name.slice(start, end);
+    frag.appendChild(mark);
+    frag.appendChild(document.createTextNode(name.slice(end)));
+    return frag;
+  }
+
+  function checkIcon(){
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "combo-check");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("aria-hidden", "true");
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "m3 8.5 3.2 3.2L13 5");
+    svg.appendChild(path);
+    return svg;
+  }
+
+  interface CountryPicker {
+    setSelected(iso: string): void;
+  }
+
+  function createCountryPicker(slot: number): CountryPicker {
+    const input = element<HTMLInputElement>("cmp" + slot);
+    const pop = element("cmp" + slot + "Pop");
+    const listbox = element("cmp" + slot + "List");
+    const emptyNote = element("cmp" + slot + "Empty");
+    const clearBtn = element<HTMLButtonElement>("cmp" + slot + "Clear");
+    const status = element("cmp" + slot + "Status");
+    const combo = input.closest(".combo") as HTMLElement;
+
+    var isOpen = false;
+    var results: CountryEntry[] = [];
+    var activeIdx = -1;
+    var statusTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function optionId(iso: string){ return "cmp" + slot + "-opt-" + iso; }
+
+    function announce(message: string, delay: number){
+      if (statusTimer) clearTimeout(statusTimer);
+      statusTimer = setTimeout(function(){ status.textContent = message; }, delay);
+    }
+
+    function renderOption(entry: CountryEntry, raw: string){
+      var option = document.createElement("div");
+      option.className = "combo-option";
+      option.id = optionId(entry.c.iso3);
+      option.setAttribute("role", "option");
+      option.dataset.iso = entry.c.iso3;
+      option.setAttribute("aria-selected", String(highlighted[slot] === entry.c.iso3));
+
+      var name = document.createElement("span");
+      name.className = "combo-name";
+      name.appendChild(labelWithMatch(entry, raw));
+      option.appendChild(name);
+
+      var otherSlot = -1;
+      for (var s = 0; s < 3; s++){
+        if (s !== slot && highlighted[s] === entry.c.iso3) otherSlot = s;
+      }
+      if (highlighted[slot] === entry.c.iso3){
+        option.appendChild(checkIcon());
+      } else if (otherSlot > -1){
+        // Choosing it here empties the other slot, so say so before the click.
+        var tag = document.createElement("span");
+        tag.className = "combo-tag";
+        var swatch = document.createElement("span");
+        swatch.className = "swatch";
+        swatch.style.background = SERIES_COLORS_LIVE()[otherSlot];
+        tag.appendChild(swatch);
+        tag.appendChild(document.createTextNode("In " + SLOT_LABELS[otherSlot].toLowerCase()));
+        option.appendChild(tag);
+      }
+      return option;
+    }
+
+    function render(raw: string){
+      results = searchCountries(raw);
+      activeIdx = -1;
+      listbox.textContent = "";
+
+      if (!results.length){
+        emptyNote.textContent = "No country matches “" + raw.trim() + "”. Try a shorter spelling or a three-letter code.";
+        emptyNote.hidden = false;
+        input.removeAttribute("aria-activedescendant");
+        announce("No countries found.", 400);
+        return;
+      }
+      emptyNote.hidden = true;
+
+      var frag = document.createDocumentFragment();
+      if (!normalizeQuery(raw)){
+        // Unfiltered, continent grouping is the only structure worth keeping.
+        CONTINENTS.forEach(function(continent){
+          var members = results.filter(function(e){ return e.c.continent === continent; });
+          if (!members.length) return;
+          var group = document.createElement("div");
+          group.setAttribute("role", "group");
+          group.setAttribute("aria-label", continent);
+          var label = document.createElement("div");
+          label.className = "combo-group-label";
+          label.setAttribute("aria-hidden", "true");
+          label.textContent = continent;
+          group.appendChild(label);
+          members.forEach(function(entry){ group.appendChild(renderOption(entry, "")); });
+          frag.appendChild(group);
+        });
+        // Grouping reorders the flat list, so mirror it back for arrow keys.
+        results = CONTINENTS.reduce(function(acc: CountryEntry[], continent){
+          return acc.concat(results.filter(function(e){ return e.c.continent === continent; }));
+        }, []);
+      } else {
+        results.forEach(function(entry){
+          var option = renderOption(entry, raw);
+          var place = document.createElement("span");
+          place.className = "combo-tag";
+          if (!option.querySelector(".combo-tag") && !option.querySelector(".combo-check")){
+            place.textContent = entry.c.continent;
+            option.appendChild(place);
+          }
+          frag.appendChild(option);
+        });
+        announce(results.length === 1
+          ? "1 country found: " + results[0].c.name + "."
+          : results.length + " countries found. " + results[0].c.name + " is first.", 400);
+      }
+      listbox.appendChild(frag);
+      if (normalizeQuery(raw)) setActive(0);
+      else {
+        // Opening on the current pick: centre it, so the names either side of
+        // it are visible instead of the list landing on its last row.
+        var selectedIdx = results.findIndex(function(e){ return e.c.iso3 === highlighted[slot]; });
+        if (selectedIdx > -1) setActive(selectedIdx, "center");
+      }
+    }
+
+    function setActive(index: number, block: ScrollLogicalPosition = "nearest"){
+      var previous = listbox.querySelector<HTMLElement>('[data-active="true"]');
+      if (previous) previous.removeAttribute("data-active");
+      activeIdx = index;
+      if (index < 0 || !results[index]){
+        input.removeAttribute("aria-activedescendant");
+        return;
+      }
+      var id = optionId(results[index].c.iso3);
+      var option = document.getElementById(id);
+      if (!option) return;
+      option.dataset.active = "true";
+      input.setAttribute("aria-activedescendant", id);
+      revealOption(option, block === "center");
+    }
+
+    // scrollIntoView would scroll the page as well as the list. This moves only
+    // the list, and keeps the sticky continent heading clear of the active row.
+    function revealOption(option: HTMLElement, center: boolean){
+      var listRect = listbox.getBoundingClientRect();
+      var optionRect = option.getBoundingClientRect();
+      if (center){
+        listbox.scrollTop += (optionRect.top - listRect.top) - (listRect.height - optionRect.height) / 2;
+        return;
+      }
+      var heading = listbox.querySelector<HTMLElement>(".combo-group-label");
+      var inset = heading ? heading.offsetHeight : 0;
+      if (optionRect.top - inset < listRect.top) listbox.scrollTop += optionRect.top - inset - listRect.top;
+      else if (optionRect.bottom > listRect.bottom) listbox.scrollTop += optionRect.bottom - listRect.bottom;
+    }
+
+    function move(delta: number){
+      if (!results.length) return;
+      var next = activeIdx + delta;
+      if (next < 0) next = results.length - 1;
+      if (next >= results.length) next = 0;
+      setActive(next);
+    }
+
+    function place(){
+      var rect = input.getBoundingClientRect();
+      var below = window.innerHeight - rect.bottom - 16;
+      var above = rect.top - 16;
+      var flip = below < 200 && above > below;
+      if (flip) pop.dataset.placement = "top";
+      else delete pop.dataset.placement;
+      var room = Math.max(160, Math.min(304, flip ? above : below));
+      listbox.style.maxHeight = room + "px";
+    }
+
+    function openList(){
+      if (isOpen || input.disabled) return;
+      isOpen = true;
+      pop.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+      place();
+      render(input.value === selectedName() ? "" : input.value);
+    }
+
+    function closeList(){
+      if (!isOpen) return;
+      isOpen = false;
+      pop.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+      input.removeAttribute("aria-activedescendant");
+      activeIdx = -1;
+      if (statusTimer) clearTimeout(statusTimer);
+    }
+
+    function selectedName(){
+      var iso = highlighted[slot];
+      return iso && COUNTRIES_BY_ISO[iso] ? COUNTRIES_BY_ISO[iso].name : "";
+    }
+
+    function syncInput(){
+      input.value = selectedName();
+      clearBtn.hidden = !input.value;
+    }
+
+    function commit(iso: string){
+      var displaced = -1;
+      for (var other = 0; other < 3; other++){
+        if (other !== slot && highlighted[other] === iso && iso !== ""){
+          displaced = other;
+          highlighted[other] = "";
+          PICKERS[other].setSelected("");
+        }
+      }
+      highlighted[slot] = iso;
+      syncInput();
+      closeList();
+
+      if (statusTimer) clearTimeout(statusTimer);
+      status.textContent = iso
+        ? COUNTRIES_BY_ISO[iso].name + " selected for " + SLOT_LABELS[slot] + "."
+          + (displaced > -1 ? " " + SLOT_LABELS[displaced] + " is now empty." : "")
+        : SLOT_LABELS[slot] + " cleared.";
+
+      renderChoropleth();
+      renderScatter();
+      renderSmallMultiples();
+      updateCompareTable();
+      updateRankings(true);
+    }
+
+    input.addEventListener("focus", function(){
+      input.select();
+      openList();
+    });
+
+    input.addEventListener("pointerdown", function(){
+      if (document.activeElement === input) {
+        if (isOpen) closeList(); else openList();
+      }
+    });
+
+    input.addEventListener("input", function(){
+      clearBtn.hidden = !input.value;
+      if (!isOpen) openList();
+      else { render(input.value); place(); }
+    });
+
+    input.addEventListener("keydown", function(event){
+      if (event.key === "ArrowDown"){
+        event.preventDefault();
+        if (!isOpen) openList(); else move(1);
+      } else if (event.key === "ArrowUp"){
+        event.preventDefault();
+        if (!isOpen){ openList(); setActive(results.length - 1); }
+        else move(-1);
+      } else if (event.key === "Enter"){
+        if (isOpen && activeIdx > -1){
+          event.preventDefault();
+          commit(results[activeIdx].c.iso3);
+        }
+      } else if (event.key === "Escape"){
+        if (isOpen){
+          event.preventDefault();
+          event.stopPropagation();
+          closeList();
+          syncInput();
+        } else if (input.value){
+          syncInput();
+        }
+      } else if (event.key === "Tab"){
+        closeList();
+        syncInput();
+      }
+    });
+
+    // mousedown would blur the input first and close the list under the cursor.
+    listbox.addEventListener("mousedown", function(event){ event.preventDefault(); });
+    listbox.addEventListener("click", function(event){
+      var option = (event.target as HTMLElement).closest<HTMLElement>(".combo-option");
+      if (option && option.dataset.iso) commit(option.dataset.iso);
+    });
+    listbox.addEventListener("pointermove", function(event){
+      var option = (event.target as HTMLElement).closest<HTMLElement>(".combo-option");
+      if (!option || !option.dataset.iso) return;
+      var iso = option.dataset.iso;
+      var index = results.findIndex(function(e){ return e.c.iso3 === iso; });
+      if (index > -1 && index !== activeIdx) setActive(index);
+    });
+
+    clearBtn.addEventListener("click", function(){
+      commit("");
+      input.focus();
+    });
+
+    combo.addEventListener("focusout", function(event){
+      if (combo.contains(event.relatedTarget as Node)) return;
+      closeList();
+      syncInput();
+    });
+
+    window.addEventListener("resize", function(){ if (isOpen) place(); });
+
+    return {
+      setSelected: function(iso: string){
+        highlighted[slot] = iso;
+        syncInput();
+      }
+    };
+  }
+
+  const PICKERS: CountryPicker[] = [];
+
+  function buildCountryPickers(){
+    buildCountryIndex();
+    [0,1,2].forEach(function(slot){ PICKERS.push(createCountryPicker(slot)); });
+    [0,1,2].forEach(function(slot){ PICKERS[slot].setSelected(highlighted[slot] || ""); });
   }
 
   function wireEvents(){
@@ -322,23 +838,21 @@ function initAtlas(){
       scatterYMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderScatter();
     });
-    [0,1,2].forEach(function(slot){
-      element<HTMLSelectElement>("cmp" + slot).addEventListener("change", function(e){
-        var iso = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
-        // avoid duplicate picks across slots
-        [0,1,2].forEach(function(other){
-          if (other !== slot && highlighted[other] === iso && iso !== "") {
-            highlighted[other] = "";
-            element<HTMLSelectElement>("cmp" + other).value = "";
-          }
-        });
-        highlighted[slot] = iso;
-        renderChoropleth();
-        renderScatter();
-        renderSmallMultiples();
-        updateCompareTable();
+    element<HTMLSelectElement>("rankMetric").addEventListener("change", function(e){
+      rankMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
+      syncRankBasisControl();
+      updateRankings(true);
+    });
+    document.querySelectorAll<HTMLInputElement>("input[name=rankBasis]").forEach(function(input){
+      input.addEventListener("change", function(){
+        if (!input.checked) return;
+        rankBasis = input.value as MoverBasis;
+        updateRankings(true);
       });
     });
+    // Country slots wire themselves up in createCountryPicker.
+
+    if (rankWidth.addEventListener) rankWidth.addEventListener("change", function(){ updateRankings(false); });
 
     var mq = window.matchMedia("(prefers-color-scheme: dark)");
     if (mq.addEventListener) mq.addEventListener("change", reTheme);
@@ -349,6 +863,7 @@ function initAtlas(){
     renderChoropleth();
     renderScatter();
     renderSmallMultiples();
+    updateRankings(false);
   }
 
   function setPlayState(playing: boolean){
@@ -356,6 +871,9 @@ function initAtlas(){
     element("playIcon").style.display = playing ? "none" : "block";
     element("pauseIcon").style.display = playing ? "block" : "none";
     element("playBtn").setAttribute("aria-pressed", String(playing));
+    // Pressing Play is the gesture a browser requires before it will let any
+    // audio start, so the sound control listens for this rather than guessing.
+    document.dispatchEvent(new CustomEvent("atlas:playback", { detail: { playing: playing } }));
   }
 
   function updateYearOutputs(){
@@ -401,6 +919,429 @@ function initAtlas(){
     updateScatterYear();
     updateSmallMultipleMarkers();
     updateCompareTable();
+    updateRankings(true);
+  }
+
+  // ---------- Rankings ----------
+  // Four ranked lists in two pairs. Each pair shares one scale, so the gap
+  // between the top of one list and the top of the other is real rather than
+  // an artefact of scaling each list to its own maximum.
+  type MoverBasis = "pct" | "abs";
+  var rankMetric = "co2_per_capita";
+  var rankBasis: MoverBasis = "pct";
+  // Ten rows a list reads well beside its pair on a wide screen. Stacked on a
+  // phone the same four lists add nearly 1,300px of scroll, so the phone gets
+  // five; the rank numbers and the reporting count keep that honest.
+  const RANK_ROWS_WIDE = 10;
+  const RANK_ROWS_NARROW = 5;
+  var rankWidth = window.matchMedia("(min-width: 640px)");
+  function rankRows(){ return rankWidth.matches ? RANK_ROWS_WIDE : RANK_ROWS_NARROW; }
+  // A country that reports a near-zero figure still gets a visible sliver, so
+  // it never reads as the grey of no data.
+  const RANK_FLOOR = 0.008;
+
+  interface RankEntry { iso: string; name: string; value: number; rank: number; }
+  interface MoverEntry { iso: string; name: string; delta: number; }
+  interface RankRow { iso: string; name: string; rank: string; value: string; ratio: number; fill: string; }
+  var EXIT_MS = 320;
+
+  function isShareMetric(metric: string){
+    return CHANGE_BANDS[metric].mode === "pts";
+  }
+
+  // fmtValue rounds for the comparison table, where a rounded zero is fine.
+  // In a ranked list the smallest reporters are the content, so carry enough
+  // digits that they never all read as the same flat zero.
+  function fmtRankValue(v: number, metric: string){
+    var base = fmtValue(v, metric);
+    if (v <= 0 || /[1-9]/.test(base)) return base;
+    if (metric === "gdp_per_capita") return "$" + Number(v.toPrecision(2));
+    if (metric === "population") return String(Math.round(v));
+    var unit = metric === "co2" ? " Mt" : metric === "co2_per_capita" ? " t" : "%";
+    return Number(v.toPrecision(2)) + unit;
+  }
+
+  function fmtAmount(delta: number, metric: string){
+    var sign = delta > 0 ? "+" : delta < 0 ? "−" : "";
+    if (isShareMetric(metric)) return fmtChange(delta, CHANGE_BANDS[metric], metric);
+    return sign + fmtValue(Math.abs(delta), metric);
+  }
+
+  function fmtMover(delta: number, metric: string){
+    return rankBasis === "pct" && !isShareMetric(metric)
+      ? fmtChange(delta, PCT_CHANGE, metric)
+      : fmtAmount(delta, metric);
+  }
+
+  function rankedFor(metric: string, yearIdx: number): RankEntry[] {
+    var series = DATA.metrics[metric];
+    if (!series) return [];
+    var rows: { iso: string; name: string; value: number }[] = [];
+    Object.keys(series).forEach(function(iso){
+      var country = COUNTRIES_BY_ISO[iso];
+      var v = series[iso][yearIdx];
+      if (country && hasNumber(v)) rows.push({ iso: iso, name: country.name, value: v });
+    });
+    rows.sort(function(a, b){ return b.value - a.value || a.name.localeCompare(b.name); });
+    // Competition ranking: countries reporting the same figure share a rank.
+    var ranked: RankEntry[] = [];
+    rows.forEach(function(row, i){
+      var rank = i > 0 && row.value === rows[i - 1].value ? ranked[i - 1].rank : i + 1;
+      ranked.push({ iso: row.iso, name: row.name, value: row.value, rank: rank });
+    });
+    return ranked;
+  }
+
+  function moversFor(metric: string, yearIdx: number): MoverEntry[] {
+    var series = DATA.metrics[metric];
+    if (!series || yearIdx === 0) return [];
+    var relative = rankBasis === "pct" && !isShareMetric(metric);
+    var out: MoverEntry[] = [];
+    Object.keys(series).forEach(function(iso){
+      var country = COUNTRIES_BY_ISO[iso];
+      if (!country) return;
+      var from = series[iso][0];
+      var to = series[iso][yearIdx];
+      if (!hasNumber(from) || !hasNumber(to)) return;
+      // A percent change off a zero baseline is not a number, so those
+      // countries drop out of the relative list rather than reading infinite.
+      if (relative && from === 0) return;
+      out.push({ iso: iso, name: country.name, delta: relative ? (to - from) / from * 100 : to - from });
+    });
+    out.sort(function(a, b){ return b.delta - a.delta || a.name.localeCompare(b.name); });
+    return out;
+  }
+
+  function levelBandColors(){
+    var t = theme();
+    return [t.seq[0], t.seq[1], t.seq[2], t.seq[3], t.seq[5], t.seq[6]];
+  }
+
+  function levelFill(value: number, colors: string[]){
+    return colors[bandIndex(LEVEL_BANDS[rankMetric].edges, value)];
+  }
+
+  // Movers inherit the Change map's reading: green and red where the metric
+  // has a planetary direction, neutral growth or decline where it does not.
+  function moverFill(metric: string, delta: number){
+    var better = PLANET_BETTER_WHEN[metric];
+    var token = better
+      ? ((delta > 0 ? "up" : "down") === better ? "--rank-good" : "--rank-bad")
+      : (delta > 0 ? "--rank-growth" : "--rank-decline");
+    return getVar(token);
+  }
+
+  function createRankRow(key: string){
+    var li = document.createElement("li");
+    li.className = "rank-row";
+    li.dataset.key = key;
+    li.dataset.enter = "true";
+    var bar = document.createElement("i");
+    bar.className = "rank-bar";
+    bar.setAttribute("aria-hidden", "true");
+    var fill = document.createElement("i");
+    fill.className = "rank-fill";
+    bar.appendChild(fill);
+    var num = document.createElement("span");
+    num.className = "rank-num";
+    var name = document.createElement("span");
+    name.className = "rank-name";
+    var swatch = document.createElement("span");
+    swatch.className = "swatch";
+    var label = document.createElement("span");
+    label.className = "rank-label";
+    name.appendChild(swatch);
+    name.appendChild(label);
+    var value = document.createElement("span");
+    value.className = "rank-value";
+    li.appendChild(bar);
+    li.appendChild(num);
+    li.appendChild(name);
+    li.appendChild(value);
+    return li;
+  }
+
+  function updateRankRow(li: HTMLElement, row: RankRow){
+    var slot = highlighted.indexOf(row.iso);
+    li.style.setProperty("--rank-fill", row.fill);
+    (li.querySelector(".rank-fill") as HTMLElement).style.transform =
+      "scaleX(" + (row.ratio > 0 ? Math.max(row.ratio, RANK_FLOOR) : 0).toFixed(4) + ")";
+    li.querySelector(".rank-num")!.textContent = row.rank;
+    li.querySelector(".rank-label")!.textContent = row.name;
+    li.querySelector(".rank-value")!.textContent = row.value;
+    var swatch = li.querySelector(".swatch") as HTMLElement;
+    swatch.hidden = slot < 0;
+    if (slot > -1){
+      li.dataset.selected = "true";
+      var mark = SERIES_COLORS_LIVE()[slot];
+      li.style.setProperty("--rank-mark", mark);
+      swatch.style.background = mark;
+    } else {
+      delete li.dataset.selected;
+      li.style.removeProperty("--rank-mark");
+    }
+  }
+
+  // Rows are reused rather than rebuilt, so a bar can transition its width and
+  // a row that moves up the list can be measured before and after the move.
+  function syncRankList(listId: string, rows: RankRow[], emptyText: string){
+    var list = element(listId);
+    var note = element(listId.replace("List", "Empty"));
+    note.hidden = rows.length > 0;
+    note.textContent = emptyText;
+    const existing: Record<string, HTMLElement> = {};
+    Array.prototype.forEach.call(list.children, function(child: HTMLElement){
+      if (child.dataset.key) existing[child.dataset.key] = child;
+    });
+    const keep: Record<string, boolean> = {};
+    rows.forEach(function(row){
+      var key = listId + ":" + row.iso;
+      keep[key] = true;
+      var li = existing[key] || createRankRow(key);
+      updateRankRow(li, row);
+      list.appendChild(li);
+    });
+    Object.keys(existing).forEach(function(key){
+      if (keep[key]) return;
+      var leaving = existing[key];
+      if (leaving.dataset.exit) return;
+      // Pin it where it already sits, then let it fade without dragging the
+      // rows that remain, which is what made a playing list look like flicker.
+      leaving.style.top = leaving.offsetTop + "px";
+      leaving.dataset.exit = "true";
+      delete leaving.dataset.key;
+      setTimeout(function(){ leaving.remove(); }, EXIT_MS);
+    });
+  }
+
+  function levelRows(entries: RankEntry[], scale: number): RankRow[] {
+    var colors = levelBandColors();
+    return entries.map(function(entry){
+      return {
+        iso: entry.iso,
+        name: entry.name,
+        rank: String(entry.rank),
+        value: fmtRankValue(entry.value, rankMetric),
+        ratio: scale > 0 ? Math.max(entry.value, 0) / scale : 0,
+        fill: levelFill(entry.value, colors)
+      };
+    });
+  }
+
+  function moverRows(entries: MoverEntry[], scale: number): RankRow[] {
+    return entries.map(function(entry, i){
+      return {
+        iso: entry.iso,
+        name: entry.name,
+        rank: String(i + 1),
+        value: fmtMover(entry.delta, rankMetric),
+        ratio: scale > 0 ? Math.abs(entry.delta) / scale : 0,
+        fill: moverFill(rankMetric, entry.delta)
+      };
+    });
+  }
+
+  function rankMoves(): Record<string, number> {
+    const moves: Record<string, number> = {};
+    var series = DATA.metrics[rankMetric];
+    if (!series || currentYearIdx === 0) return moves;
+    var both: { iso: string; then: number; now: number; name: string }[] = [];
+    Object.keys(series).forEach(function(iso){
+      var country = COUNTRIES_BY_ISO[iso];
+      var then = series[iso][0];
+      var now = series[iso][currentYearIdx];
+      if (country && hasNumber(then) && hasNumber(now)){
+        both.push({ iso: iso, then: then, now: now, name: country.name });
+      }
+    });
+    const thenRank: Record<string, number> = {};
+    both.slice().sort(function(a, b){ return b.then - a.then || a.name.localeCompare(b.name); })
+      .forEach(function(row, i){ thenRank[row.iso] = i + 1; });
+    both.slice().sort(function(a, b){ return b.now - a.now || a.name.localeCompare(b.name); })
+      .forEach(function(row, i){ moves[row.iso] = thenRank[row.iso] - (i + 1); });
+    return moves;
+  }
+
+  // Rebuilt from scratch this strip flashed three times a second under Play.
+  // The cells are kept and only their text is rewritten.
+  function updateRankYours(entries: RankEntry[]){
+    var list = element("rankYours");
+    var year = YEARS[currentYearIdx];
+    var moves = rankMoves();
+    var colors = SERIES_COLORS_LIVE();
+
+    if (!highlighted.some(Boolean)){
+      if (!list.querySelector(".rank-your-empty")){
+        list.innerHTML = '<li class="rank-your-empty text-[12.5px] text-muted">Pick countries above to see where they stand.</li>';
+      }
+      return;
+    }
+    var emptyNote = list.querySelector(".rank-your-empty");
+    if (emptyNote) emptyNote.remove();
+
+    const existing: Record<string, HTMLElement> = {};
+    Array.prototype.forEach.call(list.children, function(child: HTMLElement){
+      if (child.dataset.slot) existing[child.dataset.slot] = child;
+    });
+    const keep: Record<string, boolean> = {};
+
+    highlighted.forEach(function(iso, slot){
+      if (!iso) return;
+      var country = COUNTRIES_BY_ISO[iso];
+      if (!country) return;
+      keep[String(slot)] = true;
+      var li = existing[String(slot)];
+      if (!li){
+        li = document.createElement("li");
+        li.className = "rank-your-item";
+        li.dataset.slot = String(slot);
+        ["swatch", "rank-your-name", "rank-your-value", "rank-your-note"].forEach(function(cls){
+          var span = document.createElement("span");
+          span.className = cls;
+          li.appendChild(span);
+        });
+      }
+      var entry: RankEntry | null = null;
+      for (var i = 0; i < entries.length; i++){
+        if (entries[i].iso === iso){ entry = entries[i]; break; }
+      }
+      var move = moves[iso];
+      var movePhrase = move === undefined ? ""
+        : move === 0 ? " \u00b7 same place as in " + YEARS[0]
+        : " \u00b7 " + (move > 0 ? "up " : "down ") + Math.abs(move)
+          + " place" + (Math.abs(move) === 1 ? "" : "s") + " since " + YEARS[0];
+
+      (li.querySelector(".swatch") as HTMLElement).style.background = colors[slot];
+      li.querySelector(".rank-your-name")!.textContent = country.name;
+      li.querySelector(".rank-your-value")!.textContent = entry ? fmtRankValue(entry.value, rankMetric) : "\u2014";
+      li.querySelector(".rank-your-note")!.textContent = entry
+        ? ordinal(entry.rank) + " highest of " + entries.length + movePhrase
+        : "No data for " + year;
+      list.appendChild(li);
+    });
+
+    Object.keys(existing).forEach(function(slot){
+      if (!keep[slot]) existing[slot].remove();
+    });
+  }
+
+  function updateRankText(entries: RankEntry[], movers: MoverEntry[],
+      topRise: MoverEntry | undefined, topFall: MoverEntry | undefined, sharedScale: boolean){
+    var meta = DATA.metricMeta[rankMetric];
+    var year = YEARS[currentYearIdx];
+    var reporting = entries.length + " of " + COUNTRIES_SORTED.length + " countries report";
+    element("rankTopMeta").textContent = reporting;
+    element("rankBottomMeta").textContent = reporting;
+
+    var share = isShareMetric(rankMetric);
+    var basisWord = currentYearIdx === 0
+      ? ""
+      : share
+      ? meta.label + " is already a percentage, so its movers are measured in percentage points, never as a percent of a percent."
+      : rankBasis === "pct"
+        ? "Percent change from " + YEARS[0] + " to " + year + ". Each list is scaled to itself, because a rise has no ceiling while a fall can never pass 100%, so the two full bars do not stand for the same size of change. Countries that started from zero are left out."
+        : "Change from " + YEARS[0] + " to " + year + ", in " + meta.unit + ". Both lists share one scale, so a fall can outrun a rise.";
+    element("rankMoveSub").textContent = basisWord;
+
+    var moverMeta = movers.length + " of " + COUNTRIES_SORTED.length + " countries report both years";
+    // On a shared scale the bar lengths already compare; on separate scales each
+    // card has to say what its own full bar is worth.
+    element("rankRiseMeta").textContent = !movers.length ? ""
+      : sharedScale || !topRise ? moverMeta
+      : "Full bar " + fmtMover(topRise.delta, rankMetric) + " · " + moverMeta;
+    element("rankFallMeta").textContent = !movers.length ? ""
+      : sharedScale || !topFall ? moverMeta
+      : "Full bar " + fmtMover(topFall.delta, rankMetric) + " · " + moverMeta;
+
+    element("rankCaption").textContent =
+      meta.label + " (" + meta.unit + ") in " + year + ". "
+      + "Highest and Lowest share one scale, and every bar carries the same six bands as the World View map. "
+      + "Your three countries are marked in their own colours. "
+      + (PLANET_BETTER_WHEN[rankMetric]
+        ? "Mover bars are green where the change is better for the planet and red where it is worse."
+        : "Mover bars show growth or decline, which this metric does not judge as better or worse.");
+  }
+
+  function updateRankings(animate: boolean){
+    var entries = rankedFor(rankMetric, currentYearIdx);
+    var movers = moversFor(rankMetric, currentYearIdx);
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var flip = animate && !reduce;
+    var lists = ["rankTopList", "rankBottomList", "rankRiseList", "rankFallList"];
+
+    // Read every position before writing any, then write, then read once more:
+    // two batched passes rather than a read/write interleave per row.
+    const before = new Map<HTMLElement, number>();
+    if (flip){
+      lists.forEach(function(id){
+        element(id).querySelectorAll<HTMLElement>(".rank-row:not([data-exit])").forEach(function(row){
+          before.set(row, row.getBoundingClientRect().top);
+        });
+      });
+    }
+
+    var count = rankRows();
+    var top = entries.slice(0, count);
+    var bottom = entries.slice(-count).reverse();
+    var levelScale = entries.length ? Math.max(entries[0].value, 0) : 0;
+    var noLevel = "No country reports this metric for " + YEARS[currentYearIdx] + ".";
+    syncRankList("rankTopList", levelRows(top, levelScale), noLevel);
+    syncRankList("rankBottomList", levelRows(bottom, levelScale), noLevel);
+
+    var rises = movers.filter(function(m){ return m.delta > 0; }).slice(0, count);
+    var falls = movers.filter(function(m){ return m.delta < 0; }).slice(-count).reverse();
+    var moverScale = Math.max(
+      rises.length ? Math.abs(rises[0].delta) : 0,
+      falls.length ? Math.abs(falls[0].delta) : 0
+    );
+    var sharedMoverScale = rankBasis === "abs";
+    var riseScale = sharedMoverScale || !rises.length ? moverScale : Math.abs(rises[0].delta);
+    var fallScale = sharedMoverScale || !falls.length ? moverScale : Math.abs(falls[0].delta);
+    syncRankList("rankRiseList", moverRows(rises, riseScale), "No country rose since " + YEARS[0] + ".");
+    syncRankList("rankFallList", moverRows(falls, fallScale), "No country fell since " + YEARS[0] + ".");
+
+    var noMovers = !movers.length;
+    element("rankMoversPair").hidden = noMovers;
+    var empty = element("rankMoveEmpty");
+    empty.hidden = !noMovers;
+    empty.textContent = currentYearIdx === 0
+      ? "Move the year past " + YEARS[0] + " to see how far countries have travelled."
+      : "No country reports both " + YEARS[0] + " and " + YEARS[currentYearIdx] + " for this metric.";
+
+    updateRankYours(entries);
+    updateRankText(entries, movers, rises[0], falls[0], sharedMoverScale);
+
+    if (!flip) return;
+    const moves: { el: HTMLElement; dy: number }[] = [];
+    lists.forEach(function(id){
+      element(id).querySelectorAll<HTMLElement>(".rank-row:not([data-exit])").forEach(function(row){
+        var was = before.get(row);
+        if (was === undefined) return;
+        var dy = was - row.getBoundingClientRect().top;
+        if (Math.abs(dy) > 0.5) moves.push({ el: row, dy: dy });
+      });
+    });
+    moves.forEach(function(move){
+      move.el.style.transition = "none";
+      move.el.style.transform = "translateY(" + move.dy.toFixed(1) + "px)";
+    });
+    if (moves.length) requestAnimationFrame(function(){
+      moves.forEach(function(move){
+        move.el.style.transition = "";
+        move.el.style.transform = "";
+      });
+    });
+  }
+
+  // Percent of a percent misleads, so the share metrics are held to points.
+  function syncRankBasisControl(){
+    var share = isShareMetric(rankMetric);
+    if (share) rankBasis = "abs";
+    element("rankBasisAmount").textContent = share ? "Points" : "Amount";
+    document.querySelectorAll<HTMLInputElement>("input[name=rankBasis]").forEach(function(input){
+      input.checked = input.value === rankBasis;
+      input.disabled = share && input.value === "pct";
+    });
   }
 
   // ---------- Choropleth ----------

@@ -24,12 +24,42 @@ const colors = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)'];
     {colors.map((color, slot) => (
       <div class="country-control flex min-w-0 flex-col gap-3 rounded-xl border border-line bg-field p-4">
         <div class="flex items-center justify-between gap-3">
-          <label for={`cmp${slot}`} class="text-xs font-semibold text-secondary">Country {slot + 1}</label>
+          <label id={`cmp${slot}Label`} for={`cmp${slot}`} class="text-xs font-semibold text-secondary">Country {slot + 1}</label>
           <span class="swatch" style={{ background: color }}></span>
         </div>
-        <div class="flex items-center gap-2">
-          <select id={`cmp${slot}`} class="w-full max-w-none flex-1" disabled></select>
+        <div class="combo" data-slot={slot}>
+          <svg class="combo-icon" aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="7" cy="7" r="4.25" /><path d="m10.2 10.2 3.05 3.05" />
+          </svg>
+          <input
+            type="text"
+            id={`cmp${slot}`}
+            class="combo-input"
+            role="combobox"
+            placeholder="Type a country name"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            enterkeyhint="go"
+            aria-expanded="false"
+            aria-autocomplete="list"
+            aria-controls={`cmp${slot}List`}
+            aria-describedby={`cmp${slot}Hint`}
+            disabled
+          />
+          <button type="button" id={`cmp${slot}Clear`} class="combo-clear" aria-label={`Clear country ${slot + 1}`} hidden>
+            <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="m5 5 6 6M11 5l-6 6" />
+            </svg>
+          </button>
+          <div class="combo-pop" id={`cmp${slot}Pop`} hidden>
+            <div class="combo-list" id={`cmp${slot}List`} role="listbox" aria-labelledby={`cmp${slot}Label`}></div>
+            <p class="combo-empty" id={`cmp${slot}Empty`} hidden></p>
+          </div>
         </div>
+        <p id={`cmp${slot}Hint`} class="sr-only">Type to search 217 countries and territories by name or three-letter code. Use the up and down arrow keys to move through the results, Enter to choose, Escape to close.</p>
+        <p id={`cmp${slot}Status`} class="sr-only" role="status"></p>
       </div>
     ))}
   </div>

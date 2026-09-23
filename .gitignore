@@ -31,3 +31,6 @@ test-results/
 .impeccable/
 PRODUCT.md
 DESIGN.md
+
+# Source audio kept locally; the shipped loop is public/audio/atlas-ambient.m4a
+audio-master/

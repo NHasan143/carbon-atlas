@@ -1,0 +1,282 @@
+---
+// A 75-second seamless loop, mono AAC. Drop a replacement at the same path,
+// or change this one line.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const trackUrl = `${base}/audio/atlas-ambient.m4a`;
+---
+
+<button
+  type="button"
+  class="sound-toggle"
+  data-sound-toggle
+  data-src={trackUrl}
+  aria-pressed="false"
+  aria-label="Ambient sound"
+  title="Ambient sound"
+  hidden
+>
+  <svg class="sound-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4.5 7.75h2.25L10.5 4.5v11L6.75 12.25H4.5z" />
+    <path class="sound-wave" d="M13.4 7.9a3 3 0 0 1 0 4.2" />
+    <path class="sound-wave sound-wave-far" d="M15.6 5.7a6 6 0 0 1 0 8.6" />
+    <path class="sound-slash" d="M13.6 8.1l3.5 3.8M17.1 8.1l-3.5 3.8" />
+  </svg>
+</button>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-sound-toggle]');
+  const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+
+  if (button && Ctx) {
+    const src = button.dataset.src!;
+    const STORE_KEY = 'carbon-atlas:ambient';
+    // Quiet enough to sit under a reading session rather than accompany it.
+    // The track is mastered to -24 dBFS, so this lands around -41 dBFS.
+    const TARGET_VOLUME = 0.14;
+    const FADE_IN = 1.4;
+    const FADE_OUT = 0.7;
+    const SILENT = 0.0001;
+
+    let ctx: AudioContext | null = null;
+    let gain: GainNode | null = null;
+    let loading: Promise<boolean> | null = null;
+    let wanted = false;
+    let ready = false;
+
+    const stored = () => {
+      try { return localStorage.getItem(STORE_KEY); } catch { return null; }
+    };
+    const remember = (on: boolean) => {
+      try { localStorage.setItem(STORE_KEY, on ? 'on' : 'off'); } catch { /* private mode */ }
+    };
+
+    // The icon must never claim sound is playing when it is not, so it follows
+    // the graph's real state rather than the stored preference.
+    const paint = (on: boolean) => {
+      button.setAttribute('aria-pressed', String(on));
+      button.classList.toggle('is-on', on);
+    };
+
+    const context = () => (ctx ??= new Ctx());
+
+    // The loop is decoded into memory rather than streamed, because a media
+    // element repeats with the gap the container's encoder padding leaves
+    // behind; an AudioBuffer wraps sample-accurately, which is the whole point
+    // of shipping a loop with a crossfaded seam.
+    const load = () =>
+      (loading ??= (async () => {
+        try {
+          const response = await fetch(src);
+          if (!response.ok) throw new Error(String(response.status));
+          const decoded = await context().decodeAudioData(await response.arrayBuffer());
+          gain = context().createGain();
+          gain.gain.value = 0;
+          gain.connect(context().destination);
+          const source = context().createBufferSource();
+          source.buffer = decoded;
+          source.loop = true;
+          source.connect(gain);
+          source.start();
+          return true;
+        } catch {
+          loading = null;
+          return false;
+        }
+      })());
+
+    // Loudness is perceived exponentially, so a straight line on the gain value
+    // would rush in and then crawl.
+    const ramp = (to: number, seconds: number) => {
+      if (!ctx || !gain) return;
+      const now = ctx.currentTime;
+      const param = gain.gain;
+      param.cancelScheduledValues(now);
+      param.setValueAtTime(Math.max(param.value, SILENT), now);
+      param.exponentialRampToValueAtTime(Math.max(to, SILENT), now + seconds);
+      if (to === 0) param.setValueAtTime(0, now + seconds);
+    };
+
+    const start = async () => {
+      const c = context();
+      try { await c.resume(); } catch { /* not resumable yet */ }
+      if (c.state !== 'running') {
+        // Blocked until the visitor interacts; nothing is downloaded until it
+        // can actually be heard.
+        paint(false);
+        return false;
+      }
+      if (!(await load())) return false;
+      wanted = true;
+      paint(true);
+      ramp(TARGET_VOLUME, FADE_IN);
+      return true;
+    };
+
+    const stop = () => {
+      wanted = false;
+      paint(false);
+      if (!ctx) return;
+      ramp(0, FADE_OUT);
+      window.setTimeout(() => {
+        if (!wanted) ctx?.suspend().catch(() => {});
+      }, FADE_OUT * 1000 + 60);
+    };
+
+    button.addEventListener('click', () => {
+      if (button.classList.contains('is-on') || wanted) {
+        stop();
+        remember(false);
+      } else {
+        start().then(ok => { if (ok) remember(true); });
+      }
+    });
+
+    document.addEventListener('atlas:playback', event => {
+      const playing = (event as CustomEvent<{ playing: boolean }>).detail?.playing;
+      if (!playing || !ready || wanted) return;
+      // Someone who switched it off is not asked again by a different control.
+      if (stored() === 'off') return;
+      start().then(ok => { if (ok) remember(true); });
+    });
+
+    // A non-essential loop has no business running on a tab nobody is looking at.
+    document.addEventListener('visibilitychange', () => {
+      if (!ctx || !wanted) return;
+      if (document.hidden) ctx.suspend().catch(() => {});
+      else ctx.resume().then(() => ramp(TARGET_VOLUME, 0.6)).catch(() => {});
+    });
+
+    // Only offer the control once the file is known to be there, so the corner
+    // stays empty rather than holding a button that would do nothing.
+    fetch(src, { method: 'HEAD' })
+      .then(response => {
+        if (!response.ok) throw new Error(String(response.status));
+        ready = true;
+        button.hidden = false;
+        requestAnimationFrame(() => button.classList.add('is-ready'));
+
+        if (stored() !== 'on') return;
+        // The preference was set on an earlier visit, but a fresh page load has
+        // no gesture yet, so resume on the first one instead of failing silently.
+        start().then(ok => {
+          if (ok) return;
+          const resume = () => {
+            start().then(started => { if (started) detach(); });
+          };
+          const detach = () => {
+            document.removeEventListener('pointerdown', resume);
+            document.removeEventListener('keydown', resume);
+          };
+          document.addEventListener('pointerdown', resume, { once: false });
+          document.addEventListener('keydown', resume, { once: false });
+        });
+      })
+      .catch(() => { button.hidden = true; });
+  }
+</script>
+
+<style>
+  /* Bottom-left, because Back-to-top owns the right corner and appears only
+     after the hero leaves; two independent corners need no coordination. */
+  .sound-toggle {
+    position: fixed;
+    left: max(16px, calc(env(safe-area-inset-left) + 16px));
+    bottom: max(16px, calc(env(safe-area-inset-bottom) + 16px));
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    cursor: pointer;
+    border: 1px solid rgb(255 255 255 / 0.28);
+    border-radius: 9999px;
+    background: #000;
+    color: #fff;
+    box-shadow: 0 12px 30px -16px rgb(0 0 0 / 0.7);
+    opacity: 0;
+    transform: translateY(18px) scale(0.92);
+    filter: blur(6px);
+    transition:
+      opacity 420ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+      filter 420ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 300ms ease,
+      box-shadow 300ms ease;
+  }
+
+  .sound-toggle.is-ready {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+
+  .sound-toggle:hover,
+  .sound-toggle:focus-visible {
+    border-color: oklch(75% 0.25 145 / 0.8);
+    box-shadow:
+      0 0 0 1px oklch(75% 0.25 145 / 0.36),
+      0 0 28px oklch(75% 0.25 145 / 0.48),
+      0 18px 44px -14px oklch(75% 0.25 145 / 0.62);
+  }
+
+  .sound-toggle.is-ready:hover {
+    transform: scale(1.05);
+  }
+
+  .sound-toggle.is-on {
+    border-color: oklch(75% 0.25 145 / 0.55);
+    color: oklch(75% 0.25 145);
+  }
+
+  .sound-icon {
+    width: 19px;
+    height: 19px;
+  }
+
+  /* Off is the resting state: the slash shows, the waves are away. */
+  .sound-wave {
+    opacity: 0;
+    transform: translateX(-3px);
+    transform-origin: 11px 10px;
+    transition: opacity 260ms ease, transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .sound-wave-far { transition-delay: 60ms; }
+  .sound-slash {
+    opacity: 1;
+    transition: opacity 200ms ease;
+  }
+
+  .sound-toggle.is-on .sound-wave {
+    opacity: 1;
+    transform: none;
+  }
+  .sound-toggle.is-on .sound-slash {
+    opacity: 0;
+  }
+
+  @media (max-width: 639px) {
+    .sound-toggle {
+      width: 46px;
+      height: 46px;
+    }
+    .sound-icon {
+      width: 17px;
+      height: 17px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sound-toggle,
+    .sound-toggle.is-ready,
+    .sound-toggle.is-ready:hover {
+      transform: none;
+      filter: none;
+      transition: opacity 1ms, border-color 300ms ease, box-shadow 300ms ease;
+    }
+    .sound-wave,
+    .sound-slash {
+      transition: opacity 1ms;
+    }
+    .sound-toggle.is-on .sound-wave { transform: none; }
+  }
+</style>
