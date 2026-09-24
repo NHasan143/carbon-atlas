@@ -186,9 +186,18 @@ test('a shared link restores every comparison choice and stays current as the vi
       value: { writeText: async text => { window.__copiedAtlasLink = text; } },
     });
   });
+  // Share opens a card of destinations; Copy link is one of them.
   await page.getByRole('button', { name: 'Share this view' }).click();
+  await expect(page.locator('#sharePop')).toBeVisible();
+  await expect(page.locator('#shareUrlPreview')).toHaveAttribute('title', page.url());
+  await expect(page.locator('[data-share-target="x"]')).toHaveAttribute('target', '_blank');
+  const shareHref = await page.locator('[data-share-target="facebook"]').getAttribute('href');
+  expect(shareHref).toContain(encodeURIComponent(page.url()));
+  await page.locator('#shareCopyBtn').click();
   await expect(page.locator('#shareViewStatus')).toHaveText('Link copied');
   expect(await page.evaluate(() => window.__copiedAtlasLink)).toBe(page.url());
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#sharePop')).toBeHidden();
 
   await page.reload();
   await expect(page.getByRole('button', { name: 'Share this view' })).toBeEnabled({ timeout: 30000 });

@@ -1,5 +1,6 @@
 ---
 import AtlasControls from './AtlasControls.astro';
+import AtlasFooter from './AtlasFooter.astro';
 import BackToTop from './BackToTop.astro';
 import Hero from './Hero.astro';
 import MetricSelect from './MetricSelect.astro';
@@ -153,20 +154,7 @@ import SoundToggle from './SoundToggle.astro';
       <div id="smGrid" class="trend-grid grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
     </Panel>
 
-    <footer class="mx-auto mt-12 max-w-[1000px] border-t border-line pt-8 text-[12.5px] leading-[1.7] text-muted">
-      <p>
-      Data: <a class="text-secondary underline" href="https://github.com/owid/co2-data" target="_blank" rel="noopener">Our World in Data – CO₂ and Greenhouse Gas Emissions</a> and{' '}
-      <a class="text-secondary underline" href="https://github.com/owid/energy-data" target="_blank" rel="noopener">Our World in Data – Energy</a>, and{' '}
-      <a class="text-secondary underline" href="https://ourworldindata.org/grapher/gdp-per-capita-worldbank" target="_blank" rel="noopener">World Bank – GDP per capita, PPP (constant 2021 international $)</a> via Our World in Data, all CC BY. Renewables-share data covers 79 countries with reliable energy-mix reporting; others show as no-data on the map and are omitted from that metric's comparisons.
-      </p>
-      <p class="mt-6 flex items-center justify-center gap-1 text-[13px] text-secondary">
-        Made with
-        <svg class="size-3.5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" role="img" aria-label="love">
-          <path d="M10 17.5s-6.5-3.9-6.5-8.6A3.7 3.7 0 0 1 10 6.6a3.7 3.7 0 0 1 6.5 2.3c0 4.7-6.5 8.6-6.5 8.6Z" />
-        </svg>
-        by <a class="text-ink underline decoration-accent underline-offset-4" href="https://github.com/NHasan143" target="_blank" rel="noopener noreferrer">Naymul Hasan</a>
-      </p>
-    </footer>
+    <AtlasFooter />
   </div>
 
 <script>
@@ -912,7 +900,7 @@ function initAtlas(){
     });
     // Country slots wire themselves up in createCountryPicker.
 
-    element("shareViewBtn").addEventListener("click", shareView);
+    wireShare();
     window.addEventListener("popstate", restoreUrlState);
 
     if (rankWidth.addEventListener) rankWidth.addEventListener("change", function(){ updateRankings(false); });
@@ -950,16 +938,115 @@ function initAtlas(){
     element("shareViewStatus").textContent = "";
   }
 
-  async function shareView(){
+  // ---------- Share ----------
+  // Every target is a plain link built at open time from the current URL, so
+  // nothing third-party loads until the reader actually chooses a destination.
+  var shareOpen = false;
+  var copiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function shareText(){
+    return "Carbon Atlas — " + highlighted
+      .filter(Boolean)
+      .map(function(iso){ return COUNTRIES_BY_ISO[iso].name; })
+      .join(", ") + " in " + YEARS[currentYearIdx];
+  }
+
+  function shareHref(target: string, link: string){
+    var url = encodeURIComponent(link);
+    var text = encodeURIComponent(shareText());
+    if (target === "x") return "https://x.com/intent/post?url=" + url + "&text=" + text;
+    if (target === "facebook") return "https://www.facebook.com/sharer/sharer.php?u=" + url;
+    if (target === "linkedin") return "https://www.linkedin.com/sharing/share-offsite/?url=" + url;
+    if (target === "whatsapp") return "https://wa.me/?text=" + encodeURIComponent(shareText() + " " + link);
+    return "mailto:?subject=" + text + "&body=" + encodeURIComponent(shareText() + "\n\n" + link);
+  }
+
+  function refreshShareTargets(){
     writeUrlState();
     const link = window.location.href;
+    const preview = element("shareUrlPreview");
+    preview.textContent = link.replace(/^https?:\/\//, "");
+    preview.title = link;
+    document.querySelectorAll<HTMLAnchorElement>("[data-share-target]").forEach(function(anchor){
+      const target = anchor.dataset.shareTarget as string;
+      anchor.href = shareHref(target, link);
+      // Mail opens a client rather than a page, so it keeps the current tab.
+      if (target === "email") anchor.removeAttribute("target");
+      else anchor.target = "_blank";
+    });
+  }
+
+  function setShareOpen(open: boolean){
+    if (open === shareOpen) return;
+    shareOpen = open;
+    const pop = element("sharePop");
+    const button = element("shareViewBtn");
+    pop.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+    if (open){
+      refreshShareTargets();
+      // Flip above the button when the card would run past the viewport.
+      const below = window.innerHeight - button.getBoundingClientRect().bottom;
+      if (below < pop.offsetHeight + 24) pop.dataset.placement = "top";
+      else delete pop.dataset.placement;
+      element<HTMLButtonElement>("shareCopyBtn").focus();
+    } else {
+      resetCopyState();
+      element("shareViewStatus").textContent = "";
+    }
+  }
+
+  function resetCopyState(){
+    if (copiedTimer) clearTimeout(copiedTimer);
+    copiedTimer = null;
+    const copy = element("shareCopyBtn");
+    delete copy.dataset.copied;
+    copy.querySelector(".share-copy-label")!.textContent = "Copy";
+  }
+
+  async function copyShareLink(){
+    writeUrlState();
+    const link = window.location.href;
+    const copy = element("shareCopyBtn");
     try {
       if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
       await navigator.clipboard.writeText(link);
+      copy.dataset.copied = "true";
+      copy.querySelector(".share-copy-label")!.textContent = "Copied";
       element("shareViewStatus").textContent = "Link copied";
+      if (copiedTimer) clearTimeout(copiedTimer);
+      copiedTimer = setTimeout(resetCopyState, 2400);
     } catch {
       element("shareViewStatus").textContent = "Copy the URL from your address bar";
     }
+  }
+
+  function wireShare(){
+    element("shareViewBtn").addEventListener("click", function(){ setShareOpen(!shareOpen); });
+    element("sharePopClose").addEventListener("click", function(){
+      setShareOpen(false);
+      element("shareViewBtn").focus();
+    });
+    element("shareCopyBtn").addEventListener("click", copyShareLink);
+    // Choosing a destination is the end of the task, so the card closes behind it.
+    document.querySelectorAll<HTMLAnchorElement>("[data-share-target]").forEach(function(anchor){
+      anchor.addEventListener("click", function(){ setShareOpen(false); });
+    });
+    element("sharePop").addEventListener("keydown", function(event){
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      setShareOpen(false);
+      element("shareViewBtn").focus();
+    });
+    const actions = document.querySelector(".share-actions") as HTMLElement;
+    actions.addEventListener("focusout", function(event){
+      if (actions.contains(event.relatedTarget as Node)) return;
+      setShareOpen(false);
+    });
+    document.addEventListener("pointerdown", function(event){
+      if (shareOpen && !actions.contains(event.target as Node)) setShareOpen(false);
+    });
+    window.addEventListener("resize", function(){ if (shareOpen) setShareOpen(false); });
   }
 
   function setPlayState(playing: boolean){

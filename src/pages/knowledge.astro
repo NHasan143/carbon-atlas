@@ -1,5 +1,6 @@
 ---
 import AtlasLayout from '../layouts/AtlasLayout.astro';
+import AtlasFooter from '../components/AtlasFooter.astro';
 import AccountLine from '../components/knowledge/AccountLine.astro';
 import BalanceRail from '../components/knowledge/BalanceRail.astro';
 import EntryBar from '../components/knowledge/EntryBar.astro';
@@ -301,6 +302,8 @@ const atlasLinks = [
         </footer>
       </article>
     </div>
+
+    <AtlasFooter />
   </div>
 </AtlasLayout>
 
@@ -535,8 +538,10 @@ const atlasLinks = [
 
   /* ---------- sources ---------- */
 
+  /* The article's own citations close the reading; the site footer that follows
+     brings its own top margin, so this stops short rather than doubling it. */
   .sources {
-    padding: clamp(30px, 4vw, 44px) 0 clamp(36px, 5vw, 56px);
+    padding: clamp(30px, 4vw, 44px) 0 4px;
     border-top: 1px solid var(--border);
   }
 
