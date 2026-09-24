@@ -1,0 +1,306 @@
+---
+/**
+ * The running balance. It stays with the reader down the account, marking which
+ * line they are on and restating the figure that line turns on. Rendered whole
+ * and readable before any script runs; the script only moves the marker and
+ * swaps the figure, which is tabular so it cannot jitter as it changes.
+ */
+interface Line {
+  id: string;
+  line: string;
+  label: string;
+  figure: string;
+  unit: string;
+  caption: string;
+}
+interface Props { lines: Line[]; }
+const { lines } = Astro.props;
+
+// What the rail reads before the reader has left the opening plate.
+const opening = { figure: '+1.0', unit: 'W/m²', caption: 'Held back' };
+const figures = Object.fromEntries(lines.map((l) => [l.id, { figure: l.figure, unit: l.unit, caption: l.caption }]));
+---
+
+<aside class="rail" aria-label="Where you are in the account">
+  <p class="rail-caption">The account</p>
+  <ol class="rail-list">
+    {lines.map((entry) => (
+      <li class="rail-item" data-rail-item={entry.id}>
+        <a href={`#${entry.id}`} class="rail-link">
+          <span class="rail-line">{entry.line}</span>
+          <span class="rail-label">{entry.label}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+  <p class="rail-balance">
+    <span class="rail-balance-label" data-rail-caption>{opening.caption}</span>
+    <span class="rail-balance-value" data-rail-figure>{opening.figure}</span>
+    <span class="rail-balance-unit" data-rail-unit>{opening.unit}</span>
+  </p>
+</aside>
+
+{/* Below the rail's breakpoint the same state rides as one sticky line, so the
+    account's running figure survives on a phone instead of disappearing. */}
+<div class="rail-strip" aria-hidden="true">
+  <span class="rail-strip-line" data-strip-line>—</span>
+  <span class="rail-strip-caption" data-rail-caption>{opening.caption}</span>
+  <span class="rail-strip-value" data-rail-figure>{opening.figure}</span>
+  <span class="rail-strip-unit" data-rail-unit>{opening.unit}</span>
+</div>
+
+<script is:inline define:vars={{ figures, opening }}>
+  window.__atlasRailFigures = figures;
+  window.__atlasRailOpening = opening;
+</script>
+
+<style>
+  .rail {
+    display: none;
+  }
+
+  @media (min-width: 1100px) {
+    .rail {
+      display: block;
+      position: sticky;
+      top: 32px;
+      align-self: start;
+      padding-right: 8px;
+    }
+  }
+
+  .rail-caption {
+    font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .rail-list {
+    margin-top: 18px;
+    border-left: 1px solid var(--border);
+  }
+
+  .rail-link {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    padding: 9px 0 9px 14px;
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+
+  .rail-link:hover {
+    color: var(--text-primary);
+  }
+
+  .rail-item[data-active='true'] .rail-link {
+    border-left-color: var(--action-accent);
+    color: var(--text-primary);
+  }
+
+  .rail-line {
+    font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+    padding-top: 0.15em;
+  }
+
+  .rail-label {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .rail-item[data-active='true'] .rail-label {
+    font-weight: 600;
+  }
+
+  .rail-balance {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    margin-top: 26px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .rail-balance-label {
+    flex-basis: 100%;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .rail-balance-value {
+    font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-size: 28px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .rail-balance-unit {
+    font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  /* ---------- the compact form ---------- */
+
+  /* Fixed, never in flow: sitting in the grid it rendered above the h1 and read
+     as an eyebrow over the title, which is the one shape this page refuses. It
+     stays out of sight through the opening plate and arrives only once a ledger
+     line is actually being read, which is also the first moment it has anything
+     to say that the account below is not already saying.
+     The blur is a specific effect — content passes under it — not decoration. */
+  .rail-strip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in oklab, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+    transition: opacity 220ms ease, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .rail-strip[data-visible='true'] {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (min-width: 640px) {
+    .rail-strip { padding-inline: 24px; }
+  }
+
+  @media (min-width: 1100px) {
+    .rail-strip { display: none; }
+  }
+
+  .rail-strip-line,
+  .rail-strip-unit {
+    font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+
+  .rail-strip-caption {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-muted);
+  }
+
+  .rail-strip-value {
+    font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rail-link,
+    .rail-strip { transition: none; }
+  }
+</style>
+
+<script>
+  // The rail marks the line the reader is on and restates that line's figure.
+  // Nothing here reveals content: every row is readable with this script absent.
+  interface RailFigure { figure: string; unit: string; caption: string; }
+  const figures = (window as any).__atlasRailFigures as Record<string, RailFigure> | undefined;
+  const opening = (window as any).__atlasRailOpening as RailFigure | undefined;
+
+  const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-ledger-row]'));
+  const items = new Map<string, HTMLElement>();
+  document.querySelectorAll<HTMLElement>('[data-rail-item]').forEach((item) => {
+    if (item.dataset.railItem) items.set(item.dataset.railItem, item);
+  });
+  const captions = document.querySelectorAll<HTMLElement>('[data-rail-caption]');
+  const values = document.querySelectorAll<HTMLElement>('[data-rail-figure]');
+  const units = document.querySelectorAll<HTMLElement>('[data-rail-unit]');
+  const stripLines = document.querySelectorAll<HTMLElement>('[data-strip-line]');
+  const strip = document.querySelector<HTMLElement>('.rail-strip');
+
+  if (rows.length && items.size && figures && opening) {
+    let active = '';
+    const write = (nodes: NodeListOf<HTMLElement>, text: string) => {
+      nodes.forEach((node) => { node.textContent = text; });
+    };
+
+    const mark = (id: string) => {
+      if (id === active) return;
+      if (active) delete items.get(active)?.dataset.active;
+      active = id;
+      const reading = (id && figures[id]) || opening;
+      write(captions, reading.caption);
+      write(values, reading.figure);
+      write(units, reading.unit);
+      write(stripLines, id ? id.replace('line-', '') : '—');
+      // The strip belongs to the account, not to the plate above it.
+      if (strip) {
+        if (id) strip.dataset.visible = 'true';
+        else delete strip.dataset.visible;
+      }
+      if (!id) return;
+      const item = items.get(id);
+      if (item) item.dataset.active = 'true';
+    };
+
+    // The last row whose start has passed the reading line is the one being
+    // read; an IntersectionObserver alone flips between two rows sharing the view.
+    // While the reader is still in the opening plate no row has passed it, and
+    // the rail holds the opening balance rather than claiming a line.
+    const readingLine = () => {
+      let current = '';
+      for (const row of rows) {
+        if (row.getBoundingClientRect().top <= window.innerHeight * 0.34) current = row.id;
+      }
+      mark(current);
+    };
+
+    let queued = false;
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        readingLine();
+      });
+    };
+
+    readingLine();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+  }
+</script>

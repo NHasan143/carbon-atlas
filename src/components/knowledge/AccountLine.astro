@@ -1,0 +1,103 @@
+---
+/**
+ * One line of an account: label left, figure right in tabular mono, so a column
+ * of figures lines up on the decimal the way a ledger's does. `rule` draws the
+ * sum line above a subtotal; `total` is the line that line adds up to.
+ */
+interface Props {
+  label: string;
+  value: string;
+  unit?: string;
+  note?: string;
+  rule?: boolean;
+  total?: boolean;
+  /**
+   * The line the whole account resolves to. It is marked by size and weight,
+   * never by colour: Living Green is the action colour and encodes no data,
+   * and any green here would also read as good news about a deficit.
+   */
+  held?: boolean;
+}
+const { label, value, unit, note, rule = false, total = false, held = false } = Astro.props;
+---
+
+<div class:list={['account-line', { 'account-line-rule': rule, 'account-line-total': total, 'account-line-held': held }]}>
+  <span class="account-label">
+    {label}
+    {note && <span class="account-note">{note}</span>}
+  </span>
+  <span class="account-figure">
+    <span class="account-value">{value}</span>
+    {unit && <span class="account-unit">{unit}</span>}
+  </span>
+</div>
+
+<style>
+  .account-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 16px;
+    padding: 10px 0;
+  }
+
+  /* The sum line of an account: a rule above the figure it totals. */
+  .account-line-rule {
+    border-top: 1px solid var(--border);
+    margin-top: 6px;
+    padding-top: 14px;
+  }
+
+  .account-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    font-size: 13.5px;
+    color: var(--text-secondary);
+  }
+
+  .account-line-total .account-label {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .account-note {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .account-figure {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 6px;
+    font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .account-value {
+    font-size: clamp(26px, 5.2vw, 40px);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  .account-line-total .account-value {
+    font-weight: 600;
+  }
+
+  .account-line-held .account-value {
+    font-size: clamp(40px, 9vw, 68px);
+    font-weight: 600;
+  }
+
+  .account-unit {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+</style>

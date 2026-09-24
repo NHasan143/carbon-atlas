@@ -1,0 +1,593 @@
+---
+import AtlasLayout from '../layouts/AtlasLayout.astro';
+import AccountLine from '../components/knowledge/AccountLine.astro';
+import BalanceRail from '../components/knowledge/BalanceRail.astro';
+import EntryBar from '../components/knowledge/EntryBar.astro';
+import LedgerRow from '../components/knowledge/LedgerRow.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Effective radiative forcing, 1750 to 2019, in W/m². IPCC AR6 WG1 Chapter 7,
+// Table 7.8. These are the entries that moved the account, in its own unit, and
+// they are the complete set: listed plus "other, net" they sum to the +2.72
+// total AR6 reports, so the account on screen reconciles.
+const forcings = [
+  { name: 'Carbon dioxide', note: 'fossil fuels, cement, land clearing', value: 2.16 },
+  { name: 'Methane', note: 'livestock, rice, landfill, gas and coal leaks', value: 0.54 },
+  { name: 'Ozone near the ground', note: 'formed from traffic and industrial fumes', value: 0.47 },
+  { name: 'Halocarbons', note: 'refrigerants and industrial gases', value: 0.41 },
+  { name: 'Nitrous oxide', note: 'nitrogen fertiliser, manure', value: 0.21 },
+  { name: 'Aerosol haze', note: 'soot and sulphate, the one entry that cools', value: -1.06 },
+];
+const forcingScale = Math.max(...forcings.map((f) => Math.abs(f.value)));
+const warmingTotal = forcings.filter((f) => f.value > 0).reduce((sum, f) => sum + f.value, 0);
+
+// The rail restates the figure the line in view is about. Every one of these
+// also appears in that line's prose, so the rail never asserts anything the
+// page has not already sourced.
+const railLines = [
+  { id: 'line-01', line: '01', label: 'Why the heat cannot leave', figure: '≈4', unit: 'W/m²', caption: 'Per doubling of CO₂' },
+  { id: 'line-02', line: '02', label: 'The entries that moved it', figure: '+2.72', unit: 'W/m²', caption: 'Net human entry' },
+  { id: 'line-03', line: '03', label: 'Where they come from', figure: '37.4', unit: 'Gt', caption: 'Fossil CO₂ a year' },
+  { id: 'line-04', line: '04', label: 'How we know they are ours', figure: '−2.2', unit: '‰', caption: 'Carbon getting lighter' },
+  { id: 'line-05', line: '05', label: 'Why it does not settle', figure: '0.45', unit: '°C', caption: 'Per trillion tonnes' },
+];
+
+const atlasLinks = [
+  {
+    href: `${base}/?mapMetric=co2_per_capita&view=change`,
+    title: 'Who has actually cut emissions per person',
+    note: 'The World View map, showing change since 1990 rather than a single year.',
+  },
+  {
+    href: `${base}/?mapMetric=renewables_share_energy`,
+    title: 'Where the energy mix has really moved',
+    note: 'Renewables share of energy, the term in the account that countries control most directly.',
+  },
+  {
+    href: `${base}/?rankMetric=co2&rankBasis=abs`,
+    title: 'The biggest movers in total emissions',
+    note: 'Ranked by the amount emitted, not the percentage, so size is visible.',
+  },
+];
+---
+
+<AtlasLayout
+  title="Why global warming is increasing — Carbon Atlas"
+  description="The planet runs an energy account: about 340 W/m² arrives and about 339 leaves. This is what holds the difference back, which gases moved the balance, how we know they are ours, and why the account does not settle on its own."
+  socialDescription="More energy arrives than leaves. Read the planet's energy account line by line — the mechanism, the causes in order of size, the fingerprint that ties them to us, and why carbon's lifetime keeps the balance open."
+  schemaType="Article"
+>
+  <div class="knowledge mx-auto max-w-[1280px] px-4 pb-6 sm:px-6">
+    <a href={`${base}/`} class="return-link">
+      <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9.5 3.5 5 8l4.5 4.5" />
+      </svg>
+      Back to the atlas
+    </a>
+
+    <div class="knowledge-layout">
+      <BalanceRail lines={railLines} />
+
+      <article class="knowledge-body">
+        <header class="ledger-plate">
+          <h1 class="plate-title">The planet keeps an account.</h1>
+          <p class="plate-standfirst">
+            Sunlight arrives. Heat leaves. For almost all of human history those two figures
+            matched closely enough that the climate held steady. They no longer match — and the
+            difference, small as it looks, is what global warming is.
+          </p>
+
+          <div class="account">
+            <AccountLine label="Sunlight arriving" value="340" unit="W/m²" note="averaged over the whole planet, day and night" />
+            <AccountLine label="Reflected straight back" value="−100" unit="W/m²" note="by clouds, ice, deserts, haze" />
+            <AccountLine label="Absorbed by the Earth" value="240" unit="W/m²" rule total />
+            <AccountLine label="Radiated back out as heat" value="−239" unit="W/m²" />
+            <AccountLine label="Held back" value="+1.0" unit="W/m²" rule total held />
+          </div>
+
+          <p class="account-meta">
+            Top-of-atmosphere energy budget, rounded. IPCC AR6 Working&nbsp;Group&nbsp;I,
+            Chapter&nbsp;7, and NASA's CERES satellites. The imbalance is the hardest figure to
+            measure and the estimates run from roughly&nbsp;0.8 to&nbsp;1.3&nbsp;W/m² depending on
+            the period and instrument.
+          </p>
+
+          <p class="plate-close">
+            One watt per square metre is about three-tenths of one percent of what arrives. It is
+            also roughly twenty times humanity's entire energy use, applied continuously, and it
+            has nowhere to go but into the ocean, the ice and the air.
+          </p>
+        </header>
+
+        <LedgerRow
+          id="line-01"
+          line="01"
+          title="Why the heat cannot leave"
+          standfirst="Greenhouse gases do not trap heat under a lid. They raise the altitude from which the planet finally lets it go."
+        >
+          <p>
+            Sunlight reaches the surface as mostly visible light, which the atmosphere is largely
+            transparent to. The ground and ocean absorb it, warm, and radiate that energy back
+            upward — but now as infrared, a longer wavelength. <strong>Carbon dioxide, methane,
+            nitrous oxide and water vapour are transparent to the first and opaque to the
+            second.</strong> They absorb the outgoing infrared and re-emit it in every direction,
+            including back down.
+          </p>
+          <p>
+            The part most explanations skip is what happens when you add more. Heat escapes to
+            space from whatever altitude is thin enough to radiate freely. Add carbon dioxide and
+            that altitude rises. Higher air is colder, and colder things radiate less energy. So
+            the planet emits slightly less than it receives — and keeps doing so until the whole
+            column warms enough to restore the balance. <strong>The warming is not the problem
+            being caused; it is the account rebalancing itself.</strong>
+          </p>
+          <p>
+            Doubling the carbon dioxide in the atmosphere knocks roughly 4&nbsp;W/m² off the
+            outgoing side of the ledger. That is the entire mechanism, and it has been measured in
+            the laboratory since the 1850s and from satellites since the 1970s.
+          </p>
+        </LedgerRow>
+
+        <LedgerRow
+          id="line-02"
+          line="02"
+          title="The entries that moved it"
+          standfirst="Each gas can be written in the account's own unit: how much it has shifted the balance since 1750."
+        >
+          <p>
+            Comparing greenhouse gases by tonnage is misleading, because a tonne of methane and a
+            tonne of carbon dioxide do very different amounts of work. Comparing them by their
+            effect on the energy balance is exact — and it puts every entry on the same line of the
+            same account.
+          </p>
+
+          <ul class="entries" aria-label="Change in the energy balance since 1750, by gas, in watts per square metre">
+            {forcings.map((entry) => <EntryBar {...entry} scale={forcingScale} />)}
+          </ul>
+
+          <div class="account account-inline">
+            <AccountLine label="Everything on the warming side" value={`+${warmingTotal.toFixed(2)}`} unit="W/m²" rule total />
+            <AccountLine label="Less the cooling from haze" value="−1.06" unit="W/m²" />
+            <AccountLine label="Other effects, net" value="−0.01" unit="W/m²" note="soot on snow and contrails, less the albedo of cleared land" />
+            <AccountLine label="Net human entry" value="+2.72" unit="W/m²" rule total />
+          </div>
+
+          <p class="figure-note">
+            Effective radiative forcing, 1750 to 2019. IPCC AR6 Working&nbsp;Group&nbsp;I,
+            Chapter&nbsp;7, Table&nbsp;7.8. Bars share one scale, so their lengths compare directly,
+            and the lines above add up: this is the complete set of entries, not a selection.
+          </p>
+
+          <p>
+            Two things stand out. <strong>Carbon dioxide alone is more than half of everything on
+            the warming side</strong>, which is why it dominates every discussion. And the haze
+            from burning dirty fuel has been quietly cancelling more than a quarter of it — so as
+            countries clean up their air, which saves lives, some of the warming that was being
+            masked appears. The account has been flattering us.
+          </p>
+        </LedgerRow>
+
+        <LedgerRow
+          id="line-03"
+          line="03"
+          title="Where the gases come from"
+          standfirst="Four activities, in order of size. The first one is not close."
+        >
+          <p>
+            <strong>Burning fossil fuels</strong> — coal, oil and gas for electricity, heat,
+            transport, and industry — released about 37.4&nbsp;billion tonnes of carbon dioxide in
+            2024. It is the single largest entry by a wide margin, and it is the one that has grown
+            most since 1990.
+          </p>
+          <p>
+            <strong>Clearing and burning land</strong> adds roughly 4.2&nbsp;billion tonnes a year.
+            A forest is a store of carbon; cutting it both releases what was held and removes the
+            thing that was absorbing more.
+          </p>
+          <p>
+            <strong>Farming</strong> is the main source of the other two gases: methane from cattle,
+            sheep and flooded rice, nitrous oxide from nitrogen fertiliser and manure. Neither comes
+            from combustion, which is why emissions do not fall simply because the power grid gets
+            cleaner.
+          </p>
+          <p>
+            <strong>Making cement and chemicals</strong> releases carbon dioxide from the chemistry
+            itself, not just from the fuel. Heating limestone to make cement drives CO₂ out of the
+            rock. Roughly 1.6&nbsp;billion tonnes a year arrives this way and would still arrive if
+            every kiln ran on renewable electricity.
+          </p>
+          <p class="figure-note">
+            Annual figures from the Global Carbon Budget 2024 (Friedlingstein et&nbsp;al.). Fossil
+            and land-use figures are reported separately and carry different uncertainties; the
+            land-use figure is the least certain number on this page.
+          </p>
+        </LedgerRow>
+
+        <LedgerRow
+          id="line-04"
+          line="04"
+          title="How we know they are ours"
+          standfirst="The atmosphere carries a signature, and it is not the sun's."
+        >
+          <p>
+            Carbon from ancient plants — coal, oil and gas — is measurably lighter than carbon from
+            volcanoes or the ocean, because photosynthesis prefers the lighter isotope.{' '}
+            <strong>As carbon dioxide has risen, the atmosphere's carbon has been getting
+            isotopically lighter</strong> — by about 2.2 parts per thousand since 1850, in exactly
+            the proportion expected if the addition were fossil. At the same time, oxygen is
+            falling in step, which is what combustion does and what a volcano does not.
+          </p>
+          <p>
+            If a brighter sun were the cause, the whole atmosphere would be warming. Instead{' '}
+            <strong>the upper atmosphere is cooling while the lower atmosphere warms</strong> —
+            the specific fingerprint of heat being held below rather than added from above. Nights
+            are warming faster than days, and winters faster than summers, for the same reason.
+          </p>
+          <p>
+            And the sun has been checked directly. Satellites have measured its output since the
+            late 1970s; it has been flat to slightly declining across the period in which
+            temperatures rose fastest. Volcanoes emit roughly one percent of what human activity
+            does, and their short-term effect is cooling, not warming.
+          </p>
+        </LedgerRow>
+
+        <LedgerRow
+          id="line-05"
+          line="05"
+          title="Why it does not settle"
+          standfirst="Stopping the entries would not close the account. Carbon's lifetime and the planet's own responses keep it open."
+        >
+          <p>
+            Carbon dioxide is not consumed by the atmosphere; it is slowly moved elsewhere. Oceans
+            and plants absorb a little over half of what is emitted each year, but the remainder
+            accumulates, and <strong>roughly a quarter of today's emissions will still be in the
+            air a thousand years from now.</strong> This is why total emissions since the
+            industrial revolution — not this year's — set the temperature. Each additional trillion
+            tonnes of CO₂ adds about 0.45&nbsp;°C.
+          </p>
+          <p>
+            The planet then amplifies its own change. Warmer air holds more water vapour, itself a
+            greenhouse gas, which roughly doubles the warming from CO₂ alone. Melting ice replaces
+            a white reflecting surface with a dark absorbing one. Thawing permafrost releases
+            carbon that had been frozen for millennia. None of these started the warming; all of
+            them extend it.
+          </p>
+          <p>
+            Meanwhile the absorbers are tiring. The ocean's capacity falls as it warms and
+            acidifies, and drought and fire have turned parts of the land sink into a source.{' '}
+            <strong>The same emissions now leave more carbon in the air than they did
+            thirty years ago.</strong>
+          </p>
+        </LedgerRow>
+
+        <section id="line-06" class="close" aria-labelledby="close-title">
+          <h2 id="close-title" class="close-title">Now read it country by country.</h2>
+          <p class="close-standfirst">
+            The account above is global. The atlas holds the same story for 217 countries and
+            territories from 1990 to 2024 — who emits, who has cut, and what their energy actually
+            runs on. Each link opens the atlas on that question.
+          </p>
+          <ul class="close-list">
+            {atlasLinks.map((link) => (
+              <li>
+                <a href={link.href} class="close-link">
+                  <span class="close-link-title">{link.title}</span>
+                  <span class="close-link-note">{link.note}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a href={`${base}/`} class="close-cta">
+            Explore the atlas
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 10h12M11 5l5 5-5 5" />
+            </svg>
+          </a>
+        </section>
+
+        <footer class="sources">
+          <h2 class="sources-title">Where these figures come from</h2>
+          <ul class="sources-list">
+            <li><a href="https://www.ipcc.ch/report/ar6/wg1/" target="_blank" rel="noopener">IPCC Sixth Assessment Report, Working Group I</a> — the energy budget, the forcing figures, and the carbon-to-temperature relationship.</li>
+            <li><a href="https://globalcarbonbudget.org/" target="_blank" rel="noopener">Global Carbon Budget 2024</a> — annual emissions by source, and the strength of the ocean and land sinks.</li>
+            <li><a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA Global Monitoring Laboratory</a> — atmospheric concentrations and the isotope record.</li>
+            <li><a href="https://ceres.larc.nasa.gov/" target="_blank" rel="noopener">NASA CERES</a> — the satellite measurement of the imbalance itself.</li>
+          </ul>
+          <p class="sources-note">
+            Every figure on this page is a measurement or an assessed estimate with a published
+            uncertainty, not a projection. Nothing here forecasts past 2024.
+          </p>
+        </footer>
+      </article>
+    </div>
+  </div>
+</AtlasLayout>
+
+<style>
+  .knowledge {
+    padding-top: 28px;
+  }
+
+  .return-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+
+  .return-link:hover {
+    color: var(--text-primary);
+  }
+
+  .return-link svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .knowledge-layout {
+    display: grid;
+    gap: 0;
+  }
+
+  @media (min-width: 1100px) {
+    .knowledge-layout {
+      grid-template-columns: 210px minmax(0, 1fr);
+      gap: 56px;
+      align-items: start;
+    }
+  }
+
+  .knowledge-body {
+    min-width: 0;
+  }
+
+  /* ---------- the plate ---------- */
+
+  .ledger-plate {
+    padding: clamp(20px, 4vw, 44px) 0 clamp(40px, 6vw, 72px);
+  }
+
+  .plate-title {
+    max-width: 16ch;
+    font-family: var(--font-display, "Playfair Display Variable", Georgia, serif);
+    font-size: clamp(34px, 5.6vw, 58px);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .plate-standfirst {
+    max-width: 58ch;
+    margin-top: 22px;
+    font-size: clamp(16px, 1.6vw, 18px);
+    line-height: 1.62;
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+
+  .account {
+    max-width: 640px;
+    margin-top: clamp(30px, 4vw, 46px);
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Its first line already draws the sum rule, so the container drops its own
+     border — two hairlines and two paddings had opened a hole under the bars. */
+  .account-inline {
+    margin-top: 6px;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .account-meta,
+  .figure-note {
+    max-width: 62ch;
+    margin-top: 16px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .plate-close {
+    max-width: 62ch;
+    margin-top: 30px;
+    font-size: 15.5px;
+    line-height: 1.72;
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+
+  /* ---------- entries ---------- */
+
+  .entries {
+    max-width: 640px;
+    margin: 4px 0;
+  }
+
+  /* ---------- close ---------- */
+
+  .close {
+    position: relative;
+    padding: clamp(40px, 6vw, 72px) 0 clamp(30px, 4vw, 48px);
+    border-top: 1px solid var(--border);
+  }
+
+  .close::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--action-accent), transparent);
+    opacity: 0.42;
+  }
+
+  .close-title {
+    max-width: 18ch;
+    font-family: var(--font-display, "Playfair Display Variable", Georgia, serif);
+    font-size: clamp(28px, 4.2vw, 46px);
+    font-weight: 600;
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  .close-standfirst {
+    max-width: 62ch;
+    margin-top: 16px;
+    font-size: 15.5px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+
+  .close-list {
+    display: grid;
+    gap: 0;
+    max-width: 700px;
+    margin-top: 30px;
+    border-top: 1px solid var(--border);
+  }
+
+  .close-link {
+    display: grid;
+    gap: 3px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+  }
+
+  /* The text steps aside on hover, not the row: transforming the two spans
+     keeps the hairline anchored and keeps the move off the layout path. */
+  .close-link-title,
+  .close-link-note {
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .close-link:hover .close-link-title,
+  .close-link:hover .close-link-note,
+  .close-link:focus-visible .close-link-title,
+  .close-link:focus-visible .close-link-note {
+    transform: translateX(10px);
+  }
+
+  .close-link-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-decoration-color: var(--action-accent);
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+  }
+
+  .close-link-note {
+    max-width: 62ch;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
+  /* An analytical surface, so the hover is tone and hairline. The hero's green
+     bloom stays on the hero, where the Cinematic Exception keeps it. */
+  .close-cta {
+    margin-top: 34px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: background-color 200ms ease, border-color 200ms ease;
+  }
+
+  .close-cta:hover {
+    border-color: var(--axis);
+    background: var(--surface-2);
+  }
+
+  .close-cta svg {
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .close-cta:hover svg {
+    transform: translateX(3px);
+  }
+
+  .close-cta svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  /* ---------- sources ---------- */
+
+  .sources {
+    padding: clamp(30px, 4vw, 44px) 0 clamp(36px, 5vw, 56px);
+    border-top: 1px solid var(--border);
+  }
+
+  .sources-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .sources-list {
+    display: grid;
+    gap: 10px;
+    max-width: 74ch;
+    margin-top: 16px;
+  }
+
+  .sources-list li {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-muted);
+  }
+
+  .sources-list a {
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .sources-list a:hover {
+    color: var(--text-primary);
+  }
+
+  .sources-note {
+    max-width: 74ch;
+    margin-top: 18px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .return-link,
+    .close-link-title,
+    .close-link-note { transition: none; }
+
+    .close-link:hover .close-link-title,
+    .close-link:hover .close-link-note,
+    .close-link:focus-visible .close-link-title,
+    .close-link:focus-visible .close-link-note { transform: none; }
+  }
+</style>
