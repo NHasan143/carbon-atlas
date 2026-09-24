@@ -6,6 +6,12 @@ An interactive climate and energy explorer for comparing emissions, energy mix, 
 
 The bundled dataset contains **217 countries and territories**, **35 years (1990–2024)**, and **six metrics**. Coverage varies by metric and year.
 
+## Frontend stack
+
+The site remains an Astro static site. Its existing UI, animations, audio control, and charts use Astro components with typed browser scripts and Tailwind CSS v4. TypeScript is configured in strict mode.
+
+React integration is available for new interactive islands. A typed, Tailwind-styled [button primitive](src/components/ui/button.tsx) uses Radix UI's `Slot` for `asChild` composition, and [components.json](components.json) configures the shadcn/ui CLI for future components. The current atlas controls have not been replaced, so adding this stack does not alter their appearance or behavior. Hydrate a new React component only when it needs client-side state, using an Astro `client:*` directive.
+
 ## Features
 
 - **World map:** explore any metric on a choropleth map with country hover details.
