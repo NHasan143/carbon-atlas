@@ -38,16 +38,6 @@ const { id, line, title } = Astro.props;
     .ledger-row { scroll-margin-top: 24px; }
   }
 
-  /* The atlas marks every chapter with the same accent hairline. */
-  .ledger-row::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--action-accent), transparent);
-    opacity: 0.42;
-  }
-
   .ledger-head {
     display: flex;
     align-items: baseline;

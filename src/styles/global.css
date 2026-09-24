@@ -253,7 +253,7 @@
      width; from `sm` up it takes its own column between name and value. */
   @media (min-width: 640px) {
     .rank-row {
-      grid-template-columns: 1.6rem minmax(0, 1fr) clamp(54px, 27%, 168px) auto;
+      grid-template-columns: 1.6rem minmax(0, 1fr) clamp(90px, 38%, 260px) auto;
       grid-template-areas: "num name bar value";
       gap: 10px;
     }
@@ -275,6 +275,11 @@
     background: var(--rank-fill, transparent);
     transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
   }
+  /* A flag reads faster than a name in a list of ten. It sits between the
+     selection swatch and the label, and carries no alt text: the name is
+     right beside it, so announcing the country twice helps nobody. */
+  .row-flag { @apply block h-[15px] w-5 shrink-0 rounded-[2px] object-cover; box-shadow: inset 0 0 0 1px var(--border); }
+  .row-flag-slot { @apply flex shrink-0 items-center; }
   .rank-num { grid-area: num; @apply text-right text-[11.5px] text-muted tabular-nums; }
   .rank-name { grid-area: name; @apply flex min-w-0 items-center gap-2 text-ink; }
   .rank-value { grid-area: value; @apply shrink-0 font-mono text-[13px] tabular-nums; }
@@ -293,11 +298,12 @@
   .rank-row[data-enter="true"] { animation: rank-enter 400ms cubic-bezier(0.16, 1, 0.3, 1); }
 
   .rank-yours { @apply rounded-xl bg-field px-5 py-4; }
-  .rank-your-item { @apply grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2.5 gap-y-1; }
+  .rank-your-item { @apply grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto] items-baseline gap-x-2.5 gap-y-1; }
   .rank-your-item .swatch { @apply self-center; }
+  .rank-your-item .row-flag-slot { @apply self-center; }
   .rank-your-name { @apply truncate text-[13px] font-semibold; }
   .rank-your-value { @apply text-right font-mono text-[13px] tabular-nums; }
-  .rank-your-note { @apply col-start-2 col-end-4 text-[11.5px] text-muted; }
+  .rank-your-note { @apply col-start-3 col-end-5 text-[11.5px] text-muted; }
   @media (min-width: 640px) {
     .rank-your-item + .rank-your-item { @apply border-l border-line pl-6; }
   }
@@ -340,25 +346,16 @@
    chart or a card grid does. */
 .map-section {
   border-block: 1px solid var(--border);
-  padding-bottom: clamp(20px, 2.2vw, 28px);
+  padding-bottom: clamp(14px, 1.6vw, 20px);
 }
 
 .rankings-section {
   border-bottom: 1px solid var(--border);
-  padding-bottom: clamp(20px, 2.2vw, 28px);
+  padding-bottom: clamp(14px, 1.6vw, 20px);
 }
 
 .trends-section {
   border-top: 1px solid var(--border);
-}
-
-.atlas-section::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--action-accent), transparent);
-  opacity: 0.42;
 }
 
 .country-control {

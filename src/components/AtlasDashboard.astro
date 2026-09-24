@@ -151,7 +151,7 @@ import SoundToggle from './SoundToggle.astro';
         </div>
       </div>
       <div class="chart-stage min-w-0 rounded-xl border border-line bg-surface p-2 sm:p-4">
-        <div id="scatterChart" class="h-[500px] w-full sm:h-[620px]" aria-label="Country metric and population comparison"></div>
+        <div id="scatterChart" class="h-[380px] w-full sm:h-[460px]" aria-label="Country metric and population comparison"></div>
       </div>
     </Panel>
 
@@ -1252,6 +1252,35 @@ function initAtlas(){
     return getVar(token);
   }
 
+  // A country's flag, created only when there is one to show and reused in
+  // place afterwards: the rank rows are re-textured on every playback step, so
+  // this must not rebuild or refetch when the country in the row has not moved.
+  function setFlag(host: HTMLElement, iso: string){
+    var code = (COUNTRY_FLAGS as Record<string, string>)[iso];
+    var img = host.firstElementChild as HTMLImageElement | null;
+    if (!code){
+      if (img) host.textContent = "";
+      return;
+    }
+    var src = assetBase + "flags/" + code + ".svg";
+    if (img){
+      if (img.getAttribute("src") !== src) img.src = src;
+      return;
+    }
+    // Finished before it is appended: an <img> is never in the document
+    // without a source, not even for the rest of this tick.
+    img = document.createElement("img");
+    img.className = "row-flag";
+    img.width = 20;
+    img.height = 15;
+    img.loading = "lazy";
+    img.decoding = "async";
+    // The name is already beside it, so the flag is decoration to a reader.
+    img.alt = "";
+    img.src = src;
+    host.appendChild(img);
+  }
+
   function createRankRow(key: string){
     var li = document.createElement("li");
     li.className = "rank-row";
@@ -1269,9 +1298,12 @@ function initAtlas(){
     name.className = "rank-name";
     var swatch = document.createElement("span");
     swatch.className = "swatch";
+    var flag = document.createElement("span");
+    flag.className = "row-flag-slot";
     var label = document.createElement("span");
     label.className = "rank-label";
     name.appendChild(swatch);
+    name.appendChild(flag);
     name.appendChild(label);
     var value = document.createElement("span");
     value.className = "rank-value";
@@ -1288,6 +1320,7 @@ function initAtlas(){
     (li.querySelector(".rank-fill") as HTMLElement).style.transform =
       "scaleX(" + (row.ratio > 0 ? Math.max(row.ratio, RANK_FLOOR) : 0).toFixed(4) + ")";
     li.querySelector(".rank-num")!.textContent = row.rank;
+    setFlag(li.querySelector(".row-flag-slot") as HTMLElement, row.iso);
     li.querySelector(".rank-label")!.textContent = row.name;
     li.querySelector(".rank-value")!.textContent = row.value;
     var swatch = li.querySelector(".swatch") as HTMLElement;
@@ -1416,7 +1449,7 @@ function initAtlas(){
         li = document.createElement("li");
         li.className = "rank-your-item";
         li.dataset.slot = String(slot);
-        ["swatch", "rank-your-name", "rank-your-value", "rank-your-note"].forEach(function(cls){
+        ["swatch", "row-flag-slot", "rank-your-name", "rank-your-value", "rank-your-note"].forEach(function(cls){
           var span = document.createElement("span");
           span.className = cls;
           li.appendChild(span);
@@ -1433,6 +1466,7 @@ function initAtlas(){
           + " place" + (Math.abs(move) === 1 ? "" : "s") + " since " + YEARS[0];
 
       (li.querySelector(".swatch") as HTMLElement).style.background = colors[slot];
+      setFlag(li.querySelector(".row-flag-slot") as HTMLElement, iso);
       li.querySelector(".rank-your-name")!.textContent = country.name;
       li.querySelector(".rank-your-value")!.textContent = entry ? fmtRankValue(entry.value, rankMetric) : "\u2014";
       li.querySelector(".rank-your-note")!.textContent = entry
@@ -1876,18 +1910,24 @@ function initAtlas(){
     var code = (COUNTRY_FLAGS as Record<string, string>)[iso];
     if (!country || !code){ clearFlag(); return; }
     var slot = element("choroFlagSlot");
+    var src = assetBase + "flags/" + code + ".svg";
     var img = slot.firstElementChild as HTMLImageElement | null;
-    if (!img){
+    if (img){
+      if (img.getAttribute("src") !== src) img.src = src;
+      img.alt = "Flag of " + country.name;
+    } else {
+      // Finished before it is appended, so it never enters the document
+      // without a source.
       img = document.createElement("img");
       img.id = "choroFlagImg";
       img.className = "map-flag-img";
       img.width = 42;
       img.height = 32;
       img.decoding = "async";
+      img.alt = "Flag of " + country.name;
+      img.src = src;
       slot.appendChild(img);
     }
-    img.src = assetBase + "flags/" + code + ".svg";
-    img.alt = "Flag of " + country.name;
     element("choroFlagName").textContent = country.name;
     var value = valueAt(iso, choroMetric, currentYearIdx);
     element("choroFlagValue").textContent = hasNumber(value)
