@@ -50,7 +50,16 @@ import SoundToggle from './SoundToggle.astro';
           </div>
         </aside>
         <div class="chart-stage min-w-0 rounded-xl border border-line bg-surface p-2 sm:p-4">
-          <div id="choroplethChart" class="h-[210px] w-full sm:h-[360px] lg:h-[460px]" role="img" aria-label="World map of the selected metric"></div>
+          <div class="map-globe relative">
+            <div id="choroplethChart" class="h-[210px] w-full sm:h-[360px] lg:h-[460px]" role="img" aria-label="World map of the selected metric"></div>
+            <figure id="choroFlag" class="map-flag" hidden>
+              <span id="choroFlagSlot" class="map-flag-slot"></span>
+              <figcaption class="map-flag-text">
+                <span id="choroFlagName" class="map-flag-name"></span>
+                <span id="choroFlagValue" class="map-flag-value"></span>
+              </figcaption>
+            </figure>
+          </div>
           <div id="choroLegend" class="map-legend"></div>
         </div>
       </div>
@@ -159,6 +168,18 @@ import SoundToggle from './SoundToggle.astro';
 
 <script>
 import type { Data, Layout, Shape, Annotations, ScatterLine, PlotlyHTMLElement } from 'plotly.js';
+import type Highcharts from 'highcharts';
+import COUNTRY_FLAGS from '../data/country-flags.json';
+
+// Highcharts hangs the sea disc off the chart, and exposes the graticule's
+// projected bounds on the series; neither is in the shipped types.
+declare module 'highcharts' {
+  interface Chart { sea?: Highcharts.SVGElement; }
+  interface Series { bounds?: Highcharts.MapBounds; }
+}
+
+interface TopoGeometry { id?: string; properties?: Record<string, unknown>; }
+interface TopoGeometryFile { objects: { countries: { geometries: TopoGeometry[] } }; }
 
 interface Country { iso3: string; name: string; continent: string; }
 interface AtlasData {
@@ -187,6 +208,9 @@ function element<T extends HTMLElement = HTMLElement>(id: string): T {
 
 function initAtlas(){
   let Plotly: typeof import('plotly.js');
+  let Highcharts: typeof import('highcharts');
+  let mapChart: Highcharts.MapChart | null = null;
+  let MAP_TOPOLOGY: TopoGeometryFile | null = null;
 
   let DATA: AtlasData;
   let YEARS: number[] = [];
@@ -324,12 +348,25 @@ function initAtlas(){
     }).catch(function(){
       throw new Error("The chart library could not load. Reload the atlas to try again.");
     }),
-    // Same file Plotly draws from, so its own request is served from cache.
+    // Highmaps carries the map series types; bundled, so nothing is fetched
+    // from a CDN at runtime.
+    import("highcharts/highmaps").then(function(module){
+      Highcharts = (module.default || module) as typeof import('highcharts');
+    }).catch(function(){
+      throw new Error("The map library could not load. Reload the atlas to try again.");
+    }),
+    // The globe's own geometry, self-hosted. Highcharts joins on a property
+    // rather than the feature id, so the ISO3 is copied into properties here.
     fetch(assetBase + "world_110m.json").then(function(response){
       if (!response.ok) throw new Error("HTTP " + response.status);
-      return response.json() as Promise<{ objects: { countries: { geometries: { id?: string }[] } } }>;
+      return response.json() as Promise<TopoGeometryFile>;
     }).then(function(topo){
-      topo.objects.countries.geometries.forEach(function(g){ if (g.id) MAP_ISOS.add(g.id); });
+      topo.objects.countries.geometries.forEach(function(g){
+        if (!g.id) return;
+        MAP_ISOS.add(g.id);
+        g.properties = Object.assign({}, g.properties, { iso3: g.id });
+      });
+      MAP_TOPOLOGY = topo;
     }).catch(function(){
       throw new Error("The map could not load. Check your connection and reload the atlas.");
     }),
@@ -339,7 +376,7 @@ function initAtlas(){
     }).catch(function(){
       throw new Error("The atlas data could not load. Check your connection and reload the atlas.");
     })
-  ]).then(function([, , d]){
+  ]).then(function([, , , d]){
     DATA = d;
     YEARS = d.years;
     d.countries.forEach(function(c){ COUNTRIES_BY_ISO[c.iso3] = c; });
@@ -1637,152 +1674,403 @@ function initAtlas(){
   }
 
   // Plotly draws bands as a stepped colour scale over band indices.
-  function steppedScale(colors: string[]): [number, string][] {
-    var n = colors.length;
-    var stops: [number, string][] = [];
-    colors.forEach(function(color, i){ stops.push([i / n, color], [(i + 1) / n, color]); });
-    return stops;
-  }
-
   function mapCells(){
     return MAP_COUNTRIES.map(function(c){ return mapCell(c.iso3); });
   }
 
-  function missingData(cells: MapCell[]){
-    var isos: string[] = [], reasons: string[] = [];
-    cells.forEach(function(cell, i){
-      if (cell.z === null){ isos.push(MAP_COUNTRIES[i].iso3); reasons.push(cell.detail); }
+  // Rows for the globe: the band colour is chosen by the same bandIndex call
+  // the legend and the rank bars use, so the three agree by construction.
+  function mapRows(){
+    var colors = bandColors();
+    var cells = mapCells();
+    return MAP_COUNTRIES.map(function(c, i){
+      var cell = cells[i];
+      return {
+        iso3: c.iso3,
+        name: c.name,
+        value: cell.band,
+        color: cell.band < 0 ? theme().grid : colors[cell.band],
+        custom: { detail: cell.detail }
+      };
     });
-    return { isos: isos, reasons: reasons };
+  }
+
+  // Only the selected countries, drawn again on their own series so they can be
+  // lifted off the sphere. Empty slots are skipped, never drawn transparent.
+  function liftedRows(){
+    var rows = mapRows();
+    return highlighted
+      .map(function(iso, slot){ return { iso: iso, slot: slot }; })
+      .filter(function(s){ return s.iso && MAP_ISOS.has(s.iso); })
+      .map(function(s){
+        var row = rows.find(function(r){ return r.iso3 === s.iso; });
+        return Object.assign({}, row, { custom: { detail: row!.custom.detail, slot: s.slot } });
+      });
+  }
+
+  // The graticule: meridians and parallels, drawn as one mapline series. It is
+  // also what the sea disc measures itself against.
+  var GRATICULE = (function(meridianStep: number, parallelStep: number){
+    var data: { geometry: { type: string; coordinates: number[][] }; lineWidth?: number }[] = [];
+    for (var x = -180; x <= 180; x += meridianStep){
+      data.push({ geometry: { type: "LineString", coordinates: x % 90 === 0
+        ? [[x, -90], [x, 0], [x, 90]]
+        : [[x, -80], [x, 80]] } });
+    }
+    for (var y = -90; y <= 90; y += parallelStep){
+      var coordinates: number[][] = [];
+      for (var lx = -180; lx <= 180; lx += 5) coordinates.push([lx, y]);
+      data.push({ geometry: { type: "LineString", coordinates: coordinates }, lineWidth: y === 0 ? 1.4 : undefined });
+    }
+    return data;
+  })(15, 10);
+
+  // How far the selected countries stand off the sphere, in pixels at the
+  // centre of the disc. A country at the limb is seen edge-on, so its lift
+  // tapers to nothing there: scaling the whole shape about the globe's centre
+  // is the physically exact move, but at the limb it throws the country clean
+  // off the disc and reads as a bug rather than as height.
+  var LIFT_PX = 30;
+  var LIFT_SCALE = 0.11;
+
+  function globeCentre(chart: Highcharts.MapChart){
+    var graticule = chart.get("graticule") as Highcharts.Series | undefined;
+    var bounds = graticule && graticule.bounds;
+    var view = chart.mapView;
+    if (!bounds || !view) return null;
+    var p1 = view.projectedUnitsToPixels({ x: bounds.x1, y: bounds.y1 });
+    var p2 = view.projectedUnitsToPixels({ x: bounds.x2, y: bounds.y2 });
+    return { cx: (p1.x + p2.x) / 2, cy: (p1.y + p2.y) / 2, r: Math.min(p2.x - p1.x, p1.y - p2.y) / 2 };
+  }
+
+  // Applied to each lifted country's own path rather than to the series group,
+  // so Highcharts keeps control of the group's transform. Reapplied on every
+  // render, because a redraw, a zoom or a drag clears it.
+  //
+  // Measured in screen space and converted back through the element's own CTM:
+  // map navigation puts its own transforms on the series groups, so the path's
+  // local coordinates are not the projection's pixel coordinates and cannot be
+  // compared with the globe's centre directly.
+  function applyLift(chart: Highcharts.MapChart){
+    var series = chart.get("lifted") as Highcharts.Series | undefined;
+    if (!series || !chart.sea) return;
+    var seaRect = chart.sea.element.getBoundingClientRect();
+    var cx = seaRect.x + seaRect.width / 2;
+    var cy = seaRect.y + seaRect.height / 2;
+    var radius = seaRect.width / 2;
+    if (!radius) return;
+    var colors = SERIES_COLORS_LIVE();
+
+    // Clear first, so the shapes are measured without last frame's lift and
+    // without the drop shadow, which would inflate the bounding box.
+    var targets: { el: SVGGraphicsElement; slot: number }[] = [];
+    series.points.forEach(function(point){
+      var el = point.graphic && point.graphic.element as SVGGraphicsElement | undefined;
+      if (!el) return;
+      el.removeAttribute("transform");
+      el.style.filter = "";
+      targets.push({ el: el, slot: (point.options as { custom?: { slot?: number } }).custom?.slot ?? 0 });
+    });
+
+    targets.forEach(function(target){
+      var el = target.el;
+      var rect = el.getBoundingClientRect();
+      if (!rect.width) return;
+      var dx = rect.x + rect.width / 2 - cx;
+      var dy = rect.y + rect.height / 2 - cy;
+      var d = Math.sqrt(dx * dx + dy * dy) || 1;
+      // 1 at the centre of the disc, 0 at the limb, where a country is seen
+      // edge-on and any lift would throw it clean off the globe.
+      var facing = Math.max(0, 1 - d / radius);
+      if (facing <= 0.01) return;
+      var ctm = el.getScreenCTM();
+      var unit = ctm && ctm.a ? ctm.a : 1;
+      var rise = LIFT_PX * facing / unit;
+      var box = el.getBBox();
+      var bx = box.x + box.width / 2;
+      var by = box.y + box.height / 2;
+      var scale = 1 + LIFT_SCALE * facing;
+      el.setAttribute("transform",
+        "translate(" + ((dx / d) * rise).toFixed(2) + "," + ((dy / d) * rise).toFixed(2) + ") " +
+        "translate(" + bx.toFixed(2) + "," + by.toFixed(2) + ") " +
+        "scale(" + scale.toFixed(4) + ") " +
+        "translate(" + (-bx).toFixed(2) + "," + (-by).toFixed(2) + ")");
+      // The cast shadow is what reads as height. It carries the country's own
+      // series colour, so the slot stays identifiable without an outline.
+      el.style.filter =
+        "drop-shadow(0 " + (1 + 2 * facing).toFixed(1) + "px " + (2 + 3 * facing).toFixed(1) + "px rgb(0 0 0 / 0.45)) " +
+        "drop-shadow(0 " + (4 + 10 * facing).toFixed(1) + "px " + (6 + 12 * facing).toFixed(1) + "px " +
+        colorMix(colors[target.slot], 0.35 + 0.45 * facing) + ")";
+    });
+  }
+
+  function colorMix(color: string, alpha: number){
+    return "color-mix(in oklab, " + color + " " + Math.round(alpha * 100) + "%, transparent)";
+  }
+
+  // ---------- Click a country: turn the globe to it, and name it ----------
+  var spinFrame = 0;
+
+  // The live rotation sits on the view's projection, which the shipped types
+  // do not expose; the chart options' copy lags behind a drag.
+  function currentRotation(chart: Highcharts.MapChart): [number, number] {
+    var view = chart.mapView as (Highcharts.MapView & { projection?: { options?: { rotation?: [number, number] } } }) | undefined;
+    var rotation = view?.projection?.options?.rotation;
+    return [rotation ? rotation[0] : 0, rotation ? rotation[1] : 0];
+  }
+
+  // Highcharts rotates the globe, so the rotation is the negated centre.
+  // Longitude wraps, so the spin takes whichever way round is shorter.
+  function shortestDelta(from: number, to: number){
+    var d = (to - from) % 360;
+    if (d > 180) d -= 360;
+    if (d < -180) d += 360;
+    return d;
+  }
+
+  function spinTo(lon: number, lat: number){
+    if (!mapChart) return;
+    var chart = mapChart;
+    cancelAnimationFrame(spinFrame);
+    var start = currentRotation(chart);
+    var targetLon = -lon;
+    // Past the poles the globe would roll over; hold the tilt short of them.
+    var targetLat = Math.max(-75, Math.min(75, -lat));
+    var dLon = shortestDelta(start[0], targetLon);
+    var dLat = targetLat - start[1];
+
+    var found = chart.mapView;
+    if (!found) return;
+    const view = found;
+    var apply = function(rotation: [number, number]){
+      view.update({ projection: { name: "Orthographic", rotation: rotation } }, true, false);
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || (!dLon && !dLat)){
+      apply([targetLon, targetLat]);
+      return;
+    }
+
+    var DURATION = 700;
+    var began = 0;
+    var step = function(now: number){
+      if (!began) began = now;
+      var progress = Math.min(1, (now - began) / DURATION);
+      // Exponential ease-out, from an already-visible globe.
+      var eased = 1 - Math.pow(1 - progress, 3);
+      apply([start[0] + dLon * eased, start[1] + dLat * eased]);
+      if (progress < 1) spinFrame = requestAnimationFrame(step);
+    };
+    spinFrame = requestAnimationFrame(step);
+  }
+
+  function clearFlag(){
+    element("choroFlag").hidden = true;
+    // The image is removed rather than blanked: an <img> with no src is a
+    // broken-image box waiting for the first stylesheet that unhides it.
+    element("choroFlagSlot").textContent = "";
+  }
+
+  function showFlag(iso: string){
+    var country = COUNTRIES_BY_ISO[iso];
+    var code = (COUNTRY_FLAGS as Record<string, string>)[iso];
+    if (!country || !code){ clearFlag(); return; }
+    var slot = element("choroFlagSlot");
+    var img = slot.firstElementChild as HTMLImageElement | null;
+    if (!img){
+      img = document.createElement("img");
+      img.id = "choroFlagImg";
+      img.className = "map-flag-img";
+      img.width = 42;
+      img.height = 32;
+      img.decoding = "async";
+      slot.appendChild(img);
+    }
+    img.src = assetBase + "flags/" + code + ".svg";
+    img.alt = "Flag of " + country.name;
+    element("choroFlagName").textContent = country.name;
+    var value = valueAt(iso, choroMetric, currentYearIdx);
+    element("choroFlagValue").textContent = hasNumber(value)
+      ? fmtValue(value, choroMetric)
+      : "No data for " + YEARS[currentYearIdx];
+    element("choroFlag").hidden = false;
+  }
+
+  // Keeps the card honest as the year, the metric or the country list moves
+  // under it. The card is only ever shown for a country still on the globe.
+  var flaggedIso = "";
+
+  function refreshFlag(){
+    if (!flaggedIso) return;
+    showFlag(flaggedIso);
+  }
+
+  // The topology carries a few shapes the dataset has no country for; the
+  // globe still turns to them, but nothing is claimed about them.
+  function selectCountryOnGlobe(iso: string, lon: number, lat: number){
+    flaggedIso = COUNTRIES_BY_ISO[iso] ? iso : "";
+    if (flaggedIso) showFlag(flaggedIso); else clearFlag();
+    spinTo(lon, lat);
   }
 
   function renderChoropleth(){
     var t = theme();
-    var locations = MAP_COUNTRIES.map(function(c){ return c.iso3; });
-    var names = locations.map(function(iso){ return COUNTRIES_BY_ISO[iso].name; });
-    var cells = mapCells();
     var colors = bandColors();
-    var hoverlabel = { bgcolor: t.surface, bordercolor: t.border, font: { color: t.text, family: t.fontFamily, size: 12 } };
-
-    var trace = {
-      type: "choropleth",
-      locationmode: "ISO-3",
-      locations: locations,
-      z: cells.map(function(cell){ return cell.z; }),
-      zmin: 0,
-      zmax: colors.length,
-      colorscale: steppedScale(colors),
-      showscale: false,
-      marker: { line: { color: t.surface, width: 0.5 } },
-      text: names,
-      customdata: cells.map(function(cell){ return cell.detail; }),
-      hovertemplate: "<b>%{text}</b><br>%{customdata}<extra></extra>",
-      hoverlabel: hoverlabel
-    } as Data;
-
-    // Countries without a value get their own neutral fill, so "no data"
-    // never reads as the lowest shade. (The self-hosted atlas has no land layer.)
-    var missing = missingData(cells);
-    var noDataTrace = {
-      type: "choropleth",
-      locationmode: "ISO-3",
-      // An empty choropleth breaks Plotly's hover, so hide it when every country reports.
-      visible: missing.isos.length > 0,
-      locations: missing.isos,
-      z: missing.isos.map(function(){ return 1; }),
-      colorscale: [[0, t.grid], [1, t.grid]],
-      showscale: false,
-      marker: { line: { color: t.surface, width: 0.5 } },
-      text: missing.isos.map(function(iso){ return COUNTRIES_BY_ISO[iso].name; }),
-      customdata: missing.reasons,
-      hovertemplate: "<b>%{text}</b><br>%{customdata}<extra></extra>",
-      hoverlabel: hoverlabel
-    } as Data;
-
-    // The three selected countries are outlined in their series colours, the
-    // same identity they carry in the table, bubble chart and trends.
-    // A wider page-coloured stroke underneath keeps each outline legible
-    // even where it crosses a fill of the same hue.
-    var focusIsos = highlighted.filter(function(iso){ return iso && MAP_ISOS.has(iso); });
-    var outline = function(iso: string, color: string, width: number){
-      return {
-        type: "choropleth",
-        locationmode: "ISO-3",
-        locations: [iso],
-        z: [1],
-        colorscale: [[0, "rgba(0,0,0,0)"], [1, "rgba(0,0,0,0)"]],
-        showscale: false,
-        marker: { line: { color: color, width: width } },
-        hoverinfo: "skip"
-      } as Data;
-    };
-    var focusTraces: Data[] = focusIsos.map(function(iso){ return outline(iso, t.surface, 4); })
-      .concat(highlighted.map(function(iso, slot){
-        return iso && MAP_ISOS.has(iso) ? outline(iso, SERIES_COLORS_LIVE()[slot], 1.8) : null;
-      }).filter((trace): trace is Data => trace !== null));
-
-    // showcountries draws every country's outline (from the same self-hosted
-    // world_110m.json below), so a country with no value for this metric still
-    // reads as "on the map, just uncolored" rather than vanishing into the ocean.
-    var layout: Partial<Layout> = {
-      paper_bgcolor: t.surface,
-      plot_bgcolor: t.surface,
-      font: { color: t.text, family: t.fontFamily },
-      margin: { l:0, r:0, t:0, b:0 },
-      geo: {
-        scope: "world",
-        resolution: 110,
-        // The self-hosted topology carries only `countries`, so every other
-        // base layer stays off: asking Plotly for an ocean or land layer it
-        // has no geometry for throws inside updateBaseLayers.
-        showcoastlines: false,
-        showland: false,
-        showocean: false,
-        showlakes: false,
-        showcountries: true,
-        countrycolor: t.surface,
-        projection: { type: "orthographic", rotation: { lon: 10, lat: 20 } },
-        // bgcolor paints the subplot rectangle, not the projection disc, so it
-        // matches the card and stays invisible; the frame draws the globe's
-        // edge and the sea is simply the page behind it. A tinted sea would
-        // have to be blue to read as sea, and blue already encodes magnitude.
-        bgcolor: t.surface,
-        showframe: true,
-        framecolor: t.border,
-        framewidth: 1,
-        lonaxis: { showgrid: true, gridcolor: t.grid, gridwidth: 0.5, dtick: 15 },
-        lataxis: { showgrid: true, gridcolor: t.grid, gridwidth: 0.5, dtick: 15 }
-      }
-    };
 
     updateMapText();
     renderMapLegend(colors);
     updateChoroplethReadout();
-    // Plotly's default base-map atlas streams from Plotly's own CDN at draw
-    // time; topojsonURL redirects that one request to a same-origin file
-    // (world_110m.json, published next to this page) built from Natural Earth
-    // 110m data, so nothing is fetched from an external host at runtime.
-    return Plotly.react("choroplethChart", ([trace, noDataTrace] as Data[]).concat(focusTraces), layout, {displayModeBar:false, responsive:true, topojsonURL:assetBase});
+    refreshFlag();
+
+    if (mapChart){
+      mapChart.update({
+        series: [
+          { type: "mapline", id: "graticule", color: t.grid },
+          { type: "map", id: "choropleth", data: mapRows(), borderColor: t.surface, nullColor: t.grid },
+          { type: "map", id: "lifted", data: liftedRows(), borderColor: t.surface, borderWidth: 2 }
+        ] as Highcharts.SeriesOptionsType[]
+      }, true, false, false);
+      restyleGlobe();
+      return Promise.resolve();
+    }
+
+    mapChart = Highcharts.mapChart("choroplethChart", {
+      chart: {
+        map: MAP_TOPOLOGY as unknown as Highcharts.GeoJSON,
+        backgroundColor: "transparent",
+        spacing: [0, 0, 0, 0],
+        animation: { duration: 350 },
+        style: { fontFamily: t.fontFamily }
+      },
+      title: { text: undefined },
+      credits: { enabled: false },
+      legend: { enabled: false },
+      mapNavigation: {
+        enabled: true,
+        enableDoubleClickZoomTo: true,
+        enableMouseWheelZoom: false,
+        buttonOptions: { verticalAlign: "bottom", theme: { fill: t.surface, stroke: t.border } }
+      },
+      mapView: { maxZoom: 30, projection: { name: "Orthographic", rotation: [-20, -20] } },
+      tooltip: {
+        backgroundColor: t.surface,
+        borderColor: t.border,
+        style: { color: t.text, fontSize: "12px" },
+        useHTML: true,
+        headerFormat: "",
+        pointFormatter: function(){
+          var detail = (this.options as { custom?: { detail?: string } }).custom?.detail || "";
+          return "<b>" + this.name + "</b><br>" + detail;
+        }
+      },
+      plotOptions: {
+        series: { animation: { duration: 350 }, clip: false },
+        map: {
+          cursor: "pointer",
+          point: {
+            events: {
+              click: function(){
+                var point = this as Highcharts.Point & { plotX?: number; plotY?: number };
+                var iso = (point.options as { iso3?: string }).iso3;
+                if (!iso || !mapChart) return;
+                // The point's own centre, read back through the projection, so
+                // the globe turns to the country rather than to the click.
+                var view = mapChart.mapView;
+                if (point.plotX === undefined || point.plotY === undefined || !view) return;
+                var here = view.pixelsToLonLat({
+                  x: point.plotX + mapChart.plotLeft,
+                  y: point.plotY + mapChart.plotTop
+                });
+                if (!here) return;
+                selectCountryOnGlobe(iso, here.lon, here.lat);
+              }
+            }
+          }
+        }
+      },
+      series: [{
+        type: "mapline",
+        id: "graticule",
+        name: "Graticule",
+        data: GRATICULE,
+        color: t.grid,
+        enableMouseTracking: false,
+        accessibility: { enabled: false },
+        states: { inactive: { enabled: false } }
+      } as Highcharts.SeriesMaplineOptions, {
+        type: "map",
+        id: "choropleth",
+        name: "Metric",
+        data: mapRows(),
+        joinBy: ["iso3", "iso3"],
+        borderColor: t.surface,
+        borderWidth: 0.5,
+        nullColor: t.grid,
+        states: { hover: { borderColor: t.axis, brightness: 0.06 } },
+        accessibility: { exposeAsGroupOnly: true }
+      } as Highcharts.SeriesMapOptions, {
+        type: "map",
+        id: "lifted",
+        name: "Your countries",
+        data: liftedRows(),
+        joinBy: ["iso3", "iso3"],
+        // joinBy would otherwise give this series a point for every feature in
+        // the topology, and the lift would be applied to the whole globe.
+        allAreas: false,
+        // The page colour, not a series colour: this is the cut edge of a
+        // raised shape, which is what separates it from the identically
+        // shaded neighbours it is lifting away from — not a highlight.
+        borderColor: t.surface,
+        borderWidth: 2,
+        states: { hover: { borderColor: t.axis, brightness: 0.06 } },
+        accessibility: { enabled: false }
+      } as Highcharts.SeriesMapOptions]
+    });
+
+    Highcharts.addEvent(mapChart, "render", function(){
+      if (mapChart) restyleGlobe();
+    });
+    restyleGlobe();
+    return Promise.resolve();
+  }
+
+  // The sea: a tonal disc behind the globe, never blue. Blue already encodes
+  // magnitude on this map, so a blue sea would read as the lowest band.
+  function renderSea(chart: Highcharts.MapChart){
+    var graticule = chart.get("graticule") as Highcharts.Series | undefined;
+    if (!graticule || !graticule.group) return;
+    var centre = globeCentre(chart);
+    if (!centre) return;
+    var t = theme();
+    var verb: "animate" | "attr" = "animate";
+    if (!chart.sea){
+      chart.sea = chart.renderer.circle().attr({ zIndex: -1 }).add(graticule.group);
+      verb = "attr";
+    }
+    chart.sea.attr({ fill: t.surface2, stroke: t.border, "stroke-width": 1 });
+    chart.sea[verb]({ cx: centre.cx, cy: centre.cy, r: centre.r });
+  }
+
+  function restyleGlobe(){
+    if (!mapChart) return;
+    renderSea(mapChart);
+    applyLift(mapChart);
   }
 
   function updateChoroplethYear(){
-    var cells = mapCells();
-    var missing = missingData(cells);
-    Plotly.restyle("choroplethChart", {
-      z: [cells.map(function(cell){ return cell.z; })],
-      customdata: [cells.map(function(cell){ return cell.detail; })]
-    }, [0]);
-    // Restyle takes one array per trace; Plotly's types model single values only.
-    Plotly.restyle("choroplethChart", {
-      visible: [missing.isos.length > 0],
-      locations: [missing.isos],
-      z: [missing.isos.map(function(){ return 1; })],
-      text: [missing.isos.map(function(iso){ return COUNTRIES_BY_ISO[iso].name; })],
-      customdata: [missing.reasons]
-    } as unknown as Data, [1]);
+    if (!mapChart) return;
+    var choropleth = mapChart.get("choropleth") as Highcharts.Series | undefined;
+    var lifted = mapChart.get("lifted") as Highcharts.Series | undefined;
+    // setData with redraw deferred, so a playback step repaints once.
+    if (choropleth) choropleth.setData(mapRows() as Highcharts.PointOptionsType[], false);
+    if (lifted) lifted.setData(liftedRows() as Highcharts.PointOptionsType[], false);
+    mapChart.redraw(false);
+    restyleGlobe();
     updateMapText();
     updateChoroplethReadout();
+    refreshFlag();
   }
+
 
   function setMapView(view: MapView){
     mapView = view;

@@ -377,6 +377,79 @@
    country list opening from the third slot is not painted under them. */
 .controls-section { z-index: 20; }
 
+/* ---------- The globe's flag card ---------- */
+/* Sits inside the plot stage, bottom right, and names the country the globe
+   has just turned to. Flat and hairlined like every other analytical surface:
+   it is chrome on the stage, not a floating overlay. */
+.map-flag {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(260px, calc(100% - 20px));
+  padding: 8px 12px 8px 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  animation: map-flag-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.map-flag-slot { display: contents; }
+
+.map-flag-img {
+  width: 42px;
+  height: 32px;
+  flex: none;
+  border-radius: 3px;
+  /* Flags are supplied 4:3; the frame keeps a pale flag off a pale card. */
+  object-fit: cover;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.map-flag-text {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.map-flag-name {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-flag-value {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* The globe is only 210px tall on a phone, so the card gives some of it back. */
+@media (max-width: 639px) {
+  .map-flag { right: 6px; bottom: 6px; gap: 7px; padding: 5px 9px 5px 5px; }
+  .map-flag-slot { display: contents; }
+
+.map-flag-img { width: 30px; height: 23px; }
+  .map-flag-name { font-size: 12px; }
+  .map-flag-value { font-size: 11px; }
+}
+
+@keyframes map-flag-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-flag { animation: none; }
+}
+
 /* ---------- Share this view ---------- */
 /* A floating overlay, so it takes the popover shadow the Cinematic Exception
    allows, and the same 180ms rise the country list opens with. */
