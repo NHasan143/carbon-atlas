@@ -1732,17 +1732,26 @@ function initAtlas(){
       geo: {
         scope: "world",
         resolution: 110,
-        showframe: false,
+        // The self-hosted topology carries only `countries`, so every other
+        // base layer stays off: asking Plotly for an ocean or land layer it
+        // has no geometry for throws inside updateBaseLayers.
         showcoastlines: false,
         showland: false,
         showocean: false,
+        showlakes: false,
         showcountries: true,
         countrycolor: t.surface,
-        showlakes: false,
-        projection: { type: "natural earth" },
-        // Antarctica carries no data; cropping it gives the inhabited world the room.
-        lataxis: { range: [-57, 84] },
-        bgcolor: t.surface
+        projection: { type: "orthographic", rotation: { lon: 10, lat: 20 } },
+        // bgcolor paints the subplot rectangle, not the projection disc, so it
+        // matches the card and stays invisible; the frame draws the globe's
+        // edge and the sea is simply the page behind it. A tinted sea would
+        // have to be blue to read as sea, and blue already encodes magnitude.
+        bgcolor: t.surface,
+        showframe: true,
+        framecolor: t.border,
+        framewidth: 1,
+        lonaxis: { showgrid: true, gridcolor: t.grid, gridwidth: 0.5, dtick: 15 },
+        lataxis: { showgrid: true, gridcolor: t.grid, gridwidth: 0.5, dtick: 15 }
       }
     };
 
