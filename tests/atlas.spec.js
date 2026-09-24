@@ -153,6 +153,52 @@ test('country search filters by name, code and common alias, and is keyboard ope
   await expect(input).toHaveValue(second.trim());
 });
 
+test('a shared link restores every comparison choice and stays current as the view changes', async ({ page }) => {
+  await page.goto('/?countries=BGD,,URY&year=2000&mapMetric=co2&xMetric=population&yMetric=share_global_co2&rankMetric=population&rankBasis=abs&view=change#controlsPanel');
+  await expect(page.getByRole('button', { name: 'Share this view' })).toBeEnabled({ timeout: 30000 });
+  await expect(page.locator('#cmp0')).toHaveValue('Bangladesh');
+  await expect(page.locator('#cmp1')).toHaveValue('');
+  await expect(page.locator('#cmp2')).toHaveValue('Uruguay');
+  await expect(page.locator('#yearReadout')).toHaveText('2000');
+  await expect(page.locator('#choroMetric')).toHaveValue('co2');
+  await expect(page.locator('#scatterX')).toHaveValue('population');
+  await expect(page.locator('#scatterY')).toHaveValue('share_global_co2');
+  await expect(page.locator('#rankMetric')).toHaveValue('population');
+  await expect(page.getByRole('radio', { name: 'Change' })).toBeChecked();
+  await expect(page.getByRole('radio', { name: 'Amount' })).toBeChecked();
+  await expect(page.locator('#compareTable tbody tr')).toHaveCount(2);
+
+  await pickCountry(page, 1, 'china', 'CHN');
+  await setYear(page, 11);
+  await page.selectOption('#scatterX', 'gdp_per_capita');
+  await page.getByRole('radio', { name: 'Percent' }).check();
+  const current = new URL(page.url());
+  expect(current.searchParams.get('countries')).toBe('BGD,CHN,URY');
+  expect(current.searchParams.get('year')).toBe('2001');
+  expect(current.searchParams.get('xMetric')).toBe('gdp_per_capita');
+  expect(current.searchParams.get('rankBasis')).toBe('pct');
+  expect(current.searchParams.get('view')).toBe('change');
+  expect(current.hash).toBe('#controlsPanel');
+
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: async text => { window.__copiedAtlasLink = text; } },
+    });
+  });
+  await page.getByRole('button', { name: 'Share this view' }).click();
+  await expect(page.locator('#shareViewStatus')).toHaveText('Link copied');
+  expect(await page.evaluate(() => window.__copiedAtlasLink)).toBe(page.url());
+
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Share this view' })).toBeEnabled({ timeout: 30000 });
+  await expect(page.locator('#cmp1')).toHaveValue('China');
+  await expect(page.locator('#yearReadout')).toHaveText('2001');
+  await expect(page.locator('#scatterX')).toHaveValue('gdp_per_capita');
+  await expect(page.getByRole('radio', { name: 'Percent' })).toBeChecked();
+  await expect(page.locator('#compareTable tbody tr')).toHaveCount(3);
+});
+
 test('rankings order both ends of a metric and the movers since 1990', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));

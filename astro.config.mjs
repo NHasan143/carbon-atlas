@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
@@ -7,6 +8,7 @@ export default defineConfig({
   // Production lives on Vercel; set SITE_URL to build for another origin.
   site: process.env.SITE_URL || 'https://carbon-atlas-brown.vercel.app',
   base: process.env.BASE_PATH || '/',
+  integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
     // Plotly's UMD distribution must be converted for the browser's ESM loader.

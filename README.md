@@ -6,11 +6,18 @@ An interactive climate and energy explorer for comparing emissions, energy mix, 
 
 The bundled dataset contains **217 countries and territories**, **35 years (1990–2024)**, and **six metrics**. Coverage varies by metric and year.
 
+## Frontend stack
+
+The site remains an Astro static site. Its existing UI, animations, audio control, and charts use Astro components with typed browser scripts and Tailwind CSS v4. TypeScript is configured in strict mode.
+
+React integration is available for new interactive islands. A typed, Tailwind-styled [button primitive](src/components/ui/button.tsx) uses Radix UI's `Slot` for `asChild` composition, and [components.json](components.json) configures the shadcn/ui CLI for future components. The current atlas controls have not been replaced, so adding this stack does not alter their appearance or behavior. Hydrate a new React component only when it needs client-side state, using an Astro `client:*` directive.
+
 ## Features
 
 - **World map:** explore any metric on a choropleth map with country hover details.
 - **Year controls:** scrub through time or play an animation that advances every 650 milliseconds.
 - **Country comparisons:** select up to three countries, grouped by continent, with consistent comparison colors in the table, scatter plot, and trend charts.
+- **Shareable views:** the URL keeps the chosen countries, year, map view, and metric selections; use **Share this view** below the country selectors to copy a link.
 - **Bubble chart:** choose the X and Y metrics, with bubble area representing population. GDP per capita and population axes use logarithmic scales.
 - **Trend charts:** compare the full history of all six metrics, with a marker for the selected year.
 - **Comparison table:** inspect all six metrics for the selected countries and year.
