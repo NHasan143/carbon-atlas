@@ -216,6 +216,60 @@ function initAtlas(){
   var maxPopulation = 1;
   let playTimer: ReturnType<typeof setInterval> | null = null;
 
+  // Share links carry one complete snapshot. Keep the three country positions,
+  // including empty slots, so their chart colours survive a round trip.
+  function readUrlState(){
+    const params = new URLSearchParams(window.location.search);
+    highlighted = ["USA", "CHN", "IND"];
+    currentYearIdx = YEARS.length - 1;
+    choroMetric = "co2_per_capita";
+    scatterXMetric = "gdp_per_capita";
+    scatterYMetric = "co2_per_capita";
+    rankMetric = "co2_per_capita";
+    rankBasis = "pct";
+    mapView = params.get("view") === "change" ? "change" : "level";
+
+    const countries = params.get("countries")?.split(",");
+    if (countries?.length === 3){
+      const seen = new Set<string>();
+      highlighted = countries.map(function(value){
+        const iso = value.toUpperCase();
+        if (!COUNTRIES_BY_ISO[iso] || seen.has(iso)) return "";
+        seen.add(iso);
+        return iso;
+      });
+    }
+    const year = params.get("year");
+    if (year && /^\d{4}$/.test(year)){
+      const index = YEARS.indexOf(Number(year));
+      if (index !== -1) currentYearIdx = index;
+    }
+    const metric = function(key: string, fallback: string){
+      const value = params.get(key);
+      return value && Object.hasOwn(DATA.metricMeta, value) ? value : fallback;
+    };
+    choroMetric = metric("mapMetric", choroMetric);
+    scatterXMetric = metric("xMetric", scatterXMetric);
+    scatterYMetric = metric("yMetric", scatterYMetric);
+    rankMetric = metric("rankMetric", rankMetric);
+    rankBasis = params.get("rankBasis") === "abs" ? "abs" : "pct";
+  }
+
+  function writeUrlState(){
+    const url = new URL(window.location.href);
+    url.searchParams.set("countries", highlighted.join(","));
+    url.searchParams.set("year", String(YEARS[currentYearIdx]));
+    url.searchParams.set("mapMetric", choroMetric);
+    url.searchParams.set("xMetric", scatterXMetric);
+    url.searchParams.set("yMetric", scatterYMetric);
+    url.searchParams.set("rankMetric", rankMetric);
+    url.searchParams.set("rankBasis", rankBasis);
+    if (mapView === "change") url.searchParams.set("view", "change");
+    else url.searchParams.delete("view");
+    window.history.replaceState(window.history.state, "", url);
+    element("shareViewStatus").textContent = "";
+  }
+
   function getVar(name: string){
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   }
@@ -312,7 +366,7 @@ function initAtlas(){
       });
     });
 
-    currentYearIdx = YEARS.length - 1;
+    readUrlState();
     element<HTMLInputElement>("yearSlider").max = String(YEARS.length - 1);
     element<HTMLInputElement>("yearSlider").value = String(currentYearIdx);
     element("yearReadout").textContent = String(YEARS[currentYearIdx]);
@@ -726,6 +780,7 @@ function initAtlas(){
       renderSmallMultiples();
       updateCompareTable();
       updateRankings(true);
+      writeUrlState();
     }
 
     input.addEventListener("focus", function(){
@@ -825,6 +880,7 @@ function initAtlas(){
     element<HTMLSelectElement>("choroMetric").addEventListener("change", function(e){
       choroMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderChoropleth();
+      writeUrlState();
     });
     document.querySelectorAll<HTMLInputElement>("input[name=mapView]").forEach(function(input){
       input.checked = input.value === mapView;
@@ -833,24 +889,31 @@ function initAtlas(){
     element<HTMLSelectElement>("scatterX").addEventListener("change", function(e){
       scatterXMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderScatter();
+      writeUrlState();
     });
     element<HTMLSelectElement>("scatterY").addEventListener("change", function(e){
       scatterYMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderScatter();
+      writeUrlState();
     });
     element<HTMLSelectElement>("rankMetric").addEventListener("change", function(e){
       rankMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       syncRankBasisControl();
       updateRankings(true);
+      writeUrlState();
     });
     document.querySelectorAll<HTMLInputElement>("input[name=rankBasis]").forEach(function(input){
       input.addEventListener("change", function(){
         if (!input.checked) return;
         rankBasis = input.value as MoverBasis;
         updateRankings(true);
+        writeUrlState();
       });
     });
     // Country slots wire themselves up in createCountryPicker.
+
+    element("shareViewBtn").addEventListener("click", shareView);
+    window.addEventListener("popstate", restoreUrlState);
 
     if (rankWidth.addEventListener) rankWidth.addEventListener("change", function(){ updateRankings(false); });
 
@@ -864,6 +927,39 @@ function initAtlas(){
     renderScatter();
     renderSmallMultiples();
     updateRankings(false);
+  }
+
+  function restoreUrlState(){
+    stopPlayback();
+    readUrlState();
+    element<HTMLInputElement>("yearSlider").value = String(currentYearIdx);
+    element("yearReadout").textContent = String(YEARS[currentYearIdx]);
+    updateYearOutputs();
+    [0, 1, 2].forEach(function(slot){ PICKERS[slot].setSelected(highlighted[slot]); });
+    element<HTMLSelectElement>("choroMetric").value = choroMetric;
+    element<HTMLSelectElement>("scatterX").value = scatterXMetric;
+    element<HTMLSelectElement>("scatterY").value = scatterYMetric;
+    element<HTMLSelectElement>("rankMetric").value = rankMetric;
+    document.querySelectorAll<HTMLInputElement>("input[name=mapView]").forEach(function(input){ input.checked = input.value === mapView; });
+    syncRankBasisControl();
+    renderChoropleth();
+    renderScatter();
+    renderSmallMultiples();
+    updateCompareTable();
+    updateRankings(false);
+    element("shareViewStatus").textContent = "";
+  }
+
+  async function shareView(){
+    writeUrlState();
+    const link = window.location.href;
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(link);
+      element("shareViewStatus").textContent = "Link copied";
+    } catch {
+      element("shareViewStatus").textContent = "Copy the URL from your address bar";
+    }
   }
 
   function setPlayState(playing: boolean){
@@ -920,6 +1016,7 @@ function initAtlas(){
     updateSmallMultipleMarkers();
     updateCompareTable();
     updateRankings(true);
+    writeUrlState();
   }
 
   // ---------- Rankings ----------
@@ -1593,11 +1690,8 @@ function initAtlas(){
 
   function setMapView(view: MapView){
     mapView = view;
-    // Keep the view in the address so a shared link opens the same map.
-    var url = new URL(window.location.href);
-    if (view === "change") url.searchParams.set("view", "change"); else url.searchParams.delete("view");
-    window.history.replaceState(null, "", url);
     renderChoropleth();
+    writeUrlState();
   }
 
   function updateMapText(){

@@ -17,6 +17,7 @@ React integration is available for new interactive islands. A typed, Tailwind-st
 - **World map:** explore any metric on a choropleth map with country hover details.
 - **Year controls:** scrub through time or play an animation that advances every 650 milliseconds.
 - **Country comparisons:** select up to three countries, grouped by continent, with consistent comparison colors in the table, scatter plot, and trend charts.
+- **Shareable views:** the URL keeps the chosen countries, year, map view, and metric selections; use **Share this view** below the country selectors to copy a link.
 - **Bubble chart:** choose the X and Y metrics, with bubble area representing population. GDP per capita and population axes use logarithmic scales.
 - **Trend charts:** compare the full history of all six metrics, with a marker for the selected year.
 - **Comparison table:** inspect all six metrics for the selected countries and year.
