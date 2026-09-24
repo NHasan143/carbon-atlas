@@ -6,10 +6,10 @@ const data = JSON.parse(readFileSync(new URL('../public/dataset.json', import.me
 async function openAtlas(page) {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'The planet, mapped.' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Explore the atlas' })).toHaveAttribute('href', '#controlsPanel');
+  await expect(page.getByRole('link', { name: 'Why it is getting warmer' })).toHaveAttribute('href', '/knowledge');
   await expect(page.getByRole('link', { name: /Donate via Wise/ })).toHaveAttribute('href', 'https://wise.com/pay/me/mdnaymulh4');
   const heroActions = await page.locator('.hero-actions a').allTextContents();
-  expect(heroActions.map(label => label.trim())).toEqual(['Explore the atlas', 'Donate']);
+  expect(heroActions.map(label => label.trim())).toEqual(['Why it is getting warmer', 'Donate']);
   await expect(page.getByRole('heading', { name: 'Compare three countries' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The Comparison' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The World View' })).toBeVisible();

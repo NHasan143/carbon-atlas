@@ -13,39 +13,59 @@ import '@fontsource-variable/google-sans/wght.css';
 interface Props {
   title?: string;
   description?: string;
+  /** Overrides the social blurb where a page is not the atlas itself. */
+  socialDescription?: string;
+  /** An article page describes itself as an Article, not as the WebApplication. */
+  schemaType?: 'WebApplication' | 'Article';
 }
 
 const {
   title = 'Carbon Atlas — The planet, mapped.',
   description = 'Compare CO₂ emissions, renewables, GDP and population across 217 countries from 1990 to 2024, with an interactive map, bubble chart and trends.',
+  socialDescription: socialDescriptionProp,
+  schemaType = 'WebApplication',
 } = Astro.props;
 
 const siteName = 'Carbon Atlas';
-const socialDescription = 'Compare any three countries across CO₂ emissions, renewable energy, GDP and population, 1990–2024. Built on open data from Our World in Data and the World Bank.';
+const socialDescription = socialDescriptionProp ?? 'Compare any three countries across CO₂ emissions, renewable energy, GDP and population, 1990–2024. Built on open data from Our World in Data and the World Bank.';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL(`${base}/og-image.jpg`, Astro.site).href;
 const ogImageAlt = 'Carbon Atlas: "The planet, mapped." beside a dew-covered sprout on black, with the line "CO₂, energy, GDP and population across 217 countries, 1990–2024."';
 
-const structuredData = {
-  '@context': 'https://schema.org',
-  '@type': 'WebApplication',
-  name: siteName,
-  url: canonical,
-  description,
-  image: ogImage,
-  applicationCategory: 'EducationalApplication',
-  operatingSystem: 'Any',
-  browserRequirements: 'Requires JavaScript',
-  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-  author: { '@type': 'Person', name: 'Naymul Hasan', url: 'https://github.com/NHasan143' },
-  temporalCoverage: '1990/2024',
-  isBasedOn: [
-    'https://github.com/owid/co2-data',
-    'https://github.com/owid/energy-data',
-    'https://ourworldindata.org/grapher/gdp-per-capita-worldbank',
-  ],
-};
+const author = { '@type': 'Person', name: 'Naymul Hasan', url: 'https://github.com/NHasan143' };
+
+const structuredData = schemaType === 'Article'
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: title,
+      url: canonical,
+      description,
+      image: ogImage,
+      author,
+      publisher: { '@type': 'Organization', name: siteName },
+      isAccessibleForFree: true,
+    }
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: siteName,
+      url: canonical,
+      description,
+      image: ogImage,
+      applicationCategory: 'EducationalApplication',
+      operatingSystem: 'Any',
+      browserRequirements: 'Requires JavaScript',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      author,
+      temporalCoverage: '1990/2024',
+      isBasedOn: [
+        'https://github.com/owid/co2-data',
+        'https://github.com/owid/energy-data',
+        'https://ourworldindata.org/grapher/gdp-per-capita-worldbank',
+      ],
+    };
 ---
 
 <!doctype html>

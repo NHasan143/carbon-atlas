@@ -1,0 +1,110 @@
+---
+/**
+ * One entry in the forcing ledger, drawn the way the atlas draws a rank row:
+ * name, a framed bar whose fill comes from the shared sequential ramp, and a
+ * mono tabular figure. The bar is a fill and carries no text, and its 1px inset
+ * frame keeps the track's extent readable whatever shade lands in it.
+ */
+interface Props {
+  name: string;
+  note: string;
+  /** Effective radiative forcing, W/m². Negative entries work the other way. */
+  value: number;
+  /** The largest magnitude in the group, so one scale covers every bar. */
+  scale: number;
+}
+const { name, note, value, scale } = Astro.props;
+
+// Six steps of the atlas's own Level ramp, in the same order the map uses them.
+const RAMP = ['--seq-100', '--seq-200', '--seq-300', '--seq-400', '--seq-600', '--seq-700'];
+const EDGES = [0.15, 0.3, 0.6, 1.2, 2.0];
+const magnitude = Math.abs(value);
+const band = EDGES.filter((edge) => magnitude >= edge).length;
+// A cooling entry is not a smaller warming entry, so it takes the decline tone
+// rather than a paler step of the same ramp.
+const fill = value < 0 ? 'var(--band-decline-2)' : `var(${RAMP[band]})`;
+const ratio = scale > 0 ? Math.max(magnitude / scale, 0.008) : 0;
+const figure = `${value > 0 ? '+' : '−'}${magnitude.toFixed(2)}`;
+---
+
+<li class="entry">
+  <span class="entry-name">{name}<span class="entry-note">{note}</span></span>
+  <i class="entry-bar" aria-hidden="true"><i class="entry-fill" style={`--entry-fill:${fill};transform:scaleX(${ratio.toFixed(4)})`}></i></i>
+  <span class="entry-value">{figure}</span>
+</li>
+
+<style>
+  .entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'name value' 'bar bar';
+    align-items: center;
+    gap: 6px 14px;
+    padding: 11px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .entry:first-child {
+    border-top: 0;
+  }
+
+  .entry-name {
+    grid-area: name;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 3px 10px;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .entry-note {
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .entry-bar {
+    grid-area: bar;
+    position: relative;
+    display: block;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--rank-track);
+    /* A drawn 1px edge, not a lift: the track stays legible under the palest step. */
+    box-shadow: inset 0 0 0 1px var(--border);
+    overflow: hidden;
+  }
+
+  .entry-fill {
+    position: absolute;
+    inset: 0;
+    display: block;
+    border-radius: 3px;
+    background: var(--entry-fill);
+    transform-origin: left center;
+  }
+
+  .entry-value {
+    grid-area: value;
+    font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-size: 14px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+
+  @media (min-width: 640px) {
+    .entry {
+      grid-template-columns: minmax(0, 1fr) clamp(54px, 27%, 168px) auto;
+      grid-template-areas: 'name bar value';
+      gap: 16px;
+    }
+
+    .entry-bar {
+      height: 13px;
+    }
+  }
+</style>
