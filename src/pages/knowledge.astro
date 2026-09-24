@@ -1,5 +1,6 @@
 ---
 import AtlasLayout from '../layouts/AtlasLayout.astro';
+import AtlasFooter from '../components/AtlasFooter.astro';
 import AccountLine from '../components/knowledge/AccountLine.astro';
 import BalanceRail from '../components/knowledge/BalanceRail.astro';
 import EntryBar from '../components/knowledge/EntryBar.astro';
@@ -104,7 +105,6 @@ const atlasLinks = [
           id="line-01"
           line="01"
           title="Why the heat cannot leave"
-          standfirst="Greenhouse gases do not trap heat under a lid. They raise the altitude from which the planet finally lets it go."
         >
           <p>
             Sunlight reaches the surface as mostly visible light, which the atmosphere is largely
@@ -133,7 +133,6 @@ const atlasLinks = [
           id="line-02"
           line="02"
           title="The entries that moved it"
-          standfirst="Each gas can be written in the account's own unit: how much it has shifted the balance since 1750."
         >
           <p>
             Comparing greenhouse gases by tonnage is misleading, because a tonne of methane and a
@@ -172,7 +171,6 @@ const atlasLinks = [
           id="line-03"
           line="03"
           title="Where the gases come from"
-          standfirst="Four activities, in order of size. The first one is not close."
         >
           <p>
             <strong>Burning fossil fuels</strong> — coal, oil and gas for electricity, heat,
@@ -208,7 +206,6 @@ const atlasLinks = [
           id="line-04"
           line="04"
           title="How we know they are ours"
-          standfirst="The atmosphere carries a signature, and it is not the sun's."
         >
           <p>
             Carbon from ancient plants — coal, oil and gas — is measurably lighter than carbon from
@@ -236,7 +233,6 @@ const atlasLinks = [
           id="line-05"
           line="05"
           title="Why it does not settle"
-          standfirst="Stopping the entries would not close the account. Carbon's lifetime and the planet's own responses keep it open."
         >
           <p>
             Carbon dioxide is not consumed by the atmosphere; it is slowly moved elsewhere. Oceans
@@ -301,6 +297,8 @@ const atlasLinks = [
         </footer>
       </article>
     </div>
+
+    <AtlasFooter dataSources={false} divider={false} />
   </div>
 </AtlasLayout>
 
@@ -350,30 +348,39 @@ const atlasLinks = [
   /* ---------- the plate ---------- */
 
   .ledger-plate {
-    padding: clamp(20px, 4vw, 44px) 0 clamp(40px, 6vw, 72px);
+    container-type: inline-size;
+    padding: clamp(16px, 2.6vw, 28px) 0 clamp(40px, 6vw, 72px);
+  }
+
+  /* Where the rail is on screen, the title's first line starts level with it.
+     Playfair carries a deep internal leading, so aligning the boxes would still
+     leave the letters sitting low: the negative margin trims that leading, and
+     an em keeps the trim proportional as the title resizes with its container. */
+  @media (min-width: 1100px) {
+    .ledger-plate { padding-top: 0; }
+    .plate-title { margin-top: -0.07em; }
   }
 
   .plate-title {
-    max-width: 16ch;
     font-family: var(--font-display, "Playfair Display Variable", Georgia, serif);
-    font-size: clamp(34px, 5.6vw, 58px);
+    font-size: min(clamp(30px, 5.8vw, 74px), 7cqi);
     font-weight: 600;
     line-height: 1.02;
     letter-spacing: -0.02em;
-    text-wrap: balance;
+    white-space: nowrap;
   }
 
   .plate-standfirst {
-    max-width: 58ch;
+    max-width: 880px;
     margin-top: 22px;
-    font-size: clamp(16px, 1.6vw, 18px);
-    line-height: 1.62;
+    font-size: clamp(17px, 1.7vw, 20px);
+    line-height: 1.6;
     color: var(--text-secondary);
     text-wrap: pretty;
   }
 
   .account {
-    max-width: 640px;
+    max-width: 880px;
     margin-top: clamp(30px, 4vw, 46px);
     padding-top: 6px;
     border-top: 1px solid var(--border);
@@ -389,7 +396,7 @@ const atlasLinks = [
 
   .account-meta,
   .figure-note {
-    max-width: 62ch;
+    max-width: 780px;
     margin-top: 16px;
     font-size: 12.5px;
     line-height: 1.6;
@@ -398,10 +405,10 @@ const atlasLinks = [
   }
 
   .plate-close {
-    max-width: 62ch;
+    max-width: 880px;
     margin-top: 30px;
-    font-size: 15.5px;
-    line-height: 1.72;
+    font-size: 18px;
+    line-height: 1.68;
     color: var(--text-secondary);
     text-wrap: pretty;
   }
@@ -409,7 +416,7 @@ const atlasLinks = [
   /* ---------- entries ---------- */
 
   .entries {
-    max-width: 640px;
+    max-width: 880px;
     margin: 4px 0;
   }
 
@@ -417,34 +424,25 @@ const atlasLinks = [
 
   .close {
     position: relative;
+    container-type: inline-size;
     padding: clamp(40px, 6vw, 72px) 0 clamp(30px, 4vw, 48px);
     border-top: 1px solid var(--border);
   }
 
-  .close::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--action-accent), transparent);
-    opacity: 0.42;
-  }
-
   .close-title {
-    max-width: 18ch;
     font-family: var(--font-display, "Playfair Display Variable", Georgia, serif);
-    font-size: clamp(28px, 4.2vw, 46px);
+    font-size: min(clamp(24px, 4.4vw, 54px), 6.2cqi);
     font-weight: 600;
     line-height: 1.06;
     letter-spacing: -0.015em;
-    text-wrap: balance;
+    white-space: nowrap;
   }
 
   .close-standfirst {
-    max-width: 62ch;
+    max-width: 880px;
     margin-top: 16px;
-    font-size: 15.5px;
-    line-height: 1.7;
+    font-size: 17px;
+    line-height: 1.68;
     color: var(--text-secondary);
     text-wrap: pretty;
   }
@@ -452,7 +450,7 @@ const atlasLinks = [
   .close-list {
     display: grid;
     gap: 0;
-    max-width: 700px;
+    max-width: 880px;
     margin-top: 30px;
     border-top: 1px solid var(--border);
   }
@@ -490,7 +488,7 @@ const atlasLinks = [
   }
 
   .close-link-note {
-    max-width: 62ch;
+    max-width: 780px;
     font-size: 13px;
     line-height: 1.55;
     color: var(--text-muted);
@@ -535,8 +533,10 @@ const atlasLinks = [
 
   /* ---------- sources ---------- */
 
+  /* The article's own citations close the reading; the site footer that follows
+     brings its own top margin, so this stops short rather than doubling it. */
   .sources {
-    padding: clamp(30px, 4vw, 44px) 0 clamp(36px, 5vw, 56px);
+    padding: clamp(30px, 4vw, 44px) 0 4px;
     border-top: 1px solid var(--border);
   }
 

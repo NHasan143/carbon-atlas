@@ -253,7 +253,7 @@
      width; from `sm` up it takes its own column between name and value. */
   @media (min-width: 640px) {
     .rank-row {
-      grid-template-columns: 1.6rem minmax(0, 1fr) clamp(54px, 27%, 168px) auto;
+      grid-template-columns: 1.6rem minmax(0, 1fr) clamp(90px, 38%, 260px) auto;
       grid-template-areas: "num name bar value";
       gap: 10px;
     }
@@ -275,6 +275,11 @@
     background: var(--rank-fill, transparent);
     transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
   }
+  /* A flag reads faster than a name in a list of ten. It sits between the
+     selection swatch and the label, and carries no alt text: the name is
+     right beside it, so announcing the country twice helps nobody. */
+  .row-flag { @apply block h-[15px] w-5 shrink-0 rounded-[2px] object-cover; box-shadow: inset 0 0 0 1px var(--border); }
+  .row-flag-slot { @apply flex shrink-0 items-center; }
   .rank-num { grid-area: num; @apply text-right text-[11.5px] text-muted tabular-nums; }
   .rank-name { grid-area: name; @apply flex min-w-0 items-center gap-2 text-ink; }
   .rank-value { grid-area: value; @apply shrink-0 font-mono text-[13px] tabular-nums; }
@@ -293,11 +298,12 @@
   .rank-row[data-enter="true"] { animation: rank-enter 400ms cubic-bezier(0.16, 1, 0.3, 1); }
 
   .rank-yours { @apply rounded-xl bg-field px-5 py-4; }
-  .rank-your-item { @apply grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2.5 gap-y-1; }
+  .rank-your-item { @apply grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto] items-baseline gap-x-2.5 gap-y-1; }
   .rank-your-item .swatch { @apply self-center; }
+  .rank-your-item .row-flag-slot { @apply self-center; }
   .rank-your-name { @apply truncate text-[13px] font-semibold; }
   .rank-your-value { @apply text-right font-mono text-[13px] tabular-nums; }
-  .rank-your-note { @apply col-start-2 col-end-4 text-[11.5px] text-muted; }
+  .rank-your-note { @apply col-start-3 col-end-5 text-[11.5px] text-muted; }
   @media (min-width: 640px) {
     .rank-your-item + .rank-your-item { @apply border-l border-line pl-6; }
   }
@@ -340,25 +346,16 @@
    chart or a card grid does. */
 .map-section {
   border-block: 1px solid var(--border);
-  padding-bottom: clamp(20px, 2.2vw, 28px);
+  padding-bottom: clamp(14px, 1.6vw, 20px);
 }
 
 .rankings-section {
   border-bottom: 1px solid var(--border);
-  padding-bottom: clamp(20px, 2.2vw, 28px);
+  padding-bottom: clamp(14px, 1.6vw, 20px);
 }
 
 .trends-section {
   border-top: 1px solid var(--border);
-}
-
-.atlas-section::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--action-accent), transparent);
-  opacity: 0.42;
 }
 
 .country-control {
@@ -376,6 +373,215 @@
 /* Lift the whole card above the sections that follow it in the DOM, so a
    country list opening from the third slot is not painted under them. */
 .controls-section { z-index: 20; }
+
+/* ---------- The globe's flag card ---------- */
+/* Sits inside the plot stage, bottom right, and names the country the globe
+   has just turned to. Flat and hairlined like every other analytical surface:
+   it is chrome on the stage, not a floating overlay. */
+.map-flag {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(260px, calc(100% - 20px));
+  padding: 8px 12px 8px 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  animation: map-flag-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.map-flag-slot { display: contents; }
+
+.map-flag-img {
+  width: 42px;
+  height: 32px;
+  flex: none;
+  border-radius: 3px;
+  /* Flags are supplied 4:3; the frame keeps a pale flag off a pale card. */
+  object-fit: cover;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.map-flag-text {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.map-flag-name {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-flag-value {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* The globe is only 210px tall on a phone, so the card gives some of it back. */
+@media (max-width: 639px) {
+  .map-flag { right: 6px; bottom: 6px; gap: 7px; padding: 5px 9px 5px 5px; }
+  .map-flag-slot { display: contents; }
+
+.map-flag-img { width: 30px; height: 23px; }
+  .map-flag-name { font-size: 12px; }
+  .map-flag-value { font-size: 11px; }
+}
+
+@keyframes map-flag-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-flag { animation: none; }
+}
+
+/* ---------- Share this view ---------- */
+/* A floating overlay, so it takes the popover shadow the Cinematic Exception
+   allows, and the same 180ms rise the country list opens with. */
+.share-actions { position: relative; }
+
+.share-pop {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 30;
+  width: 340px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.05), 0 12px 28px -8px rgb(0 0 0 / 0.22);
+  text-align: left;
+  animation: combo-open 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+}
+
+.share-pop[data-placement="top"] {
+  top: auto;
+  bottom: calc(100% + 10px);
+  transform-origin: bottom right;
+  animation-name: combo-open-up;
+}
+
+/* The row is centred on a phone, so anchoring to the button would push the
+   card off one edge or the other. It spans the row instead. */
+@media (max-width: 639px) {
+  .share-pop { right: 0; left: 0; width: auto; }
+}
+
+.share-pop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.share-pop-title { @apply text-[14px] font-semibold text-ink; }
+
+.share-close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: -4px -4px -4px 0;
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.share-close:hover { background: var(--surface-2); color: var(--text-primary); }
+
+.share-note { @apply mt-1.5 text-[12.5px] leading-relaxed text-muted; }
+
+.share-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 6px 6px 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+/* Truncates from the end, never with `direction: rtl`: the bidi algorithm
+   reorders a URL's punctuation and prints a address that was never real. */
+.share-url {
+  min-width: 0;
+  overflow: hidden;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: var(--action-accent);
+  color: #071018;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 160ms ease;
+}
+
+.share-copy:hover { filter: brightness(1.1); }
+.share-copy .share-copy-done { display: none; }
+.share-copy[data-copied="true"] .share-copy-idle { display: none; }
+.share-copy[data-copied="true"] .share-copy-done { display: block; }
+
+.share-list { margin-top: 12px; border-top: 1px solid var(--border); }
+
+.share-target {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 8px;
+  margin: 2px -8px 0;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+
+.share-target:hover { background: var(--surface-2); }
+.share-target svg { color: var(--text-muted); }
+.share-target:hover svg { color: var(--text-primary); }
+
+@media (pointer: coarse) {
+  .share-target { min-height: 44px; }
+  .share-close { width: 44px; height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .share-pop { animation: none; }
+  .share-close,
+  .share-copy,
+  .share-target { transition: none; }
+}
 
 /* Share this view answers the hero's Explore and Donate buttons, so it carries
    the same green ring and bloom. The glow values are the literal ones from

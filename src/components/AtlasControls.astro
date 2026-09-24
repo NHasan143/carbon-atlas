@@ -1,6 +1,29 @@
 ---
+import Check from 'lucide-astro/Check';
+import Facebook from 'lucide-astro/Facebook';
+import Link from 'lucide-astro/Link';
+import Linkedin from 'lucide-astro/Linkedin';
+import Mail from 'lucide-astro/Mail';
+import MessageCircle from 'lucide-astro/MessageCircle';
+import Share2 from 'lucide-astro/Share2';
+import Twitter from 'lucide-astro/Twitter';
+import X from 'lucide-astro/X';
 import Panel from './Panel.astro';
+
 const colors = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)'];
+
+// Each target is a plain link whose href the script writes at open time, so a
+// shared link always carries the countries, year and metrics currently on
+// screen and nothing third-party loads until a destination is chosen. Lucide
+// ships no mark for X or WhatsApp, so those two borrow its nearest glyph and
+// the visible label carries the name.
+const shareTargets = [
+  { id: 'x', label: 'Post on X', Icon: Twitter },
+  { id: 'facebook', label: 'Share on Facebook', Icon: Facebook },
+  { id: 'linkedin', label: 'Share on LinkedIn', Icon: Linkedin },
+  { id: 'whatsapp', label: 'Send on WhatsApp', Icon: MessageCircle },
+  { id: 'email', label: 'Email the link', Icon: Mail },
+];
 ---
 
 <Panel id="controlsPanel" title="Compare three countries" description="Choose the places and year you want to examine. Every view below updates from this shared control room." class="controls-section">
@@ -65,15 +88,51 @@ const colors = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)'];
   </div>
   <div class="mt-5 flex flex-col gap-4 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
     <p class="max-w-[85ch] text-[12.5px] leading-relaxed text-muted">Highlighted countries keep these three colors across every chart below. Everything else appears in gray for context; three distinct hues remain easier to tell apart than a larger palette.</p>
-    <div class="flex min-w-0 flex-wrap items-center justify-center gap-3 sm:shrink-0 sm:justify-end">
-      <button id="shareViewBtn" type="button" disabled class="glow-button inline-flex min-h-11 items-center gap-2 rounded-lg border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink">
-        <svg aria-hidden="true" class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="15.5" cy="4.5" r="2" /><circle cx="4.5" cy="10" r="2" /><circle cx="15.5" cy="15.5" r="2" />
-          <path d="m6.3 9 7.4-3.6M6.3 11l7.4 3.6" />
-        </svg>
+    <div class="share-actions flex min-w-0 flex-wrap items-center justify-center gap-3 sm:shrink-0 sm:justify-end">
+      <button
+        id="shareViewBtn"
+        type="button"
+        disabled
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="sharePop"
+        class="glow-button inline-flex min-h-11 items-center gap-2 rounded-lg border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink"
+      >
+        <Share2 class="size-4 shrink-0" strokeWidth={1.6} aria-hidden="true" />
         Share this view
       </button>
-      <span id="shareViewStatus" role="status" class="text-[12.5px] text-muted" aria-live="polite"></span>
+      <span id="shareViewStatus" role="status" class="sr-only" aria-live="polite"></span>
+
+      <div class="share-pop" id="sharePop" role="dialog" aria-labelledby="sharePopTitle" hidden>
+        <div class="share-pop-head">
+          <h3 class="share-pop-title" id="sharePopTitle">Share this view</h3>
+          <button type="button" id="sharePopClose" class="share-close" aria-label="Close the share options">
+            <X class="size-4" strokeWidth={1.6} aria-hidden="true" />
+          </button>
+        </div>
+
+        <p class="share-note">Your three countries, the year and every metric choice travel in the link.</p>
+
+        <div class="share-link">
+          <span class="share-url" id="shareUrlPreview" title="">—</span>
+          <button type="button" id="shareCopyBtn" class="share-copy">
+            <Link class="size-4 shrink-0 share-copy-idle" strokeWidth={1.6} aria-hidden="true" />
+            <Check class="size-4 shrink-0 share-copy-done" strokeWidth={1.6} aria-hidden="true" />
+            <span class="share-copy-label">Copy</span>
+          </button>
+        </div>
+
+        <ul class="share-list">
+          {shareTargets.map(({ id, label, Icon }) => (
+            <li>
+              <a class="share-target" data-share-target={id} href="#" rel="noopener">
+                <Icon class="size-4 shrink-0" strokeWidth={1.6} aria-hidden="true" />
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   </div>
 </Panel>

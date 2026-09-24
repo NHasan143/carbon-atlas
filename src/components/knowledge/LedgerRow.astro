@@ -2,24 +2,21 @@
 /**
  * One line of the account, as a chapter. The ledger's line number is not
  * decoration: the running rail refers to it, and the balance below depends on
- * the lines above it, so the sequence carries the reading order.
+ * the lines above it, so the sequence carries the reading order — which is why
+ * it is set at plate scale beside the title rather than tucked above it.
  */
 interface Props {
   id: string;
   line: string;
   title: string;
-  standfirst: string;
 }
-const { id, line, title, standfirst } = Astro.props;
+const { id, line, title } = Astro.props;
 ---
 
 <section id={id} class="ledger-row" data-ledger-row={line} aria-labelledby={`${id}-title`}>
   <header class="ledger-head">
     <p class="ledger-line" aria-hidden="true">{line}</p>
-    <div class="ledger-head-text">
-      <h2 id={`${id}-title`} class="ledger-title">{title}</h2>
-      <p class="ledger-standfirst">{standfirst}</p>
-    </div>
+    <h2 id={`${id}-title`} class="ledger-title">{title}</h2>
   </header>
   <div class="ledger-body">
     <slot />
@@ -29,6 +26,8 @@ const { id, line, title, standfirst } = Astro.props;
 <style>
   .ledger-row {
     position: relative;
+    /* The titles size themselves against this width, so it is the container. */
+    container-type: inline-size;
     padding: clamp(36px, 5vw, 60px) 0;
     border-top: 1px solid var(--border);
     /* Clears the fixed balance strip, so a deep link does not land under it. */
@@ -39,65 +38,48 @@ const { id, line, title, standfirst } = Astro.props;
     .ledger-row { scroll-margin-top: 24px; }
   }
 
-  /* The atlas marks every chapter with the same accent hairline. */
-  .ledger-row::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--action-accent), transparent);
-    opacity: 0.42;
-  }
-
   .ledger-head {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
-    gap: 16px;
-    margin-bottom: 28px;
+    display: flex;
+    align-items: baseline;
+    gap: clamp(14px, 2.2vw, 30px);
+    margin-bottom: clamp(24px, 3vw, 34px);
   }
 
   .ledger-line {
+    flex: none;
     font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
-    font-size: 11px;
+    font-size: min(clamp(34px, 5.2vw, 68px), 7.6cqi);
     font-weight: 600;
-    letter-spacing: 0.12em;
+    line-height: 1;
+    letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
     color: var(--text-muted);
-    padding-top: 0.7em;
   }
 
+  /* One line at every width: the size falls out of the container, the way the
+     atlas sizes a single-line chapter title. */
   .ledger-title {
-    max-width: 18ch;
+    min-width: 0;
     font-family: var(--font-display, "Playfair Display Variable", Georgia, serif);
-    font-size: clamp(28px, 4.2vw, 46px);
+    font-size: min(clamp(26px, 4.4vw, 54px), 6.1cqi);
     font-weight: 600;
     line-height: 1.06;
     letter-spacing: -0.015em;
-    text-wrap: balance;
+    white-space: nowrap;
   }
 
-  .ledger-standfirst {
-    max-width: 62ch;
-    margin-top: 14px;
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    text-wrap: pretty;
-  }
-
-  /* 58ch of the parent's 16px resolves to roughly 72 characters of 15.5px
-     running text: the `ch` unit measures a zero, which is wider than the
-     lowercase this is actually set in. */
+  /* The reading runs to the width of the ledger blocks beside it. The type
+     steps up with the measure: widening a column without growing the type is
+     what turns a long line into a tiring one. */
   .ledger-body {
     display: grid;
-    gap: 22px;
-    max-width: 58ch;
+    gap: 24px;
+    max-width: 880px;
   }
 
   .ledger-body :global(p) {
-    font-size: 15.5px;
-    line-height: 1.72;
+    font-size: 18px;
+    line-height: 1.68;
     color: var(--text-secondary);
     text-wrap: pretty;
   }
@@ -105,29 +87,5 @@ const { id, line, title, standfirst } = Astro.props;
   .ledger-body :global(strong) {
     font-weight: 600;
     color: var(--text-primary);
-  }
-
-  @media (min-width: 1024px) {
-    .ledger-head {
-      grid-template-columns: auto minmax(0, 1fr) minmax(240px, 0.6fr);
-      align-items: end;
-      gap: 12px 40px;
-    }
-
-    .ledger-head-text {
-      display: contents;
-    }
-
-    /* End-aligned with the title, so it sits at the title's foot rather than
-       floating against its middle. */
-    .ledger-line {
-      padding-top: 0;
-      padding-bottom: 0.25em;
-    }
-
-    .ledger-standfirst {
-      margin-top: 0;
-      justify-self: end;
-    }
   }
 </style>

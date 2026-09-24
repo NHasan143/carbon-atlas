@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "playwright test"
+    "test": "playwright test",
+    "flags": "node scripts/build-flags.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^7.0.0",
@@ -20,6 +21,8 @@
     "astro": "^7.3.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "highcharts": "^13.1.1",
+    "lucide-astro": "^0.556.0",
     "plotly.js-dist-min": "2.35.2",
     "radix-ui": "^1.6.7",
     "react": "^19.3.0",
@@ -33,6 +36,8 @@
     "@types/plotly.js": "^2.35.16",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "flag-icons": "^7.5.0",
+    "i18n-iso-countries": "^7.14.0",
     "typescript": "^6.0.3"
   },
   "engines": {

@@ -16,8 +16,9 @@ async function openAtlas(page) {
   await expect(page.getByRole('heading', { name: 'GDP, Emissions and Population' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The Trends Side by Side' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
-  await expect(page.locator('.js-plotly-plot')).toHaveCount(8);
-  await expect(page.locator('.choroplethlayer path').first()).toBeVisible();
+  // Seven Plotly charts: the bubble chart and the six trends. The globe is Highcharts.
+  await expect(page.locator('.js-plotly-plot')).toHaveCount(7);
+  await expect(page.locator('#choroplethChart .highcharts-map-series path').first()).toBeVisible();
 }
 
 async function setYear(page, index) {
@@ -63,14 +64,16 @@ test('renders locally and keeps Play, Pause, slider, table, map and trends synch
   await expect(page.locator('#yearReadout')).toHaveText(paused);
   await setYear(page, 10);
   await expect(page.locator('[data-year-output]')).toHaveText(['2000', '2000', '2000', '2000', '2000']);
-  const usaMap = await page.locator('#choroplethChart').evaluate(el => {
-    const trace = el.data[0];
-    const i = trace.locations.indexOf('USA');
-    return { z: trace.z[i], detail: trace.customdata[i] };
-  });
+  // The globe paints each country from the shared band ramp, so the rendered
+  // fill is the band assertion: the six Level steps of the seq scale.
   const usa2000 = data.metrics.co2_per_capita.USA[10];
-  expect(usaMap.detail).toContain(usa2000.toFixed(2));
-  expect(usaMap.z).toBe([1, 2, 5, 10, 20].filter(edge => usa2000 >= edge).length + 0.5);
+  const LEVEL_FILLS = ['#cde2fb', '#9ec5f4', '#6da7ec', '#3987e5', '#184f95', '#0d366b'];
+  const usaBand = [1, 2, 5, 10, 20].filter(edge => usa2000 >= edge).length;
+  await expect(page.locator('#choroplethChart .highcharts-name-united-states').first())
+    .toHaveAttribute('fill', LEVEL_FILLS[usaBand]);
+  // A globe hides half the world, so the figure is read from the panel beside
+  // it rather than from a tooltip that may be on the far side.
+  await expect(page.locator('#choroFocus')).toContainText(usa2000.toFixed(2));
   expect(await page.locator('#sm-co2').evaluate(el => el.layout.shapes[0].x0)).toBe(2000);
   await expect(page.locator('#compareTable tbody tr').first()).toContainText(data.metrics.co2_per_capita.USA[10].toFixed(2));
   expect(errors).toEqual([]);
@@ -186,9 +189,18 @@ test('a shared link restores every comparison choice and stays current as the vi
       value: { writeText: async text => { window.__copiedAtlasLink = text; } },
     });
   });
+  // Share opens a card of destinations; Copy link is one of them.
   await page.getByRole('button', { name: 'Share this view' }).click();
+  await expect(page.locator('#sharePop')).toBeVisible();
+  await expect(page.locator('#shareUrlPreview')).toHaveAttribute('title', page.url());
+  await expect(page.locator('[data-share-target="x"]')).toHaveAttribute('target', '_blank');
+  const shareHref = await page.locator('[data-share-target="facebook"]').getAttribute('href');
+  expect(shareHref).toContain(encodeURIComponent(page.url()));
+  await page.locator('#shareCopyBtn').click();
   await expect(page.locator('#shareViewStatus')).toHaveText('Link copied');
   expect(await page.evaluate(() => window.__copiedAtlasLink)).toBe(page.url());
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#sharePop')).toBeHidden();
 
   await page.reload();
   await expect(page.getByRole('button', { name: 'Share this view' })).toBeEnabled({ timeout: 30000 });
@@ -303,9 +315,9 @@ test('the map switches between level bands and change since 1990', async ({ page
   await expect(page.locator('#choroLegend')).toContainText('better for the planet');
   const usa = data.metrics.co2_per_capita.USA;
   const change = (usa[usa.length - 1] - usa[0]) / usa[0] * 100;
-  const usaDetail = await page.locator('#choroplethChart').evaluate(el => el.data[0].customdata[el.data[0].locations.indexOf('USA')]);
-  expect(usaDetail).toContain('since 1990');
-  expect(usaDetail).toContain(change < 0 ? 'Better for the planet' : 'Worse for the planet');
+  const focus = page.locator('#choroFocus');
+  await expect(focus).toContainText('Since 1990');
+  await expect(focus).toContainText(change < 0 ? 'better for the planet' : 'worse for the planet');
 
   // Share metrics change in percentage points; GDP and population are never judged.
   await page.selectOption('#choroMetric', 'renewables_share_energy');
@@ -322,6 +334,42 @@ test('the map switches between level bands and change since 1990', async ({ page
   await page.goto('/?view=change');
   await expect(page.getByRole('radio', { name: 'Change' })).toBeChecked({ timeout: 30000 });
   await expect(page.locator('#choroSub')).toContainText('since 1990');
+  expect(errors).toEqual([]);
+});
+
+test('clicking a country turns the globe to it and names it', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await openAtlas(page);
+  await page.locator('#worldMap').scrollIntoViewIfNeeded();
+  await expect(page.locator('#choroFlag')).toBeHidden();
+
+  await page.locator('#choroplethChart .highcharts-map-series .highcharts-name-egypt').first().click({ force: true });
+  await expect(page.locator('#choroFlag')).toBeVisible();
+  await expect(page.locator('#choroFlagImg')).toHaveAttribute('src', /\/flags\/eg\.svg$/);
+  await expect(page.locator('#choroFlagName')).toHaveText('Egypt');
+
+  // The globe turned: Egypt now sits near the centre of the disc rather than
+  // wherever it happened to be. Measured against the sea, which is the globe.
+  await expect.poll(async () => page.evaluate(() => {
+    const sea = document.querySelector('#choroplethChart svg circle');
+    const egypt = document.querySelector('#choroplethChart .highcharts-map-series .highcharts-name-egypt');
+    if (!sea || !egypt) return 999;
+    const s = sea.getBoundingClientRect(), e = egypt.getBoundingClientRect();
+    const dx = (e.x + e.width / 2) - (s.x + s.width / 2);
+    const dy = (e.y + e.height / 2) - (s.y + s.height / 2);
+    return Math.round(Math.hypot(dx, dy) / (s.width / 2) * 100);
+  }), { timeout: 10000 }).toBeLessThan(15);
+
+  // The card restates a live figure, so it follows the year and the metric.
+  const egypt2024 = data.metrics.co2_per_capita.EGY[data.years.length - 1];
+  await expect(page.locator('#choroFlagValue')).toHaveText(egypt2024.toFixed(2) + ' t');
+  await setYear(page, 10);
+  await expect(page.locator('#choroFlagValue')).toHaveText(data.metrics.co2_per_capita.EGY[10].toFixed(2) + ' t');
+  await page.selectOption('#choroMetric', 'population');
+  await expect(page.locator('#choroFlagValue')).toHaveText(
+    data.metrics.population.EGY[10].toLocaleString('en-US', { maximumFractionDigits: 0 }));
+  await expect(page.locator('#choroFlagName')).toHaveText('Egypt');
   expect(errors).toEqual([]);
 });
 
