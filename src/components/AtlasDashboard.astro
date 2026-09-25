@@ -334,8 +334,10 @@ function initAtlas(){
   }
 
   // ---------- bootstrap ----------
+  // The retry button is the one control that must stay live while everything
+  // else is disabled: it is what the reader uses to escape a failed load.
   function setControlsEnabled(enabled: boolean){
-    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button, #controlsPanel input, #controlsPanel select, #choroMetric, input[name=mapView], #scatterX, #scatterY, #rankMetric, input[name=rankBasis]").forEach(function(control){
+    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button:not(#loadRetryBtn), #controlsPanel input, #controlsPanel select, #choroMetric, input[name=mapView], #scatterX, #scatterY, #rankMetric, input[name=rankBasis]").forEach(function(control){
       control.disabled = !enabled;
     });
   }
@@ -417,6 +419,8 @@ function initAtlas(){
     status.textContent = error.message;
     status.hidden = false;
     element("loadRetry").hidden = false;
+    // Reloads this exact URL, so a shared view survives the retry.
+    element("loadRetryBtn").onclick = function(){ window.location.reload(); };
   });
 
   function buildMetricDropdown(sel: HTMLSelectElement, selected: string){
@@ -1481,12 +1485,18 @@ function initAtlas(){
   }
 
   function updateRankText(entries: RankEntry[], movers: MoverEntry[],
-      topRise: MoverEntry | undefined, topFall: MoverEntry | undefined, sharedScale: boolean){
+      topRise: MoverEntry | undefined, topFall: MoverEntry | undefined, sharedScale: boolean,
+      topScale: number, bottomScale: number){
     var meta = DATA.metricMeta[rankMetric];
     var year = YEARS[currentYearIdx];
     var reporting = entries.length + " of " + COUNTRIES_SORTED.length + " countries report";
-    element("rankTopMeta").textContent = reporting;
-    element("rankBottomMeta").textContent = reporting;
+    // Lengths compare inside a card, so each card has to say what its own
+    // full bar is worth before the two can be compared with each other.
+    var levelMeta = function(scale: number){
+      return scale > 0 ? "Full bar " + fmtRankValue(scale, rankMetric) + " · " + reporting : reporting;
+    };
+    element("rankTopMeta").textContent = levelMeta(topScale);
+    element("rankBottomMeta").textContent = levelMeta(bottomScale);
 
     var share = isShareMetric(rankMetric);
     var basisWord = currentYearIdx === 0
@@ -1510,7 +1520,7 @@ function initAtlas(){
 
     element("rankCaption").textContent =
       meta.label + " (" + meta.unit + ") in " + year + ". "
-      + "Highest and Lowest share one scale, and every bar carries the same six bands as the World View map. "
+      + "Each list is scaled to its own longest bar, so lengths compare within a card and the figures compare across them. Every bar carries the same six bands as the World View map. "
       + "Your three countries are marked in their own colours. "
       + (PLANET_BETTER_WHEN[rankMetric]
         ? "Mover bars are green where the change is better for the planet and red where it is worse."
@@ -1538,10 +1548,16 @@ function initAtlas(){
     var count = rankRows();
     var top = entries.slice(0, count);
     var bottom = entries.slice(-count).reverse();
-    var levelScale = entries.length ? Math.max(entries[0].value, 0) : 0;
+    // Each list is scaled to its own longest bar. On one shared scale the
+    // lowest ten measure a fraction of a percent of the leader — 0.24px of a
+    // 198px track — and render as an empty frame, which reads as missing data
+    // rather than as "almost none". Each card states what its full bar is
+    // worth, the way the mover lists already do when their scales differ.
+    var topScale = top.length ? Math.max(top[0].value, 0) : 0;
+    var bottomScale = bottom.length ? Math.max(bottom[bottom.length - 1].value, 0) : 0;
     var noLevel = "No country reports this metric for " + YEARS[currentYearIdx] + ".";
-    syncRankList("rankTopList", levelRows(top, levelScale), noLevel);
-    syncRankList("rankBottomList", levelRows(bottom, levelScale), noLevel);
+    syncRankList("rankTopList", levelRows(top, topScale), noLevel);
+    syncRankList("rankBottomList", levelRows(bottom, bottomScale), noLevel);
 
     var rises = movers.filter(function(m){ return m.delta > 0; }).slice(0, count);
     var falls = movers.filter(function(m){ return m.delta < 0; }).slice(-count).reverse();
@@ -1564,7 +1580,7 @@ function initAtlas(){
       : "No country reports both " + YEARS[0] + " and " + YEARS[currentYearIdx] + " for this metric.";
 
     updateRankYours(entries);
-    updateRankText(entries, movers, rises[0], falls[0], sharedMoverScale);
+    updateRankText(entries, movers, rises[0], falls[0], sharedMoverScale, topScale, bottomScale);
 
     if (!flip) return;
     const moves: { el: HTMLElement; dy: number }[] = [];

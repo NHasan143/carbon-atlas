@@ -12,6 +12,21 @@ import Panel from './Panel.astro';
 
 const colors = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)'];
 
+// Rendered hrefs point at the atlas's own canonical URL, so every destination
+// is a real, keyboard-reachable link before any script runs. The client
+// rewrites them to the live view — countries, year, metrics — when the card
+// opens; this is the fallback, not the value a reader normally shares.
+const canonical = new URL(import.meta.env.BASE_URL, Astro.site ?? 'https://carbon-atlas-brown.vercel.app').href;
+const shareFallback = (target: string) => {
+  const url = encodeURIComponent(canonical);
+  const text = encodeURIComponent('Carbon Atlas');
+  if (target === 'x') return `https://x.com/intent/post?url=${url}&text=${text}`;
+  if (target === 'facebook') return `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+  if (target === 'linkedin') return `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+  if (target === 'whatsapp') return `https://wa.me/?text=${encodeURIComponent('Carbon Atlas ' + canonical)}`;
+  return `mailto:?subject=${text}&body=${url}`;
+};
+
 // Each target is a plain link whose href the script writes at open time, so a
 // shared link always carries the countries, year and metrics currently on
 // screen and nothing third-party loads until a destination is chosen. Lucide
@@ -28,7 +43,7 @@ const shareTargets = [
 
 <Panel id="controlsPanel" title="Compare three countries" description="Choose the places and year you want to examine. Every view below updates from this shared control room." class="controls-section">
   <p id="loadStatus" role="status" class="mb-3">Loading the atlas…</p>
-  <p id="loadRetry" hidden class="mb-3"><a href="" class="text-accent underline">Reload the atlas</a></p>
+  <p id="loadRetry" hidden class="mb-3"><button type="button" id="loadRetryBtn" class="cursor-pointer text-accent underline underline-offset-4">Reload the atlas</button></p>
   <noscript><p class="mb-3">Enable JavaScript to explore the charts and compare countries.</p></noscript>
   <div class="rounded-xl bg-field px-4 py-5 sm:px-6">
     <div class="flex min-w-0 items-center gap-3.5">
@@ -125,7 +140,7 @@ const shareTargets = [
         <ul class="share-list">
           {shareTargets.map(({ id, label, Icon }) => (
             <li>
-              <a class="share-target" data-share-target={id} href="#" rel="noopener">
+              <a class="share-target" data-share-target={id} href={shareFallback(id)} rel="noopener">
                 <Icon class="size-4 shrink-0" strokeWidth={1.6} aria-hidden="true" />
                 {label}
               </a>
