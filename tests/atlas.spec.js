@@ -229,12 +229,18 @@ test('rankings order both ends of a metric and the movers since 1990', async ({ 
   const nameOf = iso => data.countries.find(c => c.iso3 === iso).name;
   await expect(top.first()).toContainText(nameOf(co2pc[0][0]));
   await expect(bottom.first()).toContainText(nameOf(co2pc[co2pc.length - 1][0]));
-  await expect(page.locator('#rankTopMeta')).toHaveText(`${co2pc.length} of ${data.countries.length} countries report`);
+  await expect(page.locator('#rankTopMeta')).toContainText(`${co2pc.length} of ${data.countries.length} countries report`);
 
-  // Highest and Lowest share one scale: the leader fills the row, the trailer barely registers.
+  // Each level list is scaled to its own longest bar, so both cards fill: on a
+  // shared scale the lowest ten rendered as an empty frame. Each card says what
+  // its full bar is worth, which is what makes the two comparable.
   const scaleOf = sel => page.locator(sel).evaluate(el => Number(el.style.transform.replace(/[^0-9.]/g, '')));
   expect(await scaleOf('#rankTopList .rank-row:first-child .rank-fill')).toBeCloseTo(1, 2);
-  expect(await scaleOf('#rankBottomList .rank-row:first-child .rank-fill')).toBeLessThan(0.02);
+  expect(await scaleOf('#rankBottomList .rank-row:last-child .rank-fill')).toBeCloseTo(1, 2);
+  // The trailer is now a visible bar rather than a sub-pixel sliver.
+  expect(await scaleOf('#rankBottomList .rank-row:first-child .rank-fill')).toBeGreaterThan(0.1);
+  await expect(page.locator('#rankTopMeta')).toContainText('Full bar');
+  await expect(page.locator('#rankBottomMeta')).toContainText('Full bar');
 
   // Every selected country is placed, whether or not it reaches a visible list.
   await expect(page.locator('#rankYours .rank-your-item')).toHaveCount(3);
@@ -607,10 +613,10 @@ test('dataset failures show a recovery action and keep controls disabled', async
   await page.route('**/dataset.json', route => route.fulfill({ status: 503, body: 'Unavailable' }));
   await page.goto('/');
   await expect(page.locator('#loadStatus')).toContainText('atlas data could not load');
-  await expect(page.getByRole('link', { name: 'Reload the atlas' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Reload the atlas' })).toBeVisible();
   await expect(page.locator('#playBtn')).toBeDisabled();
   await page.unroute('**/dataset.json');
-  await page.getByRole('link', { name: 'Reload the atlas' }).click();
+  await page.getByRole('button', { name: 'Reload the atlas' }).click();
   await expect(page.locator('#playBtn')).toBeEnabled({ timeout: 30000 });
 });
 
@@ -619,5 +625,5 @@ test('a missing Plotly bundle shows a chart-library error', async ({ page }) => 
   await page.goto('/');
   await expect(page.locator('#loadStatus')).toContainText('chart library could not load');
   await expect(page.locator('#playBtn')).toBeDisabled();
-  await expect(page.getByRole('link', { name: 'Reload the atlas' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Reload the atlas' })).toBeVisible();
 });
