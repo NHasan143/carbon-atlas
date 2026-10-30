@@ -15,7 +15,7 @@ async function openAtlas(page) {
   await expect(page.getByRole('heading', { name: 'The World View' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'GDP, Emissions and Population' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The Trends Side by Side' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
+  await expect(page.locator('#controlsPanel').getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
   // Seven Plotly charts: the bubble chart and the six trends. The globe is Highcharts.
   await expect(page.locator('.js-plotly-plot')).toHaveCount(7);
   await expect(page.locator('#choroplethChart .highcharts-map-series path').first()).toBeVisible();
@@ -56,9 +56,9 @@ test('renders locally and keeps Play, Pause, slider, table, map and trends synch
   await openAtlas(page);
   await expect(page.locator('#compareTable tbody tr')).toHaveCount(3);
   await expect(page.locator('#yearReadout')).toHaveText('2024');
-  await page.getByRole('button', { name: 'Play animation' }).click();
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Play animation' }).click();
   await expect(page.locator('#yearReadout')).not.toHaveText('2024');
-  await page.getByRole('button', { name: 'Pause animation' }).click();
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Pause animation' }).click();
   const paused = await page.locator('#yearReadout').textContent();
   await page.waitForTimeout(850);
   await expect(page.locator('#yearReadout')).toHaveText(paused);
@@ -285,13 +285,13 @@ test('rankings order both ends of a metric and the movers since 1990', async ({ 
 
   // Rows leaving the visible ten fade out of flow; the list never drops below ten.
   await page.selectOption('#rankMetric', 'co2_per_capita');
-  await page.getByRole('button', { name: 'Play animation' }).click();
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Play animation' }).click();
   for (let i = 0; i < 8; i++) {
     await page.waitForTimeout(150);
     expect(await page.locator('#rankTopList .rank-row:not([data-exit])').count()).toBe(10);
     expect(await page.locator('#rankYours .rank-your-item').count()).toBe(3);
   }
-  await page.getByRole('button', { name: 'Pause animation' }).click();
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Pause animation' }).click();
   await expect.poll(() => page.locator('.rank-row[data-exit]').count()).toBe(0);
 
   // 1990 is the baseline, so the movers block says so instead of comparing it with itself.
@@ -388,9 +388,9 @@ test('themes update chart colors and mobile layout remains usable', async ({ pag
   await page.setViewportSize({ width: 390, height: 844 });
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await expect(page.locator('#cmp0')).toBeVisible();
-  await page.getByRole('button', { name: 'Play animation' }).click();
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Play animation' }).click();
   await expect(page.locator('#yearReadout')).not.toHaveText('2024');
-  await page.getByRole('button', { name: 'Pause animation' }).click();
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Pause animation' }).click();
   // The headless renderer cannot capture past ~8192px in one texture, and the
   // mobile page is taller than that, so the reference lands in two halves.
   const tall = await page.evaluate(() => document.documentElement.scrollHeight);
@@ -512,14 +512,14 @@ test('Play starts the music, and an explicit mute outranks it', async ({ page })
   expect(downloads.count).toBe(0);
 
   // Pressing Play is the gesture the browser wants, so the music may begin.
-  await page.getByRole('button', { name: 'Play animation' }).click();
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Play animation' }).click();
   await expect.poll(async () => (await sound()).pressed, { timeout: 5000 }).toBe('true');
   expect((await sound()).state).toBe('running');
   expect((await sound()).stored).toBe('on');
 
   // Pause stops the years, not the music: this is background sound, and the
   // speaker button is its off switch.
-  await page.getByRole('button', { name: 'Pause animation' }).click();
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Pause animation' }).click();
   expect((await sound()).state).toBe('running');
 
   await page.locator('[data-sound-toggle]').click();
@@ -527,16 +527,16 @@ test('Play starts the music, and an explicit mute outranks it', async ({ page })
   expect((await sound()).stored).toBe('off');
 
   // Play must not talk a muted visitor back into sound.
-  await page.getByRole('button', { name: 'Play animation' }).click();
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Play animation' }).click();
   await page.waitForTimeout(1200);
   expect(await sound()).toMatchObject({ state: 'suspended', pressed: 'false', stored: 'off' });
-  await page.getByRole('button', { name: 'Pause animation' }).click();
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Pause animation' }).click();
 
   // And the refusal survives a reload.
   await page.reload();
   downloads.count = 0;
-  await expect(page.getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
-  await page.getByRole('button', { name: 'Play animation' }).click();
+  await expect(page.locator('#controlsPanel').getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
+  await page.locator('#controlsPanel').getByRole('button', { name: 'Play animation' }).click();
   await page.waitForTimeout(1200);
   expect(downloads.count).toBe(0);
   expect((await sound()).state).toBe(null);
@@ -547,7 +547,7 @@ test('the sound control stays away when no track is installed', async ({ page })
   await page.route('**/audio/*', route => route.fulfill({ status: 404, body: '' }));
   const { downloads } = await probeAudio(page);
   await page.goto('/');
-  await expect(page.getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
+  await expect(page.locator('#controlsPanel').getByRole('button', { name: 'Play animation' })).toBeEnabled({ timeout: 30000 });
   await expect(page.locator('[data-sound-toggle]')).toBeHidden();
   expect(downloads.count).toBe(0);
 });
@@ -665,4 +665,67 @@ test('a trend chart with no data for the selected countries says so and names th
   await expect(chart).toHaveCSS('visibility', 'visible');
   await expect(chart.locator('.scatterlayer .trace')).toHaveCount(1);
   await expect(missing.locator('.sm-chip')).toHaveText(['Albania', 'Andorra']);
+});
+
+test('the timeline steps by year, labels its ends, and announces the year', async ({ page }) => {
+  await openAtlas(page);
+  const slider = page.locator('#yearSlider');
+  const play = page.locator('#playBtn');
+  const last = data.years.length - 1;
+
+  // At the last year Play says it will start over, instead of rewinding silently.
+  await expect(slider).toHaveAttribute('aria-valuetext', String(data.years[last]));
+  await expect(play).toHaveAccessibleName(`Play animation from ${data.years[0]}`);
+  await expect(play).not.toHaveAttribute('aria-pressed', /.*/);
+  await expect(page.locator('#yearNext')).toHaveAttribute('aria-disabled', 'true');
+
+  await page.getByRole('button', { name: 'Previous year' }).first().click();
+  await expect(page.locator('#yearReadout')).toHaveText(String(data.years[last - 1]));
+  await expect(slider).toHaveAttribute('aria-valuetext', String(data.years[last - 1]));
+  await expect(play).toHaveAccessibleName('Play animation');
+  await expect(page.locator('[data-year-output]').first()).toHaveText(String(data.years[last - 1]));
+
+  // Play keeps one width whatever it says, so the row never shifts.
+  const before = (await play.boundingBox()).width;
+  await play.click();
+  await expect(play).toHaveAccessibleName('Pause animation');
+  expect((await play.boundingBox()).width).toBeCloseTo(before, 0);
+  await play.click();
+
+  // The ruler prints its decades and both ends.
+  await expect(page.locator('.ruler-label')).toHaveText(['1990', '2000', '2010', '2020', '2024']);
+});
+
+test('country slots open on click or typing, not on Tab, and show their colour state', async ({ page }) => {
+  await openAtlas(page);
+  await page.locator('#cmp0').focus();
+  await expect(page.locator('#cmp0Pop')).toBeHidden();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('#cmp0Pop')).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  await expect(page.locator('#cmp2').locator('..')).toHaveAttribute('data-empty', 'false');
+  await clearCountry(page, 3 - 1);
+  await expect(page.locator('#cmp2').locator('..')).toHaveAttribute('data-empty', 'true');
+  await expect(page.locator('#cmp2')).toHaveAttribute('placeholder', 'Add a country');
+});
+
+test('a docked strip keeps the year and countries in reach once the controls scroll away', async ({ page }) => {
+  await openAtlas(page);
+  const dock = page.locator('#atlasDock');
+  await expect(dock).toBeHidden();
+
+  await page.locator('#trends').scrollIntoViewIfNeeded();
+  await expect(dock).toBeVisible();
+  await expect(dock.locator('#dockYear')).toHaveText('2024');
+  await expect(dock.locator('[data-dock-slot] .dock-name')).toHaveText(['United States', 'China', 'India']);
+
+  await dock.getByRole('button', { name: 'Previous year' }).click();
+  await expect(dock.locator('#dockYear')).toHaveText('2023');
+  await expect(page.locator('#yearReadout')).toHaveText('2023');
+
+  // A country chip returns to the controls with that slot focused.
+  await dock.getByRole('button', { name: 'Change country 2, China' }).click();
+  await expect(page.locator('#cmp1')).toBeFocused();
+  await expect(dock).toBeHidden();
 });

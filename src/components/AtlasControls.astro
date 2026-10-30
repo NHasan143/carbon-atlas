@@ -10,7 +10,24 @@ import Twitter from 'lucide-astro/Twitter';
 import X from 'lucide-astro/X';
 import Panel from './Panel.astro';
 
-const colors = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)'];
+// Slot colours are fixed by slot (the Three-Country Rule), so the names a
+// screen reader hears can be fixed too: the charts refer to countries by them.
+const slots = [
+  { color: 'var(--accent)', name: 'blue' },
+  { color: 'var(--accent-2)', name: 'orange' },
+  { color: 'var(--accent-3)', name: 'green' },
+];
+
+// The ruler is printed at build time. The year range is fixed with the
+// dataset (see "Rebuild the dataset" in the README); the slider's max matches.
+const YEAR_START = 1990;
+const YEAR_END = 2024;
+const span = YEAR_END - YEAR_START;
+const ticks = Array.from({ length: span + 1 }, (_, i) => {
+  const year = YEAR_START + i;
+  const labelled = year % 10 === 0 || year === YEAR_END;
+  return { year, at: (i / span) * 100, major: year % 10 === 0 || year === YEAR_START || year === YEAR_END, labelled };
+});
 
 // Rendered hrefs point at the atlas's own canonical URL, so every destination
 // is a real, keyboard-reachable link before any script runs. The client
@@ -41,69 +58,30 @@ const shareTargets = [
 ];
 ---
 
-<Panel id="controlsPanel" title="Compare three countries" description="Choose the places and year you want to examine. Every view below updates from this shared control room." class="controls-section">
+<Panel id="controlsPanel" title="Compare three countries" description="Pick a year and up to three countries. Every chart below follows your choice." class="controls-section">
   <p id="loadStatus" role="status" class="mb-3">Loading the atlas…</p>
   <p id="loadRetry" hidden class="mb-3"><button type="button" id="loadRetryBtn" class="cursor-pointer text-accent underline underline-offset-4">Reload the atlas</button></p>
   <noscript><p class="mb-3">Enable JavaScript to explore the charts and compare countries.</p></noscript>
-  <div class="rounded-xl bg-field px-4 py-5 sm:px-6">
-    <div class="flex min-w-0 items-center gap-3.5">
-      <button id="playBtn" type="button" aria-label="Play animation" aria-pressed="false" disabled class="flex min-w-[76px] shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-[var(--action-accent)] px-4 py-[9px] text-[13px] font-semibold text-[#071018] hover:brightness-110">
-        <svg id="playIcon" aria-hidden="true" class="size-3" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1 11 6 2 11Z" /></svg>
-        <svg id="pauseIcon" aria-hidden="true" class="size-3" style="display:none" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1h3v10H2zM7 1h3v10H7z" /></svg>
-        <span id="playLabel">Play</span>
+
+  <!-- The year is the plate's lead figure: one ruler that every view below reads from. -->
+  <div class="timeline" style={`--fill:100%`}>
+    <button id="playBtn" type="button" aria-label="Play animation from 1990" disabled class="timeline-play">
+      <svg id="playIcon" aria-hidden="true" class="size-3" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1 11 6 2 11Z" /></svg>
+      <svg id="pauseIcon" aria-hidden="true" class="size-3" style="display:none" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1h3v10H2zM7 1h3v10H7z" /></svg>
+      <span id="playLabel">Play from 1990</span>
+    </button>
+
+    <div class="year-stepper" role="group" aria-label="Step through the years">
+      <button type="button" id="yearPrev" class="step-btn" aria-label="Previous year" disabled>
+        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>
       </button>
-      <div class="flex min-w-0 flex-auto items-center gap-3">
-        <input type="range" id="yearSlider" min="0" max="34" step="1" value="34" aria-label="Year" disabled />
-        <span id="yearReadout" class="min-w-[3.4em] text-right font-mono text-lg font-semibold tabular-nums">2024</span>
-      </div>
+      <output id="yearReadout" for="yearSlider" class="year-readout">2024</output>
+      <button type="button" id="yearNext" class="step-btn" aria-label="Next year" disabled>
+        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3.5 4.5 4.5L6 12.5" /></svg>
+      </button>
     </div>
-  </div>
-  <div class="mt-6 grid gap-3 md:grid-cols-3">
-    {colors.map((color, slot) => (
-      <div class="country-control flex min-w-0 flex-col gap-3 rounded-xl border border-line bg-field p-4">
-        <div class="flex items-center justify-between gap-3">
-          <label id={`cmp${slot}Label`} for={`cmp${slot}`} class="text-xs font-semibold text-secondary">Country {slot + 1}</label>
-          <span class="swatch" style={{ background: color }}></span>
-        </div>
-        <div class="combo" data-slot={slot}>
-          <svg class="combo-icon" aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-            <circle cx="7" cy="7" r="4.25" /><path d="m10.2 10.2 3.05 3.05" />
-          </svg>
-          <input
-            type="text"
-            id={`cmp${slot}`}
-            class="combo-input"
-            role="combobox"
-            placeholder="Type a country name"
-            autocomplete="off"
-            autocapitalize="off"
-            autocorrect="off"
-            spellcheck="false"
-            enterkeyhint="go"
-            aria-expanded="false"
-            aria-autocomplete="list"
-            aria-controls={`cmp${slot}List`}
-            aria-describedby={`cmp${slot}Hint`}
-            disabled
-          />
-          <button type="button" id={`cmp${slot}Clear`} class="combo-clear" aria-label={`Clear country ${slot + 1}`} hidden>
-            <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-              <path d="m5 5 6 6M11 5l-6 6" />
-            </svg>
-          </button>
-          <div class="combo-pop" id={`cmp${slot}Pop`} hidden>
-            <div class="combo-list" id={`cmp${slot}List`} role="listbox" aria-labelledby={`cmp${slot}Label`}></div>
-            <p class="combo-empty" id={`cmp${slot}Empty`} hidden></p>
-          </div>
-        </div>
-        <p id={`cmp${slot}Hint`} class="sr-only">Type to search 217 countries and territories by name or three-letter code. Use the up and down arrow keys to move through the results, Enter to choose, Escape to close.</p>
-        <p id={`cmp${slot}Status`} class="sr-only" role="status"></p>
-      </div>
-    ))}
-  </div>
-  <div class="mt-5 flex flex-col gap-4 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
-    <p class="max-w-[85ch] text-[12.5px] leading-relaxed text-muted">Highlighted countries keep these three colors across every chart below. Everything else appears in gray for context; three distinct hues remain easier to tell apart than a larger palette.</p>
-    <div class="share-actions flex min-w-0 flex-wrap items-center justify-center gap-3 sm:shrink-0 sm:justify-end">
+
+    <div class="share-actions">
       <button
         id="shareViewBtn"
         type="button"
@@ -111,10 +89,10 @@ const shareTargets = [
         aria-haspopup="dialog"
         aria-expanded="false"
         aria-controls="sharePop"
-        class="glow-button inline-flex min-h-11 items-center gap-2 rounded-lg border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink"
+        class="glow-button inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-surface px-3.5 py-2 text-[13px] font-semibold text-ink sm:px-4"
       >
         <Share2 class="size-4 shrink-0" strokeWidth={1.6} aria-hidden="true" />
-        Share this view
+        <span class="sm:hidden">Share</span><span class="hidden sm:inline">Share this view</span>
       </button>
       <span id="shareViewStatus" role="status" class="sr-only" aria-live="polite"></span>
 
@@ -149,5 +127,92 @@ const shareTargets = [
         </ul>
       </div>
     </div>
+
+    <div class="ruler">
+      <div class="ruler-line" aria-hidden="true"><span class="ruler-fill"></span></div>
+      <input type="range" id="yearSlider" class="ruler-input" min="0" max={span} step="1" value={span} aria-label="Year" aria-valuetext={String(YEAR_END)} disabled />
+      <div class="ruler-scale" aria-hidden="true">
+        {ticks.map((t) => (
+          <span class:list={['ruler-tick', { 'is-major': t.major }]} style={`--at:${t.at}%`} data-year={t.year}>
+            {t.labelled && <span class="ruler-label">{t.year}</span>}
+          </span>
+        ))}
+      </div>
+    </div>
   </div>
+
+  <!-- The three slots are the plate's legend: each country sits next to the colour it wears below. -->
+  <div class="slots" role="group" aria-label="Countries to compare">
+    {slots.map(({ color, name }, slot) => (
+      <div class="slot" style={`--slot:${color}`}>
+        <label id={`cmp${slot}Label`} for={`cmp${slot}`} class="slot-label">Country {slot + 1}<span class="sr-only">, drawn in {name}</span></label>
+        <div class="combo" data-slot={slot} data-empty="false">
+          <span class="combo-swatch" aria-hidden="true"></span>
+          <input
+            type="text"
+            id={`cmp${slot}`}
+            class="combo-input"
+            role="combobox"
+            placeholder="Add a country"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            enterkeyhint="go"
+            aria-expanded="false"
+            aria-autocomplete="list"
+            aria-controls={`cmp${slot}List`}
+            aria-describedby={`cmp${slot}Hint`}
+            disabled
+          />
+          <button type="button" id={`cmp${slot}Clear`} class="combo-clear" aria-label={`Clear country ${slot + 1}`} hidden>
+            <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="m5 5 6 6M11 5l-6 6" />
+            </svg>
+          </button>
+          <div class="combo-pop" id={`cmp${slot}Pop`} hidden>
+            <div class="combo-list" id={`cmp${slot}List`} role="listbox" aria-labelledby={`cmp${slot}Label`}></div>
+            <p class="combo-empty" id={`cmp${slot}Empty`} hidden></p>
+          </div>
+        </div>
+        <p id={`cmp${slot}Hint`} class="sr-only">Optional. Type to search 217 countries and territories by name or three-letter code. Use the up and down arrow keys to open and move through the results, Enter to choose, Escape to close.</p>
+        <p id={`cmp${slot}Status`} class="sr-only" role="status"></p>
+      </div>
+    ))}
+  </div>
+  <p class="slots-caption">Each country keeps its color in every chart below. Everything else is gray.</p>
 </Panel>
+
+<!-- Marks the end of the plate for the strip below; zero net height. -->
+<div id="dockSentinel" class="-mt-px h-px" aria-hidden="true"></div>
+
+<!-- Once the plate scrolls away, its state stays in reach: the year and the
+     three countries every view below is reading. Hidden (and out of the
+     accessibility tree) while the plate itself is on screen. -->
+<div id="atlasDock" class="atlas-dock" role="region" aria-label="Current year and countries" data-visible="false">
+  <div class="atlas-dock-inner">
+    <button type="button" id="dockPlay" class="dock-play" aria-label="Play animation from 1990" disabled>
+      <svg aria-hidden="true" class="dock-play-icon size-3" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1 11 6 2 11Z" /></svg>
+      <svg aria-hidden="true" class="dock-pause-icon size-3" style="display:none" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1h3v10H2zM7 1h3v10H7z" /></svg>
+      <span class="dock-play-label">Play</span>
+    </button>
+    <div class="dock-year">
+      <button type="button" id="dockPrev" class="step-btn dock-step" aria-label="Previous year" disabled>
+        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>
+      </button>
+      <span id="dockYear" class="dock-year-value">2024</span>
+      <button type="button" id="dockNext" class="step-btn dock-step" aria-label="Next year" disabled>
+        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3.5 4.5 4.5L6 12.5" /></svg>
+      </button>
+    </div>
+    <div class="dock-chips">
+      {slots.map(({ color }, slot) => (
+        <button type="button" class="dock-chip" data-dock-slot={slot} data-empty="true" style={`--slot:${color}`} aria-label={`Choose country ${slot + 1}`} disabled>
+          <span class="dock-swatch" aria-hidden="true"></span>
+          <span class="dock-name">Add</span>
+          <span class="dock-code" aria-hidden="true">Add</span>
+        </button>
+      ))}
+    </div>
+  </div>
+</div>

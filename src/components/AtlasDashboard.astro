@@ -345,7 +345,7 @@ function initAtlas(){
   // The retry button is the one control that must stay live while everything
   // else is disabled: it is what the reader uses to escape a failed load.
   function setControlsEnabled(enabled: boolean){
-    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button:not(#loadRetryBtn), #controlsPanel input, #controlsPanel select, #choroMetric, input[name=mapView], #scatterX, #scatterY, #rankMetric, input[name=rankBasis]").forEach(function(control){
+    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("#controlsPanel button:not(#loadRetryBtn), #controlsPanel input, #controlsPanel select, #atlasDock button, #choroMetric, input[name=mapView], #scatterX, #scatterY, #rankMetric, input[name=rankBasis]").forEach(function(control){
       control.disabled = !enabled;
     });
   }
@@ -403,8 +403,7 @@ function initAtlas(){
 
     readUrlState();
     element<HTMLInputElement>("yearSlider").max = String(YEARS.length - 1);
-    element<HTMLInputElement>("yearSlider").value = String(currentYearIdx);
-    element("yearReadout").textContent = String(YEARS[currentYearIdx]);
+    syncYearControls();
 
     buildMetricDropdown(element<HTMLSelectElement>("choroMetric"), choroMetric);
     buildMetricDropdown(element<HTMLSelectElement>("scatterX"), scatterXMetric);
@@ -791,6 +790,8 @@ function initAtlas(){
     function syncInput(){
       input.value = selectedName();
       clearBtn.hidden = !input.value;
+      combo.dataset.empty = String(!highlighted[slot]);
+      syncDockChip(slot);
     }
 
     function commit(iso: string){
@@ -820,14 +821,21 @@ function initAtlas(){
       writeUrlState();
     }
 
+    // A click opens the list; arriving by Tab does not, so walking through the
+    // three slots never throws a 217-row overlay over the page. Typing or the
+    // arrow keys open it from the keyboard.
+    var openOnFocus = false;
     input.addEventListener("focus", function(){
       input.select();
-      openList();
+      if (openOnFocus) openList();
+      openOnFocus = false;
     });
 
     input.addEventListener("pointerdown", function(){
       if (document.activeElement === input) {
         if (isOpen) closeList(); else openList();
+      } else {
+        openOnFocus = true;
       }
     });
 
@@ -902,6 +910,50 @@ function initAtlas(){
 
   const PICKERS: CountryPicker[] = [];
 
+  // ---------- Docked state strip ----------
+  // Shown only once the controls have scrolled above the viewport. While it is
+  // hidden it is also out of the accessibility tree (visibility: hidden), so
+  // its buttons never double the controls they mirror.
+  function syncDockChip(slot: number){
+    var chip = document.querySelector<HTMLButtonElement>('[data-dock-slot="' + slot + '"]');
+    if (!chip) return;
+    var iso = highlighted[slot];
+    var country = iso ? COUNTRIES_BY_ISO[iso] : null;
+    chip.dataset.empty = String(!country);
+    (chip.querySelector(".dock-name") as HTMLElement).textContent = country ? country.name : "Add";
+    (chip.querySelector(".dock-code") as HTMLElement).textContent = country ? country.iso3 : "Add";
+    chip.setAttribute("aria-label", country
+      ? "Change " + SLOT_LABELS[slot].toLowerCase() + ", " + country.name
+      : "Choose " + SLOT_LABELS[slot].toLowerCase());
+  }
+
+  function wireDock(){
+    var dock = element("atlasDock");
+    var panel = element("controlsPanel");
+    document.querySelectorAll<HTMLButtonElement>("[data-dock-slot]").forEach(function(chip){
+      chip.addEventListener("click", function(){
+        var input = element<HTMLInputElement>("cmp" + chip.dataset.dockSlot);
+        panel.scrollIntoView({ block: "start" });
+        input.focus({ preventScroll: true });
+      });
+    });
+    // Watch a marker at the end of the controls against a root stretched
+    // without limit below the viewport, so "intersecting" means exactly "not
+    // yet scrolled above the top". A jump straight past the controls (an
+    // anchor link, a fast fling) still flips that state, where watching the
+    // panel itself would see two non-intersections and never fire.
+    // Held for the page's lifetime: an observer nothing references can be
+    // garbage-collected, and the strip would silently stop appearing.
+    dockObserver = new IntersectionObserver(function(entries){
+      var past = !entries[entries.length - 1].isIntersecting;
+      // Hand focus back to the page before the strip hides under it.
+      if (!past && dock.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
+      dock.dataset.visible = String(past);
+    }, { rootMargin: "0px 0px 100000px 0px" });
+    dockObserver.observe(element("dockSentinel"));
+  }
+  let dockObserver: IntersectionObserver | null = null;
+
   function buildCountryPickers(){
     buildCountryIndex();
     [0,1,2].forEach(function(slot){ PICKERS.push(createCountryPicker(slot)); });
@@ -914,6 +966,10 @@ function initAtlas(){
       onYearChange();
     });
     element("playBtn").addEventListener("click", togglePlay);
+    element("dockPlay").addEventListener("click", togglePlay);
+    ["yearPrev", "dockPrev"].forEach(function(id){ element(id).addEventListener("click", function(){ stepYear(-1); }); });
+    ["yearNext", "dockNext"].forEach(function(id){ element(id).addEventListener("click", function(){ stepYear(1); }); });
+    wireDock();
     element<HTMLSelectElement>("choroMetric").addEventListener("change", function(e){
       choroMetric = (e.currentTarget as HTMLInputElement | HTMLSelectElement).value;
       renderChoropleth();
@@ -969,8 +1025,7 @@ function initAtlas(){
   function restoreUrlState(){
     stopPlayback();
     readUrlState();
-    element<HTMLInputElement>("yearSlider").value = String(currentYearIdx);
-    element("yearReadout").textContent = String(YEARS[currentYearIdx]);
+    syncYearControls();
     updateYearOutputs();
     [0, 1, 2].forEach(function(slot){ PICKERS[slot].setSelected(highlighted[slot]); });
     element<HTMLSelectElement>("choroMetric").value = choroMetric;
@@ -1098,14 +1153,54 @@ function initAtlas(){
     window.addEventListener("resize", function(){ if (shareOpen) setShareOpen(false); });
   }
 
-  function setPlayState(playing: boolean){
-    element("playLabel").textContent = playing ? "Pause" : "Play";
+  // Play and its docked twin say what pressing them will do, once: the label
+  // changes, so there is no separate pressed state to announce. From the last
+  // year Play rewinds, and says so rather than jumping without warning.
+  function syncPlayButtons(){
+    var playing = !!playTimer;
+    var atEnd = currentYearIdx >= YEARS.length - 1;
+    var label = playing ? "Pause" : atEnd ? "Play from " + YEARS[0] : "Play";
+    var name = playing ? "Pause animation" : atEnd ? "Play animation from " + YEARS[0] : "Play animation";
+    element("playLabel").textContent = label;
     element("playIcon").style.display = playing ? "none" : "block";
     element("pauseIcon").style.display = playing ? "block" : "none";
-    element("playBtn").setAttribute("aria-pressed", String(playing));
+    element("playBtn").setAttribute("aria-label", name);
+
+    var dock = element("dockPlay");
+    dock.setAttribute("aria-label", name);
+    (dock.querySelector(".dock-play-label") as HTMLElement).textContent = playing ? "Pause" : "Play";
+    (dock.querySelector(".dock-play-icon") as SVGElement).style.display = playing ? "none" : "block";
+    (dock.querySelector(".dock-pause-icon") as SVGElement).style.display = playing ? "block" : "none";
+  }
+
+  function setPlayState(playing: boolean){
+    syncPlayButtons();
     // Pressing Play is the gesture a browser requires before it will let any
     // audio start, so the sound control listens for this rather than guessing.
     document.dispatchEvent(new CustomEvent("atlas:playback", { detail: { playing: playing } }));
+  }
+
+  // Every control that shows the year reads it from here: the ruler, its
+  // readout, the steps, the docked strip, and the Play label at the ends.
+  function syncYearControls(){
+    var last = YEARS.length - 1;
+    var year = String(YEARS[currentYearIdx]);
+    var slider = element<HTMLInputElement>("yearSlider");
+    slider.value = String(currentYearIdx);
+    slider.setAttribute("aria-valuetext", year);
+    element("yearReadout").textContent = year;
+    element("dockYear").textContent = year;
+    (slider.closest(".timeline") as HTMLElement).style.setProperty("--fill", (last > 0 ? currentYearIdx / last * 100 : 100) + "%");
+    ["yearPrev", "dockPrev"].forEach(function(id){ element(id).setAttribute("aria-disabled", String(currentYearIdx <= 0)); });
+    ["yearNext", "dockNext"].forEach(function(id){ element(id).setAttribute("aria-disabled", String(currentYearIdx >= last)); });
+    syncPlayButtons();
+  }
+
+  function stepYear(delta: number){
+    var next = currentYearIdx + delta;
+    if (next < 0 || next > YEARS.length - 1) return;
+    if (playTimer) stopPlayback();
+    setYear(next);
   }
 
   function updateYearOutputs(){
@@ -1118,12 +1213,10 @@ function initAtlas(){
     if (playTimer) clearInterval(playTimer);
     playTimer = null;
     setPlayState(false);
-    element("playBtn").setAttribute("aria-label", "Play animation");
   }
 
   function setYear(idx: number){
     currentYearIdx = idx;
-    element<HTMLInputElement>("yearSlider").value = String(currentYearIdx);
     onYearChange();
   }
 
@@ -1136,16 +1229,15 @@ function initAtlas(){
     }
     var lastIdx = YEARS.length - 1;
     if (currentYearIdx >= lastIdx) setYear(0);
-    setPlayState(true);
-    element("playBtn").setAttribute("aria-label", "Pause animation");
     playTimer = setInterval(function(){
       setYear(Math.min(currentYearIdx + 1, lastIdx));
       if (currentYearIdx >= lastIdx) stopPlayback();
     }, 650);
+    setPlayState(true);
   }
 
   function onYearChange(){
-    element("yearReadout").textContent = String(YEARS[currentYearIdx]);
+    syncYearControls();
     updateYearOutputs();
     updateChoroplethYear();
     updateScatterYear();
