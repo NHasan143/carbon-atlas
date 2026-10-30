@@ -627,3 +627,42 @@ test('a missing Plotly bundle shows a chart-library error', async ({ page }) => 
   await expect(page.locator('#playBtn')).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Reload the atlas' })).toBeVisible();
 });
+
+test('a trend chart with no data for the selected countries says so and names them', async ({ page }) => {
+  await openAtlas(page);
+  const metric = 'renewables_share_energy';
+  const chart = page.locator(`#sm-${metric}`);
+  const empty = page.locator(`#sm-empty-${metric}`);
+  const missing = page.locator(`#sm-missing-${metric}`);
+
+  // The default three all report renewables, so nothing is flagged anywhere.
+  await expect(empty).toBeHidden();
+  await expect(page.locator('.sm-missing:not([hidden])')).toHaveCount(0);
+
+  // One country without data: the chart still draws, and names who is missing.
+  await pickCountry(page, 0, 'Afghanistan', 'AFG');
+  await expect(missing).toBeVisible();
+  await expect(missing.locator('.sm-chip')).toHaveText(['Afghanistan']);
+  await expect(chart.locator('.scatterlayer .trace')).toHaveCount(2);
+
+  // None with data: an explicit empty state replaces the blank plot.
+  await pickCountry(page, 1, 'Albania', 'ALB');
+  await pickCountry(page, 2, 'Andorra', 'AND');
+  await expect(empty).toBeVisible();
+  await expect(empty).toContainText('No data available for the selected countries');
+  await expect(empty.locator('.sm-chip')).toHaveText(['Afghanistan', 'Albania', 'Andorra']);
+  const covered = Object.keys(data.metrics[metric]).length;
+  await expect(empty).toContainText(`This measure covers ${covered} of ${data.countries.length} countries.`);
+  await expect(chart).toHaveCSS('visibility', 'hidden');
+  await expect(missing).toBeHidden();
+  // Metrics these countries do report keep drawing.
+  await expect(page.locator('#sm-empty-co2')).toBeHidden();
+  await expect(page.locator('#sm-co2 .scatterlayer .trace')).toHaveCount(3);
+
+  // A country with observations brings the chart back.
+  await pickCountry(page, 0, 'United States', 'USA');
+  await expect(empty).toBeHidden();
+  await expect(chart).toHaveCSS('visibility', 'visible');
+  await expect(chart.locator('.scatterlayer .trace')).toHaveCount(1);
+  await expect(missing.locator('.sm-chip')).toHaveText(['Albania', 'Andorra']);
+});

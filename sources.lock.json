@@ -1,0 +1,37 @@
+{
+  "sources": {
+    "co2": {
+      "name": "Our World in Data: CO2 and Greenhouse Gas Emissions",
+      "homepage": "https://github.com/owid/co2-data",
+      "license": "CC BY 4.0",
+      "url": "https://raw.githubusercontent.com/owid/co2-data/382ee6c662b0ece26e111f263b44c029afad7787/owid-co2-data.csv",
+      "version": "382ee6c662b0ece26e111f263b44c029afad7787",
+      "versionDate": "2026-06-02T16:33:39Z",
+      "sha256": "7f78e2b218ce4bb8c538bbec04fdc9a7982e8d40bff972e650df603899edd5f6",
+      "bytes": 14377942,
+      "retrievedAt": "2026-10-30T20:18:26Z"
+    },
+    "energy": {
+      "name": "Our World in Data: Energy",
+      "homepage": "https://github.com/owid/energy-data",
+      "license": "CC BY 4.0",
+      "url": "https://raw.githubusercontent.com/owid/energy-data/e7897aed55b514b8d16e0a3d8f1518789ac3de31/owid-energy-data.csv",
+      "version": "e7897aed55b514b8d16e0a3d8f1518789ac3de31",
+      "versionDate": "2026-04-27T14:37:58Z",
+      "sha256": "266f2e2baad7975351bc9bb4aa061d22b1da9fe4c47d51d2ac6071e01e171f76",
+      "bytes": 9229369,
+      "retrievedAt": "2026-10-30T20:18:27Z"
+    },
+    "gdp": {
+      "name": "World Bank: GDP per capita, PPP (constant 2021 international $), via Our World in Data",
+      "homepage": "https://ourworldindata.org/grapher/gdp-per-capita-worldbank",
+      "license": "CC BY 4.0",
+      "url": "https://ourworldindata.org/grapher/gdp-per-capita-worldbank.csv?v=1&csvType=full&useColumnShortNames=true",
+      "version": null,
+      "versionDate": null,
+      "sha256": "39d736d2ee530302ea99d01c2cd95a4e6fda7c26af24472ce1935aab70409ba6",
+      "bytes": 276682,
+      "retrievedAt": "2026-10-30T20:18:29Z"
+    }
+  }
+}

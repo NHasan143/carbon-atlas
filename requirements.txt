@@ -1,0 +1,11 @@
+# Data pipeline (build_dataset.py), pinned exactly, including transitive
+# dependencies, so a rebuild from the same sources.lock.json gives the same
+# dataset. Tested on Python 3.11. Change these deliberately and rebuild.
+# country_converter 1.3.2 fails to start under pandas 3, so stay on pandas 2.
+country_converter==1.3.2
+pandas==2.3.3
+numpy==2.4.6
+python-dateutil==3.0.0
+pytz==2026.6
+six==1.17.0
+tzdata==2026.6

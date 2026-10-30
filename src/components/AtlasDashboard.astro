@@ -187,6 +187,14 @@ interface AtlasData {
   countries: Country[];
   metrics: Record<string, Record<string, (number | null)[]>>;
   metricMeta: Record<string, { label: string; unit: string; vmax: number }>;
+  /** Metric -> ISO-3 -> indexes into `years` whose value was interpolated. */
+  estimated?: Record<string, Record<string, number[]>>;
+  /** How and from which pinned sources the dataset was generated. */
+  meta?: {
+    generatedAt: string;
+    generator: Record<string, string>;
+    sources: { id: string; name: string; url: string; version: string | null; sha256: string; retrievedAt: string }[];
+  };
 }
 interface Bubble { x: number; y: number; size: number; text: string; }
 interface TrendTrace {
@@ -2317,8 +2325,17 @@ function initAtlas(){
       SM_METRICS.forEach(function(metric){
         var cell = document.createElement("div");
         cell.className = "sm-cell";
+        var covered = Object.keys(DATA.metrics[metric] || {}).length;
         cell.innerHTML = '<p class="sm-title">'+DATA.metricMeta[metric].label+' ('+DATA.metricMeta[metric].unit+')</p>' +
-                          '<div class="chart-sm" id="sm-'+metric+'"></div>';
+                          '<div class="sm-stage" id="sm-stage-'+metric+'">' +
+                            '<div class="chart-sm" id="sm-'+metric+'"></div>' +
+                            '<div class="sm-empty" id="sm-empty-'+metric+'" hidden>' +
+                              '<p class="sm-empty-title">No data available for the selected countries</p>' +
+                              '<p class="sm-chips"></p>' +
+                              '<p class="sm-empty-coverage">This measure covers '+covered+' of '+DATA.countries.length+' countries.</p>' +
+                            '</div>' +
+                          '</div>' +
+                          '<p class="sm-missing" id="sm-missing-'+metric+'" hidden><span>No data for</span><span class="sm-chips"></span></p>';
         grid.appendChild(cell);
       });
       grid.dataset.built = "1";
@@ -2329,14 +2346,14 @@ function initAtlas(){
   function renderSmallMultiple(metric: string){
     var t = theme();
     var traces: TrendTrace[] = [];
+    var missingSlots: number[] = [];
     [0,1,2].forEach(function(slot){
       var iso = highlighted[slot];
       if (!iso) return;
       var series = seriesAt(iso, metric);
-      if (!series) return;
       const xs: number[] = [], ys: number[] = [];
-      series.forEach(function(v,i){ if (v!==null && v!==undefined){ xs.push(YEARS[i]); ys.push(v); } });
-      if (!xs.length) return;
+      if (series) series.forEach(function(v,i){ if (v!==null && v!==undefined){ xs.push(YEARS[i]); ys.push(v); } });
+      if (!xs.length){ missingSlots.push(slot); return; }
       traces.push({
         type:"scatter", mode:"lines", name: COUNTRIES_BY_ISO[iso].name,
         x: xs, y: ys,
@@ -2369,10 +2386,40 @@ function initAtlas(){
       showlegend:false
     };
 
+    syncTrendGaps(metric, missingSlots, traces.length === 0);
+
     var elId = "sm-" + metric;
     if (document.getElementById(elId)){
       return Plotly.react(elId, traces, layout, {displayModeBar:false, responsive:true});
     }
+  }
+
+  // A selected country with no observations for a metric draws no line. Say
+  // which ones, so a missing line or a blank chart is never left unexplained:
+  // in place of the plot when nothing can be drawn, or as a note beneath it.
+  function syncTrendGaps(metric: string, missingSlots: number[], isEmpty: boolean){
+    var stage = document.getElementById("sm-stage-" + metric);
+    var empty = document.getElementById("sm-empty-" + metric);
+    var note = document.getElementById("sm-missing-" + metric);
+    if (!stage || !empty || !note) return;
+
+    stage.toggleAttribute("data-empty", isEmpty);
+    empty.hidden = !isEmpty;
+    note.hidden = isEmpty || missingSlots.length === 0;
+
+    var target = (isEmpty ? empty : note).querySelector(".sm-chips");
+    if (!target) return;
+    var colors = SERIES_COLORS_LIVE();
+    target.replaceChildren(...missingSlots.map(function(slot){
+      var chip = document.createElement("span");
+      chip.className = "sm-chip";
+      var swatch = document.createElement("span");
+      swatch.className = "swatch";
+      swatch.style.background = colors[slot];
+      swatch.setAttribute("aria-hidden", "true");
+      chip.append(swatch, COUNTRIES_BY_ISO[highlighted[slot]].name);
+      return chip;
+    }));
   }
 
   // Countries that end on similar values (China and India on population) would
