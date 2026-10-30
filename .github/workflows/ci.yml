@@ -15,6 +15,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The pipeline only runs when the dataset is regenerated, so check it here
+  # rather than waiting for the next rebuild to find out. The validation step
+  # gates the committed public/dataset.json itself: duplicate records, series
+  # alignment, finite values, percentage ranges, and provenance that matches
+  # sources.lock.json.
+  data-pipeline:
+    name: data pipeline · dataset validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - run: python -m pip install -r requirements-dev.txt
+
+      - name: Validate dataset
+        run: python validate_dataset.py
+
+      - name: Pipeline tests
+        run: python -m pytest tests
+
   verify:
     name: lint · types · build · browser tests
     runs-on: ubuntu-latest

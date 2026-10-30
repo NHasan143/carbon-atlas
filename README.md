@@ -39,7 +39,7 @@ The hero's **Donate** button links to [Our World in Data's official donation pag
 
 ## Run locally
 
-You need **Node.js 22.12.0 or newer** and npm (Node.js 24 LTS is recommended). Python is only needed if you want to rebuild the dataset.
+You need **Node.js 22.23.4 or newer** and npm (Node.js 24 LTS is recommended). Python is only needed if you want to rebuild the dataset.
 
 ```sh
 git clone https://github.com/NHasan143/carbon-atlas.git
@@ -109,31 +109,55 @@ GDP per capita comes directly from the World Bank's PPP series (constant 2021 in
 
 ## Rebuild the dataset
 
-The optional data pipeline requires Python 3, `pandas`, and `country_converter`. Use a virtual environment to keep these dependencies separate from your system Python:
+The optional data pipeline needs Python 3.11 (see `.python-version`). Its dependencies are pinned exactly in `requirements.txt`, and `requirements-dev.txt` adds the test tools. Use a virtual environment to keep them separate from your system Python:
 
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install pandas country_converter
-python build_dataset.py
+python -m pip install -r requirements-dev.txt
+python build_dataset.py            # rebuild from the pinned sources
+python validate_dataset.py         # check public/dataset.json
+python -m pytest tests             # pipeline and validator tests
 ```
 
 On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1` instead.
 
-The script downloads the [OWID CO₂ dataset](https://github.com/owid/co2-data), the [OWID energy dataset](https://github.com/owid/energy-data), and [World Bank GDP per capita via OWID](https://ourworldindata.org/grapher/gdp-per-capita-worldbank), caches them as `co2.csv`, `energy.csv`, and `gdp_worldbank.csv`, and overwrites `public/dataset.json`.
+### Pinned sources
 
-**Existing CSV files are reused.** To fetch newer upstream data, move or delete the three cached CSV files before rerunning the script. The year range remains fixed at 1990–2024 unless you edit `YEAR_START` and `YEAR_END` in `build_dataset.py`. If you change the range or coverage, update the static year labels and coverage text in `src/components/AtlasDashboard.astro`, `src/components/AtlasControls.astro`, and this README as well.
+The pipeline reads the [OWID CO₂ dataset](https://github.com/owid/co2-data), the [OWID energy dataset](https://github.com/owid/energy-data), and [World Bank GDP per capita via OWID](https://ourworldindata.org/grapher/gdp-per-capita-worldbank), cached locally as `co2.csv`, `energy.csv`, and `gdp_worldbank.csv`.
+
+`sources.lock.json` records exactly which version of each one the bundled dataset was built from. For the two OWID files, that is the upstream Git commit. For all three, it is a SHA-256 checksum, the file size, and the date the file was retrieved.
+
+- **A normal build is reproducible.** It uses a cached CSV only if the CSV matches its checksum. A missing CSV is downloaded again from its pinned version and checked against the lock. A cached file that has changed, or an upstream URL that now serves different bytes, stops the build with instructions instead of silently using other data.
+- **Refreshing is explicit.** `python build_dataset.py --refresh` downloads the latest upstream version of every source and re-pins it in `sources.lock.json`; `--refresh gdp` (or `co2`, `energy`) refreshes only the named ones. Commit the updated lock together with the rebuilt `public/dataset.json`, so every data change is reviewable.
+- **The World Bank export has no version history,** so only its checksum pins it. If the upstream file changes, the pinned version cannot be downloaded again; refresh it to adopt the new data.
+
+On macOS with the python.org installer, downloads fail certificate checks until you run **Install Certificates.command** from the Python folder in `/Applications`, or set `SSL_CERT_FILE=/etc/ssl/cert.pem`.
+
+The year range remains fixed at 1990–2024 unless you edit `YEAR_START` and `YEAR_END` in `build_dataset.py`. If you change the range or coverage, update the static year labels and coverage text in `src/components/AtlasDashboard.astro`, `src/components/AtlasControls.astro`, and this README as well.
 
 ### Processing steps
 
-1. Keep CO₂ records with an ISO code, excluding `OWID_` aggregate codes, within the configured year range.
-2. Left-join energy data and World Bank GDP per capita on ISO code and year.
-3. Sort each country's observations by year and apply pandas linear interpolation with `limit=3, limit_area="inside"` to population and GDP per capita. Only gaps between two reported values are filled; the last reported year is never carried forward. `limit=3` limits consecutive filled entries; it does not guarantee that only complete gaps of three years or fewer are filled.
-4. Assign continent labels using `country_converter`.
-5. Export country metadata and rounded metric arrays, omitting all-null country/metric series.
-6. Calculate a fixed map color ceiling for each metric at approximately the 98th percentile of all available country-year values.
+1. Make every source available at its pinned version (see above).
+2. Keep CO₂ records with an ISO code, excluding `OWID_` aggregate codes, within the configured year range.
+3. Stop if any source repeats a country-year record; otherwise left-join energy data and World Bank GDP per capita on ISO code and year.
+4. Within each country, linearly interpolate population and GDP per capita across interior gaps of three years or fewer. A gap is filled completely or not at all: longer gaps stay empty, and leading or trailing missing years are never filled, so the last reported year is never carried forward. Each filled value is recorded in `estimated`.
+5. Assign continent labels using `country_converter`.
+6. Export country metadata and rounded metric arrays, omitting all-null country/metric series.
+7. Calculate a fixed map color ceiling for each metric at approximately the 98th percentile of all available country-year values.
+8. Validate the result (below) and write `public/dataset.json` only if it passes.
 
-The pipeline does not interpolate emissions or renewables shares. It does not regenerate `public/world_110m.json`. Upstream data and dependency versions are not pinned, so rebuilding may produce a different snapshot.
+The pipeline does not interpolate emissions or renewables shares. It does not regenerate `public/world_110m.json`.
+
+### Validation
+
+`validate_dataset.py` uses only the Python standard library. It runs at the end of every build and in CI against the committed `public/dataset.json`, and fails on:
+
+- **Duplicate records:** a country listed twice, or a repeated key within any JSON object (such as a country appearing twice under one metric).
+- **Series alignment:** years that are not consecutive, a series whose length differs from `years`, a series for a country missing from `countries`, an all-null series, or an `estimated` index outside the years or pointing at a missing value.
+- **Finite values:** `NaN`, `Infinity`, or a non-numeric value in any series or scale ceiling.
+- **Valid ranges:** negative values in any metric, and percentage metrics (unit `%`) above 100.
+- **Provenance:** missing generation metadata, or source checksums, versions, URLs, or retrieval dates that differ from `sources.lock.json`.
 
 ### JSON structure
 
@@ -145,6 +169,8 @@ The pipeline does not interpolate emissions or renewables shares. It does not re
 | `countries` | Records containing `iso3`, `name`, and `continent` |
 | `metrics` | Metric key → ISO-3 code → array of values aligned to `years` |
 | `metricMeta` | Metric key → display `label`, `unit`, and map scale ceiling `vmax` |
+| `estimated` | Interpolated metric key (`population`, `gdp_per_capita`) → ISO-3 code → indexes into `years` whose value was interpolated rather than reported. Countries with no interpolated values are omitted. |
+| `meta` | `generatedAt` (UTC), the `generator` (script plus Python, pandas, and country_converter versions), and `sources`: for each source its name, homepage, license, exact download `url`, upstream `version` and `versionDate` where it has one, `sha256`, and `retrievedAt` |
 
 A `null` array entry means that observation is missing. A country may be absent from a metric's dictionary when the entire series is missing.
 
@@ -161,16 +187,20 @@ carbon-atlas/
 ├── public/
 │   ├── dataset.json     # Bundled country/year metric data
 │   └── world_110m.json   # Local TopoJSON geometry
-├── tests/               # Playwright browser regression checks
+├── tests/               # Playwright browser checks and data pipeline tests
 ├── astro.config.mjs     # Static output and Tailwind Vite integration
 ├── package.json         # Dependencies and development commands
 ├── package-lock.json    # Reproducible dependency versions
 ├── playwright.config.js
 ├── build_dataset.py     # Optional OWID data pipeline
+├── dataset_sources.py   # Pinned upstream sources and --refresh
+├── validate_dataset.py  # Dataset checks run by the build and CI
+├── sources.lock.json    # Exact source versions, checksums, and retrieval dates
+├── requirements.txt     # Pinned pipeline dependencies (requirements-dev.txt adds tests)
 └── README.md
 ```
 
-The frontend uses **Astro 7.3.3**, **Tailwind CSS 4.3.3**, and **Plotly.js 2.35.2**. `AtlasDashboard.astro` owns the dashboard markup and a typed, bundled client script for data loading, chart rendering, and synchronized interactions. Astro generates static HTML and compiles the component's script to browser JavaScript without a React or Vue runtime. Tailwind uses its [official Vite integration for Astro](https://tailwindcss.com/docs/installation/framework-guides/astro). Plotly retains the existing version to preserve chart behavior and is bundled locally through npm.
+The frontend uses **Astro 7.4.4**, **Tailwind CSS 4.3.3**, and **Plotly.js 2.35.2**. `AtlasDashboard.astro` owns the dashboard markup and a typed, bundled client script for data loading, chart rendering, and synchronized interactions. Astro generates static HTML and compiles the component's script to browser JavaScript without a React or Vue runtime. Tailwind uses its [official Vite integration for Astro](https://tailwindcss.com/docs/installation/framework-guides/astro). Plotly retains the existing version to preserve chart behavior and is bundled locally through npm.
 
 ## Static hosting
 
@@ -201,7 +231,8 @@ The chart controller uses Astro's base URL for both dataset and map requests. Th
 - Missing values appear as dashes in the table and uncolored countries on the map. Scatter points require both axis values; nonpositive values are excluded from logarithmic axes.
 - The map scale is fixed across years for each metric and capped at its 98th-percentile ceiling. Values above the ceiling share the darkest color; the underlying dataset values are retained.
 - Trend charts remove missing observations before drawing lines, so a line can connect across a period with no recorded data.
-- Population and GDP per capita may contain interpolated values inside gaps. The exported JSON does not separately flag them.
+- A selected country with no observations for a metric is named beneath that trend chart. If none of the selected countries has data, the chart is replaced by "No data available for the selected countries", the countries left out, and how many countries the metric covers.
+- Population and GDP per capita may contain values interpolated across interior gaps of three years or fewer. `estimated` in the JSON lists each one; the dashboard does not mark them yet. The bundled snapshot has none.
 - The bundled snapshot ends in 2024, the latest year with country-level emissions data, and is not refreshed automatically.
 
 ## Data sources and attribution

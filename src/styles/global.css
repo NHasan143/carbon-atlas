@@ -185,6 +185,23 @@
   .chart-sm { @apply h-[230px] w-full; }
   .sm-title { @apply mb-3 text-[12.5px] font-semibold text-secondary; }
 
+  /* Trend gaps. When no selected country can be drawn, a recessed well takes
+     the plot's exact footprint so the grid never jumps; when only some can,
+     the ones left out are named beneath the plot in their own slot colour. */
+  .sm-stage { @apply relative; }
+  .sm-stage[data-empty] .chart-sm { visibility: hidden; }
+  .sm-empty { @apply absolute inset-0 flex flex-col items-center justify-center gap-2.5 rounded-[10px] bg-field px-6 text-center; }
+  .sm-empty-title { @apply max-w-[30ch] text-[13.5px] font-semibold text-balance text-ink; }
+  .sm-empty-coverage { @apply text-[12px] text-muted; }
+  .sm-chips { @apply flex flex-wrap items-center gap-x-3 gap-y-1; }
+  .sm-empty .sm-chips { @apply justify-center text-[12.5px] text-secondary; }
+  .sm-chip { @apply inline-flex items-center gap-1.5; }
+  .sm-chip .swatch { @apply size-2; }
+  .sm-missing { @apply mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted; }
+  .sm-missing .sm-chips { @apply text-secondary; }
+  .sm-empty[hidden],
+  .sm-missing[hidden] { display: none; }
+
   /* Country search: an editable combobox over 217 countries. A native select
      with 217 options makes the visitor hunt; typing two letters does not. */
   .combo { @apply relative min-w-0; }
@@ -583,42 +600,63 @@
   .share-target { transition: none; }
 }
 
-/* Share this view answers the hero's Explore and Donate buttons, so it carries
-   the same green ring and bloom. The glow values are the literal ones from
-   .hero-button rather than a color-mix, so the three read as one gesture.
+/* One hover for the hero's two actions and Share this view. The button itself
+   never moves or scales: scaled text is redrawn every frame and reads as a
+   shiver. Light arrives instead. The border warms to Living Green, a soft
+   glow rises inside from the bottom edge (::before), and a green shadow
+   settles beneath (::after). Both lights fade on opacity alone, so the
+   browser composites them instead of repainting a blur on every frame.
    Unlayered on purpose: it has to outrank the Tailwind cursor and transition
    utilities on the same element. */
 .glow-button {
+  --glow-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  isolation: isolate;
   cursor: pointer;
-  transition:
-    transform 300ms ease,
-    background-color 300ms ease,
-    border-color 300ms ease,
-    box-shadow 300ms ease;
+  transition: border-color 420ms var(--glow-ease);
 }
 
-.glow-button:hover:not(:disabled) {
-  transform: scale(1.05);
-  border-color: oklch(75% 0.25 145 / 0.8);
+.glow-button::before,
+.glow-button::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 420ms var(--glow-ease);
+}
+
+.glow-button::before {
+  inset: 0;
+  background: radial-gradient(120% 150% at 50% 135%, oklch(75% 0.25 145 / 0.26), transparent 62%);
+}
+
+.glow-button::after {
+  inset: -1px;
   box-shadow:
-    0 0 0 1px oklch(75% 0.25 145 / 0.36),
-    0 0 28px oklch(75% 0.25 145 / 0.48),
-    0 18px 44px -14px oklch(75% 0.25 145 / 0.62);
+    0 0 0 1px oklch(75% 0.25 145 / 0.3),
+    0 14px 32px -14px oklch(75% 0.25 145 / 0.55);
 }
 
+.glow-button:hover:not(:disabled),
 .glow-button:focus-visible {
   border-color: oklch(75% 0.25 145 / 0.8);
-  box-shadow:
-    0 0 0 1px oklch(75% 0.25 145 / 0.36),
-    0 0 28px oklch(75% 0.25 145 / 0.48);
+}
+
+.glow-button:hover:not(:disabled)::before,
+.glow-button:hover:not(:disabled)::after,
+.glow-button:focus-visible::after {
+  opacity: 1;
 }
 
 /* Until the atlas has loaded there is nothing to share yet. */
 .glow-button:disabled { cursor: wait; }
 
 @media (prefers-reduced-motion: reduce) {
-  .glow-button { transition: none; }
-  .glow-button:hover:not(:disabled) { transform: none; }
+  .glow-button,
+  .glow-button::before,
+  .glow-button::after { transition: none; }
 }
 
 .combo-pop {
