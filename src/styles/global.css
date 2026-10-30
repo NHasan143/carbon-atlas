@@ -26,6 +26,9 @@
     --grid:#e1e0d9;
     --axis:#c3c2b7;
     --action-accent:oklch(75% 0.25 145 / 0.8);
+    /* Living Green deep enough to read on paper: 6.6:1 on the field tone. The
+       bright fill stays for surfaces; marks and rings drawn on paper use this. */
+    --action-ink:oklch(45% 0.15 148);
     --accent:#2a78d6;
     --accent-2:#eb6834;
     --accent-3:#1baf7a;
@@ -35,7 +38,7 @@
     --rank-track:#f1f1ed;
     --rank-good:#4e9068; --rank-bad:#cc6a5f;
     --rank-growth:#6c86bd; --rank-decline:#a38150;
-    --focus-ring:oklch(75% 0.25 145 / 0.8);
+    --focus-ring:var(--action-ink);
     --trend-good:oklch(54% 0.1 155);
     --trend-bad:oklch(55% 0.12 27);
     /* Change map: -1 sits next to "about the same", -3 is the strongest.
@@ -62,6 +65,7 @@
       --accent:#3987e5;
       --accent-2:#d95926;
       --accent-3:#199e70;
+      --action-ink:oklch(80% 0.2 145);
       --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
       --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
       --context-dot:#4a4a47;
@@ -91,6 +95,7 @@
     --accent:#3987e5;
     --accent-2:#d95926;
     --accent-3:#199e70;
+    --action-ink:oklch(80% 0.2 145);
     --seq-100:#16324d; --seq-200:#1c4267; --seq-300:#245781; --seq-400:#3987e5;
     --seq-500:#5da0ec; --seq-600:#8fbdf3; --seq-700:#cde2fb;
     --context-dot:#4a4a47;
@@ -205,7 +210,14 @@
   /* Country search: an editable combobox over 217 countries. A native select
      with 217 options makes the visitor hunt; typing two letters does not. */
   .combo { @apply relative min-w-0; }
-  .combo-icon { @apply pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted; }
+  /* The slot's colour sits where a search glyph would: filled once a country
+     is chosen, a hollow ring while the slot is empty. */
+  .combo-swatch {
+    @apply pointer-events-none absolute top-1/2 left-3.5 size-2.5 -translate-y-1/2 rounded-full;
+    background: var(--slot);
+    transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .combo[data-empty="true"] .combo-swatch { background: transparent; box-shadow: inset 0 0 0 1.5px var(--slot); }
   .combo-input {
     @apply min-h-10 w-full min-w-0 rounded-lg border border-line bg-surface py-[9px] pr-9 pl-9 text-base text-ink sm:text-[14px];
     transition: border-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -215,7 +227,7 @@
      the page's selection green reads as a highlighter over the whole field. */
   .combo-input::selection { background: color-mix(in oklab, var(--action-accent) 32%, transparent); color: var(--text-primary); }
   .combo-input:hover:not(:disabled) { border-color: var(--axis); }
-  .combo:has(.combo-input:disabled) .combo-icon { @apply opacity-55; }
+  .combo:has(.combo-input:disabled) .combo-swatch { @apply opacity-55; }
   .combo-clear {
     @apply absolute top-1/2 right-1.5 flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-muted;
     transition: color 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -373,18 +385,6 @@
 
 .trends-section {
   border-top: 1px solid var(--border);
-}
-
-.country-control {
-  position: relative;
-  transition: border-color 240ms cubic-bezier(0.16, 1, 0.3, 1), transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.country-control:focus-within {
-  border-color: var(--action-accent);
-  transform: translateY(-2px);
-  /* Lifts the open list above the cards that follow it in the DOM. */
-  z-index: 10;
 }
 
 /* Lift the whole card above the sections that follow it in the DOM, so a
@@ -679,8 +679,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .combo-pop { animation: none; }
-  .country-control { transition: border-color 240ms ease; }
-  .country-control:focus-within { transform: none; }
 }
 
 @media (max-width: 639px) {
@@ -692,28 +690,371 @@
   .chart-sm { height: 220px; }
 }
 
-/* Native range pseudo-elements need browser-specific selectors. */
-input[type="range"] {
-  flex: 1;
+/* ---------- Compare three countries: the timeline plate ---------- */
+/* The year leads: Play, the year with one-year steps, and Share share a row
+   above a printed ruler. Below, one field well holds the three countries as
+   the plate's legend. Two wells, no per-slot cards. */
+.timeline {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "play step . share"
+    "ruler ruler ruler ruler";
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 18px;
+  padding: 20px 24px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+/* Fixed width, so Play, Pause and "Play from 1990" never nudge the row. */
+.timeline-play {
+  grid-area: play;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 9.25rem;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: var(--action-accent);
+  color: #071018;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: filter 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.timeline-play:hover:not(:disabled) { filter: brightness(1.1); }
+
+.year-stepper {
+  grid-area: step;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.year-readout {
+  min-width: 4.4ch;
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.step-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 160ms cubic-bezier(0.22, 1, 0.36, 1), color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.step-btn svg { width: 16px; height: 16px; }
+.step-btn:hover:not(:disabled):not([aria-disabled="true"]) { border-color: var(--axis); color: var(--text-primary); }
+/* The first and last year: the step stays focusable and says why it does nothing. */
+.step-btn[aria-disabled="true"] { opacity: 0.4; cursor: default; }
+
+.timeline .share-actions { grid-area: share; justify-self: end; }
+
+/* The ruler: a native range input (keyboard, screen reader and touch come
+   free) laid over a printed scale. Line, fill and ticks share one inset of
+   half a thumb, so every tick sits exactly under the thumb's centre for its
+   year. */
+.ruler {
+  --thumb: 22px;
+  --track-h: 28px;
+  grid-area: ruler;
+  position: relative;
   min-width: 0;
+}
+
+.ruler-line {
+  position: absolute;
+  top: calc(var(--track-h) / 2 - 1px);
+  left: calc(var(--thumb) / 2);
+  right: calc(var(--thumb) / 2);
+  height: 2px;
+  border-radius: 1px;
+  background: var(--text-muted);
+}
+
+.ruler-fill {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: var(--fill, 100%);
   height: 4px;
   border-radius: 2px;
-  background: var(--grid);
+  background: var(--action-ink);
+}
+
+.ruler-input {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: var(--track-h);
+  margin: 0;
+  background: transparent;
   appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
 }
-input[type="range"]::-webkit-slider-thumb {
+.ruler-input::-webkit-slider-runnable-track { height: var(--track-h); background: transparent; }
+.ruler-input::-moz-range-track { height: var(--track-h); background: transparent; }
+.ruler-input::-webkit-slider-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((var(--track-h) - var(--thumb)) / 2);
+  border: 2px solid var(--action-ink);
+  border-radius: 50%;
+  background: linear-gradient(var(--action-accent), var(--action-accent)), var(--surface);
+  /* Knocks the line out around the thumb, like a printed marker. */
+  box-shadow: 0 0 0 3px var(--surface-2);
   appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--action-accent);
-  border: 2px solid var(--surface);
+  -webkit-appearance: none;
 }
-input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+.ruler-input::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 2px solid var(--action-ink);
   border-radius: 50%;
+  background: linear-gradient(var(--action-accent), var(--action-accent)), var(--surface);
+  box-shadow: 0 0 0 3px var(--surface-2);
+}
+.ruler-input:focus-visible { outline: none; }
+.ruler-input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--surface-2), 0 0 0 5px var(--focus-ring); }
+.ruler-input:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--surface-2), 0 0 0 5px var(--focus-ring); }
+
+.ruler-scale {
+  position: relative;
+  height: 24px;
+  margin: calc(8px - var(--track-h) / 2) calc(var(--thumb) / 2) 0;
+}
+
+.ruler-tick {
+  position: absolute;
+  top: 0;
+  left: var(--at);
+  width: 1px;
+  height: 4px;
+  margin-left: -0.5px;
+  background: var(--axis);
+}
+.ruler-tick.is-major { height: 8px; background: var(--text-muted); }
+
+.ruler-label {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The legend: three slots in one well. */
+.slots {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.slot {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+/* Lifts an open list above the slots that follow it in the DOM. */
+.slot:focus-within { z-index: 10; }
+
+.slot-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.slots-caption {
+  margin-top: 12px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+@media (min-width: 768px) {
+  .slots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    padding: 18px 24px 20px;
+  }
+}
+
+/* A phone reads top to bottom: the year and Share, the ruler, then Play at
+   full width where a thumb reaches it. */
+@media (max-width: 639px) {
+  .timeline {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "step share"
+      "ruler ruler"
+      "play play";
+    row-gap: 14px;
+    padding: 16px;
+  }
+  .timeline-play { width: 100%; min-height: 44px; }
+  .year-readout { font-size: 26px; }
+  /* The share card spans the whole well rather than one corner of it. */
+  .timeline .share-actions { position: static; }
+  /* Four years of ruler is too narrow for two labels on a phone; the tick stays. */
+  .ruler-tick[data-year="2020"] .ruler-label { display: none; }
+}
+
+@media (pointer: coarse) {
+  .step-btn { width: 44px; height: 44px; }
+  .timeline-play { min-height: 44px; }
+  .ruler { --track-h: 44px; }
+  #shareViewBtn { min-height: 44px; }
+}
+
+/* ---------- The docked state strip ---------- */
+/* Appears once the plate has scrolled away, so the year and the three
+   countries every view is reading stay in reach. A floating overlay, but
+   quiet: surface tone and a hairline, no shadow. */
+.atlas-dock {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 40;
+  padding-top: env(safe-area-inset-top);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  transform: translateY(-100%);
+  visibility: hidden;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 320ms;
+}
+.atlas-dock[data-visible="true"] {
+  transform: none;
+  visibility: visible;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
+}
+
+.atlas-dock-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 1280px;
+  min-height: 52px;
+  margin-inline: auto;
+  padding: 6px 16px;
+}
+
+.dock-play {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 80px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
   background: var(--action-accent);
-  border: 2px solid var(--surface);
+  color: #071018;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dock-play:hover:not(:disabled) { filter: brightness(1.1); }
+
+.dock-year { display: flex; flex-shrink: 0; align-items: center; gap: 4px; }
+.dock-step { width: 32px; height: 32px; }
+.dock-year-value {
+  min-width: 4.4ch;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.dock-chips {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.dock-chip {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dock-chip:hover:not(:disabled) { background: var(--surface-2); }
+.dock-chip[data-empty="true"] { color: var(--text-muted); font-weight: 500; }
+.dock-swatch { flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%; background: var(--slot); }
+.dock-chip[data-empty="true"] .dock-swatch { background: transparent; box-shadow: inset 0 0 0 1.5px var(--slot); }
+.dock-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.dock-code { display: none; font-family: var(--font-mono); }
+
+@media (min-width: 640px) {
+  .atlas-dock-inner { gap: 16px; padding-inline: 24px; }
+}
+
+/* On a phone the strip keeps Play, the year and three-letter codes. */
+@media (max-width: 639px) {
+  .atlas-dock-inner { padding-inline: 10px; gap: 8px; }
+  .dock-play { min-width: 44px; padding: 0; }
+  .dock-play-label { display: none; }
+  .dock-step { display: none; }
+  .dock-name { display: none; }
+  .dock-code { display: inline; }
+  .dock-chip { gap: 5px; padding: 0 8px; font-size: 12px; }
+}
+
+@media (pointer: coarse) {
+  .dock-play, .dock-chip { min-height: 44px; }
+  .dock-step { width: 44px; height: 44px; }
+}
+
+/* A section reached by its anchor must not land under the strip. */
+.atlas-section:not(.controls-section) { scroll-margin-top: 72px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-dock,
+  .atlas-dock[data-visible="true"] { transition: none; }
+  .timeline-play, .dock-play, .step-btn, .dock-chip, .combo-swatch { transition: none; }
 }
